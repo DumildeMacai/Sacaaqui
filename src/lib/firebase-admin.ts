@@ -1,11 +1,11 @@
 // src/lib/firebase-admin.ts
 import * as admin from 'firebase-admin';
 import type { Atm } from '@/types';
-import 'dotenv/config'; // Garante que as variáveis de ambiente sejam carregadas
 
 // Garante que a inicialização ocorra apenas uma vez.
 if (!admin.apps.length) {
   try {
+    // A formatação da chave privada é crucial. As quebras de linha precisam ser restauradas.
     const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
     if (!process.env.FIREBASE_PROJECT_ID || !privateKey || !process.env.FIREBASE_CLIENT_EMAIL) {
