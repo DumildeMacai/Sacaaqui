@@ -1,6 +1,7 @@
 // src/lib/firebase-admin.ts
 import * as admin from 'firebase-admin';
 import type { Atm } from '@/types';
+import { FieldValue } from 'firebase-admin/firestore';
 
 // Garante que a inicialização ocorra apenas uma vez.
 if (!admin.apps.length) {
@@ -26,6 +27,18 @@ if (!admin.apps.length) {
 }
 
 const db = admin.firestore();
+
+export async function addAtm(atmData: Omit<Atm, 'id' | 'status' | 'lastUpdate' | 'reports'>): Promise<string> {
+    const newAtmRef = db.collection('atms').doc();
+    const newAtm = {
+        ...atmData,
+        status: 'desconhecido', // Initial status
+        lastUpdate: FieldValue.serverTimestamp(),
+        reports: [],
+    };
+    await newAtmRef.set(newAtm);
+    return newAtmRef.id;
+}
 
 export async function getAtms(): Promise<Atm[]> {
   try {

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, CircleSlash, HelpCircle, MoreHorizontal, PlusCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 
 const statusMap: { [key in Atm['status']]: { text: string; icon: React.ReactNode } } = {
     com_dinheiro: { text: 'Com Dinheiro', icon: <CheckCircle2 className="h-4 w-4 text-accent" /> },
@@ -33,9 +34,11 @@ export function AtmDataTable({ data }: AtmDataTableProps) {
                 <h2 className="text-2xl font-bold tracking-tight font-headline">Gerenciamento de ATMs</h2>
                 <p className="text-muted-foreground">Adicione, edite ou remova caixas eletrônicos.</p>
             </div>
-            <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Adicionar ATM
+            <Button asChild>
+                <Link href="/admin/atms/create">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Adicionar ATM
+                </Link>
             </Button>
         </div>
         <div className="rounded-md border bg-card">

@@ -1,60 +1,112 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 const AddAtmPage = () => {
-  const [atmName, setAtmName] = useState('');
-  const [address, setAddress] = useState('');
+    const [name, setName] = useState('');
+    const [address, setAddress] = useState('');
+    const [lat, setLat] = useState('');
+    const [lng, setLng] = useState('');
+    const [details, setDetails] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+    const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle form submission logic here
-    console.log('ATM Name:', atmName);
-    console.log('Address:', address);
-    // You would typically send this data to an API
-  };
 
-  return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Adicionar Novo ATM</h1>
-      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="atmName">
-            Nome do ATM
-          </label>
-          <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="atmName"
-            type="text"
-            placeholder="Nome do ATM"
-            value={atmName}
-            onChange={(e) => setAtmName(e.target.value)}
-          />
-        </div>
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="address">
-            Endereço
-          </label>
-          <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-            id="address"
-            type="text"
-            placeholder="Endereço"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            type="submit"
-          >
-            Salvar
-          </button>
-        </div>
-      </form>
-    </div>
-  );
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+
+        const newAtm = {
+            name,
+            address,
+            location: {
+                lat: parseFloat(lat),
+                lng: parseFloat(lng),
+            },
+            details,
+        };
+
+        try {
+            const response = await fetch('/api/atms', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newAtm),
+            });
+
+            if (!response.ok) {
+                throw new Error('Falha ao adicionar o ATM');
+            }
+
+            toast({
+                title: 'Sucesso!',
+                description: 'Novo ATM adicionado com sucesso.',
+            });
+
+            router.push('/admin/panel');
+            router.refresh(); // To show the new ATM in the list
+
+        } catch (error) {
+            console.error(error);
+            toast({
+                variant: 'destructive',
+                title: 'Erro',
+                description: 'Não foi possível adicionar o ATM. Tente novamente.',
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Adicionar Novo ATM</CardTitle>
+                <CardDescription>Preencha os detalhes do novo caixa eletrônico.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <form onSubmit={handleSubmit} className="grid gap-6">
+                    <div className="grid gap-2">
+                        <Label htmlFor="name">Nome do ATM</Label>
+                        <Input id="name" placeholder="Ex: Caixa do BCI - Mutamba" value={name} onChange={(e) => setName(e.target.value)} required />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="address">Endereço</Label>
+                        <Input id="address" placeholder="Ex: Largo da Mutamba, Luanda, Angola" value={address} onChange={(e) => setAddress(e.target.value)} required />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="lat">Latitude</Label>
+                            <Input id="lat" type="number" placeholder="-8.8157" value={lat} onChange={(e) => setLat(e.target.value)} required />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="lng">Longitude</Label>
+                            <Input id="lng" type="number" placeholder="13.2306" value={lng} onChange={(e) => setLng(e.target.value)} required />
+                        </div>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="details">Detalhes Adicionais</Label>
+                        <Input id="details" placeholder="Ex: Localizado perto da entrada principal." value={details} onChange={(e) => setDetails(e.target.value)} />
+                    </div>
+                    <div className="flex justify-end">
+                        <Button type="submit" disabled={isLoading}>
+                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Salvar ATM
+                        </Button>
+                    </div>
+                </form>
+            </CardContent>
+        </Card>
+    );
 };
 
 export default AddAtmPage;
