@@ -1,3 +1,4 @@
+
 // src/lib/firebase-admin.ts
 import * as admin from 'firebase-admin';
 import type { Atm } from '@/types';
@@ -30,6 +31,14 @@ export async function addAtm(atmData: Omit<Atm, 'id' | 'status' | 'lastUpdate' |
     await newAtmRef.set(newAtm);
     return newAtmRef.id;
 }
+
+export async function updateAtm(id: string, atmData: Omit<Atm, 'id' | 'status' | 'lastUpdate' | 'reports'>): Promise<void> {
+    const atmRef = db.collection('atms').doc(id);
+    // Usamos 'merge: true' para garantir que apenas os campos fornecidos sejam atualizados
+    // e para evitar a sobreescrita de 'reports' ou 'status' se não forem incluídos.
+    await atmRef.set(atmData, { merge: true });
+}
+
 
 export async function getAtms(): Promise<Atm[]> {
   try {

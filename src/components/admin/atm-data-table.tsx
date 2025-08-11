@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Atm } from "@/types";
@@ -72,7 +73,9 @@ export function AtmDataTable({ data }: AtmDataTableProps) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                        <DropdownMenuItem>Editar</DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link href={`/admin/atms/edit/${atm.id}`}>Editar</Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem className="text-destructive">Deletar</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
