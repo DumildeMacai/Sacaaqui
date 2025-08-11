@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, CircleSlash, HelpCircle, MoreHorizontal, PlusCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const statusMap: { [key in Atm['status']]: { text: string; icon: React.ReactNode } } = {
     com_dinheiro: { text: 'Com Dinheiro', icon: <CheckCircle2 className="h-4 w-4 text-accent" /> },
@@ -27,6 +29,15 @@ interface AtmDataTableProps {
 }
 
 export function AtmDataTable({ data }: AtmDataTableProps) {
+
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: ptBR });
+    } catch (error) {
+      console.error("Invalid date:", dateString);
+      return "Data inválida";
+    }
+  }
 
   return (
     <div className="w-full">
@@ -62,7 +73,7 @@ export function AtmDataTable({ data }: AtmDataTableProps) {
                   <TableCell>
                     <Badge variant="outline" className="gap-1">{statusMap[atm.status].icon} {statusMap[atm.status].text}</Badge>
                   </TableCell>
-                  <TableCell>{new Date(atm.lastUpdate).toLocaleString('pt-BR')}</TableCell>
+                  <TableCell>{formatDate(atm.lastUpdate)}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
