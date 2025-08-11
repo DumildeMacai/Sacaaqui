@@ -2,19 +2,62 @@
 import { AtmDetail } from '@/components/atm-detail';
 import { notFound } from 'next/navigation';
 import type { Atm } from '@/types';
-import { mockAtms } from '@/lib/mock-data'; // Importa os dados mockados
+import { useEffect, useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AtmDetailPage({ params }: { params: { id: string } }) {
   const { id: atmId } = params;
+  const [atmData, setAtmData] = useState<Atm | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Procura o ATM nos dados mockados
-  const atmData = mockAtms.find(atm => atm.id === atmId);
+  useEffect(() => {
+    if (!atmId) return;
 
-  // Se não encontrar o ATM, exibe a página de não encontrado
+    const fetchAtm = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/atms/${atmId}`);
+        if (!response.ok) {
+          if (response.status === 404) {
+            notFound();
+          }
+          throw new Error('Failed to fetch ATM data');
+        }
+        const data: Atm = await response.json();
+        setAtmData(data);
+      } catch (err: any) {
+        console.error(err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAtm();
+  }, [atmId]);
+
+  if (loading) {
+    return (
+        <div className="grid gap-8 md:grid-cols-3">
+            <div className="md:col-span-2 space-y-8">
+                <Skeleton className="h-40 w-full" />
+                <Skeleton className="h-64 w-full" />
+            </div>
+            <div className="md:col-span-1">
+                <Skeleton className="h-48 w-full" />
+            </div>
+        </div>
+    );
+  }
+  
+  if (error) {
+      return <div className="text-destructive text-center">Erro ao carregar os dados do ATM. Tente novamente mais tarde.</div>;
+  }
+
   if (!atmData) {
     notFound();
   }
 
-  // Renderiza o componente com os dados do ATM encontrado
   return <AtmDetail atm={atmData} />;
 }

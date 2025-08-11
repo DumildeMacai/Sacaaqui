@@ -1,15 +1,41 @@
-'use client'
+'use client';
 import type { Atm } from '@/types'; 
 import { AtmList } from '@/components/atm-list';
 import { LogoutButton } from '@/components/logout-button';
-import { Suspense } from 'react';
-import { mockAtms } from '@/lib/mock-data'; // Importa os dados mockados
+import { useEffect, useState, Suspense } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardPage() { 
-  // Usa os dados mockados em vez de buscar do Firestore
-  const atms = mockAtms;
+  const [atms, setAtms] = useState<Atm[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
- return (
+  useEffect(() => {
+    const fetchAtms = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/atms');
+        if (!response.ok) {
+          throw new Error('Failed to fetch ATMs');
+        }
+        const data: Atm[] = await response.json();
+        setAtms(data);
+      } catch (err: any) {
+        console.error(err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAtms();
+  }, []);
+
+  if (error) {
+    return <div className="text-destructive text-center">Erro ao carregar os ATMs. Tente novamente mais tarde.</div>;
+  }
+
+  return (
     <div className="min-h-screen p-8"> 
       <div className="flex justify-between items-center mb-8"> 
         <div className="mb-8"> 
@@ -18,8 +44,22 @@ export default function DashboardPage() {
         </div>
         <LogoutButton /> 
       </div>
-      <Suspense fallback={<div>Carregando...</div>}>
-        <AtmList initialAtms={atms} />
+      <Suspense fallback={
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <Skeleton className="h-[220px] w-full rounded-xl" />
+              <Skeleton className="h-[220px] w-full rounded-xl" />
+              <Skeleton className="h-[220px] w-full rounded-xl" />
+          </div>
+      }>
+        {loading ? (
+             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <Skeleton className="h-[220px] w-full rounded-xl" />
+                <Skeleton className="h-[220px] w-full rounded-xl" />
+                <Skeleton className="h-[220px] w-full rounded-xl" />
+             </div>
+        ) : (
+            <AtmList initialAtms={atms} />
+        )}
       </Suspense>
     </div>
   );
