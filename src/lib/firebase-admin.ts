@@ -6,6 +6,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 // Garante que a inicialização ocorra apenas uma vez.
 if (!admin.apps.length) {
   try {
+    // A chave privada precisa de ter as quebras de linha restauradas.
     const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
     if (!process.env.FIREBASE_PROJECT_ID || !privateKey || !process.env.FIREBASE_CLIENT_EMAIL) {
@@ -22,6 +23,8 @@ if (!admin.apps.length) {
     console.log("Firebase Admin SDK inicializado com sucesso.");
   } catch (error: any) {
     console.error("Erro CRÍTICO ao inicializar o Firebase Admin SDK:", error.message);
+    // Lançar o erro pode ajudar a depurar o problema de inicialização no servidor.
+    throw new Error(`Falha na inicialização do Firebase Admin: ${error.message}`);
   }
 }
 
@@ -54,6 +57,7 @@ export async function getAtms(): Promise<Atm[]> {
       
       const reports = data.reports?.map((report: any) => ({
           ...report,
+          // Garante que o timestamp do relatório também seja convertido corretamente.
           timestamp: report.timestamp?.toDate ? report.timestamp.toDate().toISOString() : (report.timestamp || new Date().toISOString()),
       })) || [];
 
@@ -87,6 +91,7 @@ export async function getAtmById(id: string): Promise<Atm | null> {
     
     const reports = data.reports?.map((report: any) => ({
       ...report,
+      // Garante que o timestamp do relatório também seja convertido corretamente.
       timestamp: report.timestamp?.toDate ? report.timestamp.toDate().toISOString() : (report.timestamp || new Date().toISOString()),
     })) || [];
 
