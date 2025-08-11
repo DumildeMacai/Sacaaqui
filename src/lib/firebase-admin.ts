@@ -3,20 +3,24 @@
 import * as admin from 'firebase-admin';
 import type { Atm } from '@/types';
 import { FieldValue } from 'firebase-admin/firestore';
-import serviceAccount from '@/firebase/serviceAccountKey.json';
 
 // Garante que a inicialização ocorra apenas uma vez.
 if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-    });
-    console.log("Firebase Admin SDK inicializado com sucesso a partir do ficheiro de credenciais.");
-  } catch (error: any) {
-    console.error("Erro CRÍTICO ao inicializar o Firebase Admin SDK:", error.message);
-    throw new Error(`Falha na inicialização do Firebase Admin: ${error.message}`);
-  }
+    try {
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY!);
+
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+        });
+        console.log("Firebase Admin SDK inicializado com sucesso.");
+    } catch (error: any) {
+        console.error("Erro CRÍTICO ao inicializar o Firebase Admin SDK:", error.message);
+        // Em um ambiente de produção, você pode querer lidar com isso de forma mais graciosa.
+        // Por agora, vamos lançar o erro para tornar o problema visível durante o desenvolvimento.
+        throw new Error(`Falha na inicialização do Firebase Admin: ${error.message}`);
+    }
 }
+
 
 const db = admin.firestore();
 
