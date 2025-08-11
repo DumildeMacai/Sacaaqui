@@ -1,31 +1,14 @@
-import { getAdminDb } from '@/firebase/adminInit'; 
-import { collection, getDocs } from 'firebase/firestore'; 
 import type { Atm } from '@/types'; 
 import { AtmList } from '@/components/atm-list';
 import { LogoutButton } from '@/components/logout-button';
 import { Suspense } from 'react';
+import { mockAtms } from '@/lib/mock-data'; // Importa os dados mock
 
-async function getAtms(): Promise<Atm[]> {
-  try {
-    const adminDb = getAdminDb(); 
-    const querySnapshot = await getDocs(collection(adminDb, 'atms'));
-    const atmsList: Atm[] = querySnapshot.docs.map(doc => {
-      const data = doc.data() as Omit<Atm, 'id'>;
-      if (data.lastUpdate && typeof data.lastUpdate !== 'string' && typeof (data.lastUpdate as any).toDate === 'function') {
-        data.lastUpdate = (data.lastUpdate as any).toDate().toISOString();
-      }
-      return { ...data, id: doc.id } as Atm; 
-    });
-    console.log('ATMs carregados do Firestore no servidor.');
-    return atmsList;
-  } catch (error) {
-    console.error('Erro ao carregar ATMs do Firestore no servidor:', error);
-    return []; 
-  }
-}
+// A função getAtms que usava Firestore foi removida.
 
 export default async function DashboardPage() { 
-  const atms = await getAtms();
+  // Usa diretamente os dados mockados
+  const atms = mockAtms;
 
  return (
     <div className="min-h-screen p-8"> 
