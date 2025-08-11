@@ -55,6 +55,23 @@ export async function updateAtm(id: string, atmData: Partial<Omit<Atm, 'id'>>): 
 }
 
 
+// Função auxiliar robusta para converter Timestamps
+const convertTimestampToString = (timestamp: any): string => {
+    if (timestamp && typeof timestamp.toDate === 'function') {
+        return timestamp.toDate().toISOString();
+    }
+    if (typeof timestamp === 'string') {
+        // Tenta validar se é um formato de data válido, se não, retorna uma data padrão
+        const date = new Date(timestamp);
+        if (!isNaN(date.getTime())) {
+            return date.toISOString();
+        }
+    }
+    // Retorna a data atual como um fallback seguro
+    return new Date().toISOString();
+};
+
+
 export async function getAtms(): Promise<Atm[]> {
   try {
     const atmsSnapshot = await db.collection('atms').get();
@@ -66,20 +83,13 @@ export async function getAtms(): Promise<Atm[]> {
     const atms = atmsSnapshot.docs.map(doc => {
       const data = doc.data();
       
-      const lastUpdate = data.lastUpdate?.toDate ? data.lastUpdate.toDate().toISOString() : new Date().toISOString();
+      const lastUpdate = convertTimestampToString(data.lastUpdate);
       
-      const reports = (data.reports || []).map((report: any) => {
-          let timestamp = new Date().toISOString();
-          if (report.timestamp?.toDate) { // Firestore Timestamp
-              timestamp = report.timestamp.toDate().toISOString();
-          } else if (typeof report.timestamp === 'string') { // Already a string
-              timestamp = report.timestamp;
-          }
-          return {
-              ...report,
-              timestamp,
-          };
-      });
+      // Garante que 'reports' seja sempre um array antes de mapear
+      const reports = (data.reports || []).map((report: any) => ({
+          ...report,
+          timestamp: convertTimestampToString(report.timestamp),
+      }));
 
       return {
         id: doc.id,
@@ -107,20 +117,13 @@ export async function getAtmById(id: string): Promise<Atm | null> {
   
     const data = atmDoc.data()!;
       
-    const lastUpdate = data.lastUpdate?.toDate ? data.lastUpdate.toDate().toISOString() : new Date().toISOString();
+    const lastUpdate = convertTimestampToString(data.lastUpdate);
     
-    const reports = (data.reports || []).map((report: any) => {
-        let timestamp = new Date().toISOString();
-        if (report.timestamp?.toDate) { // Firestore Timestamp
-            timestamp = report.timestamp.toDate().toISOString();
-        } else if (typeof report.timestamp === 'string') { // Already a string
-            timestamp = report.timestamp;
-        }
-        return {
-            ...report,
-            timestamp,
-        };
-    });
+    // Garante que 'reports' seja sempre um array antes de mapear
+    const reports = (data.reports || []).map((report: any) => ({
+        ...report,
+        timestamp: convertTimestampToString(report.timestamp),
+    }));
 
     return {
       id: atmDoc.id,
