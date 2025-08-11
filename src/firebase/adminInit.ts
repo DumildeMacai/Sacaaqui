@@ -1,60 +1,47 @@
 
 import * as admin from 'firebase-admin';
 import { config } from 'dotenv';
+import { expand } from 'dotenv-expand';
 
-// Carrega as variáveis de ambiente do arquivo .env
-config();
+const myEnv = config();
+expand(myEnv);
 
-console.log("Iniciando inicialização do Firebase Admin SDK..."); // Log de início
 
-// Carregue o conteúdo da chave privada da variável de ambiente
-const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+console.log("Tentando inicializar o Firebase Admin SDK...");
 
-console.log("FIREBASE_ADMIN_PRIVATE_KEY carregada?", !!privateKey); // Verifica se a chave privada foi carregada
+try {
+    const serviceAccount = {
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    };
 
-// Verifique se a chave privada foi carregada
-if (!privateKey) {
-  console.error("FIREBASE_ADMIN_PRIVATE_KEY não está configurada nas variáveis de ambiente.");
-  // Em um ambiente de produção, você pode querer adicionar um mecanismo de fallback ou sair do processo
+    if (!serviceAccount.projectId || !serviceAccount.privateKey || !serviceAccount.clientEmail) {
+        throw new Error("As credenciais de serviço do Firebase Admin não estão completas. Verifique as variáveis de ambiente.");
+    }
+
+    if (!admin.apps.length) {
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            databaseURL: `https://${process.env.FIREBASE_PROJECT_ID}.firebaseio.com`
+        });
+        console.log("Firebase Admin SDK inicializado com sucesso!");
+    } else {
+        console.log("Firebase Admin SDK já inicializado.");
+    }
+} catch (error) {
+    console.error("Erro ao inicializar o Firebase Admin SDK:", error);
+    // Em um ambiente de produção real, você pode querer lidar com este erro de forma mais robusta.
 }
 
-// Carregue as credenciais da conta de serviço a partir da variável de ambiente
-const serviceAccount = {
-  projectId: process.env.FIREBASE_PROJECT_ID, // Defina esta variável de ambiente
-  privateKey: privateKey ? privateKey.replace(/\\n/g, '\n') : undefined, // Substitui 
-  // por quebras de linha reais, verifica se privateKey existe
-  clientEmail: process.env.FIREBASE_CLIENT_EMAIL, // Defina esta variável de ambiente
-};
+const adminDb = admin.apps.length ? admin.firestore() : null;
+const adminAuth = admin.apps.lenth ? admin.auth() : null;
 
-console.log("Credenciais da conta de serviço carregadas:", { // Log das credenciais carregadas (sem a chave privada completa) ...privateKey é intencional para não expor a chave completa no log
-  projectId: serviceAccount.projectId,
-  clientEmail: serviceAccount.clientEmail,
-  privateKey: serviceAccount.privateKey ? "[Chave privada carregada]" : "[Chave privada ausente]"
-});
-
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-      databaseURL: 'https://atm-locator-nbjla.firebaseio.com' // Substitua pelo URL do seu projeto se necessário
-    });
-    console.log("Firebase Admin SDK inicializado com sucesso!"); // Log de sucesso na inicialização
-  } catch (error) {
-    console.error("Erro ao inicializar Firebase Admin SDK:", error); // Log de erro na inicialização
+function getAdminDb() {
+  if (!adminDb) {
+    throw new Error("O Firestore Admin não está disponível. A inicialização do Admin SDK falhou.");
   }
-} else {
-  console.log("Firebase Admin SDK já inicializado, usando instância existente."); // Log se já estiver inicializado
+  return adminDb;
 }
 
-/**
- * Retorna a instância do Firestore do Admin SDK.
- * Garante que o aplicativo Admin seja inicializado antes de acessar o Firestore.
- * @returns A instância do Firestore.
- */
-export function getAdminDb() {
-  if (admin.apps.length === 0) {
-    throw new Error("Firebase Admin SDK não foi inicializado. Chame initializeApp antes de getAdminDb.");
-  }
-  console.log("Obtendo instância do Admin Firestore..."); // Log ao obter a instância
-  return admin.firestore();
-}
+export { getAdminDb, adminAuth };
