@@ -1,12 +1,13 @@
 'use client'
 import { AtmDetail } from '@/components/atm-detail';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import type { Atm } from '@/types';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function AtmDetailPage({ params }: { params: { id: string } }) {
-  const { id: atmId } = params;
+export default function AtmDetailPage() {
+  const params = useParams();
+  const atmId = params.id as string;
   const [atmData, setAtmData] = useState<Atm | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
