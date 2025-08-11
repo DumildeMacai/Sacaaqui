@@ -1,30 +1,40 @@
-import Link from 'next/link';
-import { Package, Home, Users } from 'lucide-react';
+"use client";
 
-export function AdminSidebar() {
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
+import { Home, Users, CreditCard } from "lucide-react"
+
+export function Sidebar() {
+  const pathname = usePathname()
+
+  const links = [
+    { href: "/admin/panel", label: "Dashboard", icon: Home },
+    { href: "/admin/atms", label: "ATMs", icon: CreditCard },
+    { href: "/admin/users", label: "Usuários", icon: Users },
+  ]
+
   return (
-    <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-      <Link
-        href="/admin/panel"
-        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-      >
-        <Home className="h-4 w-4" />
-        Dashboard
-      </Link>
-      <Link
-        href="/admin/panel"
-        className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
-      >
-        <Package className="h-4 w-4" />
-        ATMs
-      </Link>
-      <Link
-        href="#"
-        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-      >
-        <Users className="h-4 w-4" />
-        Usuários
-      </Link>
-    </nav>
-  );
+    <div className="p-4 w-60 border-r bg-background h-screen">
+      <h1 className="text-2xl font-bold text-primary mb-6">Macai</h1>
+      <nav className="space-y-2">
+        {links.map(({ href, label, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
+              pathname === href
+                ? "bg-muted text-primary font-semibold"
+                : "text-muted-foreground hover:bg-muted"
+            )}
+          >
+            <Icon className="w-5 h-5" />
+            {label}
+          </Link>
+        ))}
+      </nav>
+    </div>
+  )
 }
+

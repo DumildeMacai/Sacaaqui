@@ -1,4 +1,4 @@
-import { AdminSidebar } from '@/components/admin/admin-sidebar';
+import { Sidebar } from '@/components/admin/admin-sidebar';
 import { MacaiLogo } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ export default function AdminPanelLayout({
                 </Link>
             </div>
             <div className="flex-1">
-                <AdminSidebar />
+                <Sidebar />
             </div>
         </div>
       </div>
@@ -41,7 +41,7 @@ export default function AdminPanelLayout({
                         </Link>
                     </div>
                     <div className="flex-1 py-2">
-                      <AdminSidebar />
+                      <Sidebar />
                     </div>
                 </SheetContent>
             </Sheet>

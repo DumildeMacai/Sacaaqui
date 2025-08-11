@@ -18,7 +18,24 @@ const statusMap: { [key in Atm['status']]: { text: string; variant: StatusVarian
 
 export function AtmCard({ atm, onStatusUpdate }: { atm: Atm, onStatusUpdate: (atmId: string, status: 'com_dinheiro' | 'sem_dinheiro') => void }) {
     const statusInfo = statusMap[atm.status];
-    const lastUpdate = formatDistanceToNow(new Date(atm.lastUpdate), { addSuffix: true, locale: ptBR });
+    
+    // --- Modificação: Lidar com valores de data inválidos ---
+    let lastUpdate = 'Data desconhecida'; // Valor padrão
+
+    if (atm.lastUpdate) { // Verifica se lastUpdate existe
+        try {
+            // Tenta criar um objeto Date. Se atm.lastUpdate já for Date, funcionará.
+            // Se for Timestamp convertido, também deve funcionar.
+            const date = new Date(atm.lastUpdate);
+            if (!isNaN(date.getTime())) { // Verifica se a data é válida
+                lastUpdate = formatDistanceToNow(date, { addSuffix: true, locale: ptBR });
+            }
+        } catch (error) {
+            console.error('Erro ao formatar data:', error);
+            lastUpdate = 'Erro na data'; // Mensagem de erro caso a formatação falhe
+        }
+    }
+    // --- Fim da Modificação ---
 
   return (
     <Card className="flex flex-col">

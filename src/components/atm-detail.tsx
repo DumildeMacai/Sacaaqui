@@ -53,7 +53,7 @@ export function AtmDetail({ atm }: { atm: Atm }) {
                                     {report.status === 'com_dinheiro' ? <CheckCircle2 className="h-5 w-5 text-accent" /> : <CircleSlash className="h-5 w-5 text-destructive" />}
                                     <div>
                                         <p className="font-medium">Status: {report.status === 'com_dinheiro' ? 'Com Dinheiro' : 'Sem Dinheiro'}</p>
-                                        <p className="text-sm text-muted-foreground">por {report.userId}</p>
+                                        <p className="text-sm text-muted-foreground">por {report.userName}</p>
                                     </div>
                                 </div>
                                 <div className="text-sm text-muted-foreground flex items-center gap-2">

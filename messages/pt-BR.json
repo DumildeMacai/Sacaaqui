@@ -1,0 +1,7 @@
+{
+  "homepage.title": "🌐 Localizador de caixas eletrônicos Macai",
+  "homepage.welcome": "Bem-vindo ao <span className="text-green-400">ATM Locator</span>",
+  "homepage.description": "Escolha uma opção para continuar",
+  "homepage.loginButton": "Entrar com Email e Senha",
+  "homepage.signupButton": "Criar Conta"
+}

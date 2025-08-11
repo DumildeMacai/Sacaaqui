@@ -9,8 +9,8 @@ export default {
   ],
   theme: {
     extend: {
+      // Configure 'Inter' as the default sans-serif font
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
         headline: ['Inter', 'sans-serif'],
         code: ['monospace'],
       },
