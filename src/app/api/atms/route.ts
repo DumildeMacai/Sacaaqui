@@ -1,5 +1,6 @@
 import { getAtms, addAtm } from '@/lib/firebase-admin';
 import { NextResponse } from 'next/server';
+import type { Atm } from '@/types';
 
 export async function GET() {
   try {
@@ -13,19 +14,22 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
-        const atmData = await request.json();
-        
-        // Validação completa para garantir que todos os campos obrigatórios estão presentes
-        if (!atmData.name || !atmData.address || !atmData.location || typeof atmData.location.lat !== 'number' || typeof atmData.location.lng !== 'number') {
-            return NextResponse.json({ error: 'Missing or invalid required ATM fields' }, { status: 400 });
-        }
+        const body = await request.json();
 
-        // Passa apenas os campos esperados para a função addAtm
-        const newAtmPayload = {
-            name: atmData.name,
-            address: atmData.address,
-            location: atmData.location,
-            details: atmData.details || '', // Garante que details seja uma string
+        // Validação robusta dos dados recebidos
+        if (!body.name || !body.address || !body.location || typeof body.location.lat !== 'number' || typeof body.location.lng !== 'number') {
+            return NextResponse.json({ error: 'Missing or invalid required ATM fields: name, address, location (lat, lng).' }, { status: 400 });
+        }
+        
+        // Cria um payload limpo e bem tipado para garantir a consistência dos dados
+        const newAtmPayload: Omit<Atm, 'id' | 'status' | 'lastUpdate' | 'reports'> = {
+            name: body.name,
+            address: body.address,
+            location: {
+                lat: body.location.lat,
+                lng: body.location.lng,
+            },
+            details: body.details || '', // Garante que 'details' seja sempre uma string
         };
 
         const newAtmId = await addAtm(newAtmPayload);
@@ -34,8 +38,7 @@ export async function POST(request: Request) {
 
     } catch (error) {
         console.error('Error adding ATM:', error);
-        // Retorna uma mensagem de erro mais específica se possível
-        const errorMessage = error instanceof Error ? error.message : 'Internal Server Error';
-        return NextResponse.json({ error: errorMessage }, { status: 500 });
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        return NextResponse.json({ error: 'Internal Server Error', details: errorMessage }, { status: 500 });
     }
 }
