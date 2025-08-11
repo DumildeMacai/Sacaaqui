@@ -1,12 +1,6 @@
 'use server';
 
 import * as admin from 'firebase-admin';
-import { config } from 'dotenv';
-import { expand } from 'dotenv-expand';
-
-// Garante que as variáveis de ambiente sejam carregadas
-const myEnv = config();
-expand(myEnv);
 
 function initializeAdmin() {
     if (admin.apps.length > 0) {
