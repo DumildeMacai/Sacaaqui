@@ -19,6 +19,40 @@ if (!admin.apps.length) {
             credential: admin.credential.cert(serviceAccount),
         });
         console.log("Firebase Admin SDK inicializado com sucesso.");
+
+        // --- Adicionar utilizador administrador ---
+        const adminEmail = 'admin@admin.com';
+        admin.auth().getUserByEmail(adminEmail)
+            .then(() => {
+                console.log('Utilizador administrador já existe.');
+            })
+            .catch((error) => {
+                if (error.code === 'auth/user-not-found') {
+                    admin.auth().createUser({
+                        email: adminEmail,
+                        password: '1dumilde1@A',
+                        displayName: 'Admin',
+                    })
+                    .then((userRecord) => {
+                        console.log('Utilizador administrador criado com sucesso:', userRecord.uid);
+                        // Opcional: Salvar dados adicionais no Firestore
+                        const db = admin.firestore();
+                        db.collection('users').doc(userRecord.uid).set({
+                            name: 'Admin',
+                            email: adminEmail,
+                            reputation: 10, // Reputação máxima para o admin
+                        });
+                    })
+                    .catch((createError) => {
+                        console.error('Erro ao criar utilizador administrador:', createError);
+                    });
+                } else {
+                    console.error('Erro ao verificar utilizador administrador:', error);
+                }
+            });
+        // --- Fim da adição do utilizador ---
+
+
     } catch (error: any) {
         console.error("Erro CRÍTICO ao inicializar o Firebase Admin SDK:", error.message);
         // Em um ambiente de produção, você pode querer lidar com isso de forma mais graciosa.
