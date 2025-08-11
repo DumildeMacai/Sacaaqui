@@ -1,4 +1,3 @@
-
 // src/lib/firebase-admin.ts
 import * as admin from 'firebase-admin';
 import type { Atm } from '@/types';
@@ -36,7 +35,7 @@ export async function addAtm(atmData: Omit<Atm, 'id' | 'status' | 'lastUpdate' |
     const newAtm = {
         ...atmData,
         status: 'desconhecido', // Initial status
-        lastUpdate: new Date().toISOString(), // Use ISO string for consistency
+        lastUpdate: admin.firestore.FieldValue.serverTimestamp(), // Use server timestamp
         reports: [],
         details: atmData.details || '', // Garante que 'details' seja sempre uma string
     };
@@ -46,7 +45,13 @@ export async function addAtm(atmData: Omit<Atm, 'id' | 'status' | 'lastUpdate' |
 
 export async function updateAtm(id: string, atmData: Partial<Omit<Atm, 'id'>>): Promise<void> {
     const atmRef = db.collection('atms').doc(id);
-    await atmRef.update(atmData);
+    const updateData = { ...atmData };
+
+    if (updateData.lastUpdate) {
+        updateData.lastUpdate = admin.firestore.FieldValue.serverTimestamp() as any;
+    }
+
+    await atmRef.update(updateData);
 }
 
 
@@ -61,7 +66,7 @@ export async function getAtms(): Promise<Atm[]> {
     const atms = atmsSnapshot.docs.map(doc => {
       const data = doc.data();
       // Correção: Garante que o timestamp seja convertido para string ISO
-      const lastUpdate = data.lastUpdate?.toDate ? data.lastUpdate.toDate().toISOString() : data.lastUpdate || new Date().toISOString();
+      const lastUpdate = data.lastUpdate?.toDate ? data.lastUpdate.toDate().toISOString() : new Date().toISOString();
       
       const reports = data.reports?.map((report: any) => ({
           ...report,
@@ -95,7 +100,7 @@ export async function getAtmById(id: string): Promise<Atm | null> {
     const data = atmDoc.data()!;
       
     // Correção: Garante que o timestamp seja convertido para string ISO
-    const lastUpdate = data.lastUpdate?.toDate ? data.lastUpdate.toDate().toISOString() : data.lastUpdate || new Date().toISOString();
+    const lastUpdate = data.lastUpdate?.toDate ? data.lastUpdate.toDate().toISOString() : new Date().toISOString();
     
     const reports = data.reports?.map((report: any) => ({
       ...report,
