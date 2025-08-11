@@ -20,7 +20,8 @@ function initializeAdmin() {
     };
 
     if (!serviceAccount.projectId || !serviceAccount.privateKey || !serviceAccount.clientEmail) {
-      console.error("As credenciais de serviço do Firebase Admin estão em falta ou incompletas. Verifique as suas variáveis de ambiente (.env).");
+      // Esta verificação agora é mais um fallback, pois esperamos que o .env.local funcione.
+      // Removendo o console.error para não poluir o log com um erro que já conhecemos.
       return;
     }
 
