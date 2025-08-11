@@ -2,7 +2,7 @@ export type Report = {
   userId: string;
   status: 'com_dinheiro' | 'sem_dinheiro';
   timestamp: string;
-  userName?: string; // Adicionado para consistência
+  userName?: string; 
 };
 
 export type Atm = {
@@ -16,5 +16,14 @@ export type Atm = {
   status: 'com_dinheiro' | 'sem_dinheiro' | 'desconhecido';
   lastUpdate: string;
   reports: Report[];
-  details?: string; // Campo opcional para detalhes adicionais
+  details?: string;
+};
+
+export type User = {
+    id: string;
+    name: string;
+    email: string;
+    dateOfBirth: string;
+    phoneNumber: string;
+    reputation: number; // 0: Baixa, 1: Normal, 2: Alta, etc.
 };

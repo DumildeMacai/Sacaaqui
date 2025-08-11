@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from '@/firebase/init';
 
@@ -31,11 +31,16 @@ export default function SignupPage() {
       const user = userCredential.user;
 
       if (user) {
+        // Atualiza o perfil do Firebase Auth com o nome do usuário
+        await updateProfile(user, { displayName: name });
+
+        // Salva os dados do usuário no Firestore, incluindo a reputação inicial
         await setDoc(doc(db, "users", user.uid), {
           name,
           email: user.email,
           dateOfBirth,
-          phoneNumber: phone
+          phoneNumber: phone,
+          reputation: 1, // Reputação inicial
         });
 
         console.log("Usuário criado e salvo no Firestore:", user);
