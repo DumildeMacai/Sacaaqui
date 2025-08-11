@@ -2,13 +2,11 @@ import type { Atm } from '@/types';
 import { AtmList } from '@/components/atm-list';
 import { LogoutButton } from '@/components/logout-button';
 import { Suspense } from 'react';
-import { mockAtms } from '@/lib/mock-data'; // Importa os dados mock
-
-// A função getAtms que usava Firestore foi removida.
+import { getAtms } from '@/lib/data'; // Importa a função para buscar dados reais
 
 export default async function DashboardPage() { 
-  // Usa diretamente os dados mockados
-  const atms = mockAtms;
+  // Usa a função para buscar dados do Firestore
+  const atms = await getAtms();
 
  return (
     <div className="min-h-screen p-8"> 

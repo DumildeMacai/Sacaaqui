@@ -1,13 +1,13 @@
 import { AtmDetail } from '@/components/atm-detail';
 import { notFound } from 'next/navigation';
 import type { Atm } from '@/types';
-import { mockAtms } from '@/lib/mock-data'; // Importa os dados mock
+import { getAtmById } from '@/lib/data'; // Importa a função para buscar dados reais por ID
 
 export default async function AtmDetailPage({ params }: { params: { id: string } }) {
   const { id: atmId } = params;
 
-  // Procura o ATM nos dados mockados
-  const atmData = mockAtms.find(atm => atm.id === atmId);
+  // Procura o ATM no Firestore
+  const atmData = await getAtmById(atmId);
 
   // Se não encontrar o ATM, exibe a página de não encontrado
   if (!atmData) {
