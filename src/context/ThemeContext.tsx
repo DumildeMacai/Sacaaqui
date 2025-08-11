@@ -1,4 +1,6 @@
 // src/context/ThemeContext.tsx
+"use client";
+
 import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "light" | "dark";
@@ -17,25 +19,34 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Define o tema real apenas no cliente após a montagem
     const savedTheme = localStorage.getItem("theme") as Theme;
-    setTheme(savedTheme || "dark");
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
     setMounted(true); // Define mounted como true após ler do localStorage
   }, []);
 
   useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
+    if (mounted) {
+      if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+      localStorage.setItem("theme", theme);
     }
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+  }, [theme, mounted]);
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
-  // Renderiza os filhos apenas quando mounted for true
-  return mounted ? (
+  // Renderiza um placeholder ou nada até o componente estar montado no cliente
+  // para evitar o piscar de conteúdo (flicker) e erros de hidratação.
+  if (!mounted) {
+    return null; 
+  }
+
+  return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>
-  ) : null;
+  );
 };
 
 export const useTheme = () => {
