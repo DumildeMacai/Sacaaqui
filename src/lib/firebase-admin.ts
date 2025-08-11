@@ -6,7 +6,6 @@ import { FieldValue } from 'firebase-admin/firestore';
 // Garante que a inicialização ocorra apenas uma vez.
 if (!admin.apps.length) {
   try {
-    // A formatação da chave privada é crucial. As quebras de linha precisam ser restauradas.
     const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
     if (!process.env.FIREBASE_PROJECT_ID || !privateKey || !process.env.FIREBASE_CLIENT_EMAIL) {
@@ -50,14 +49,19 @@ export async function getAtms(): Promise<Atm[]> {
 
     const atms = atmsSnapshot.docs.map(doc => {
       const data = doc.data();
+      // Correção: Garante que o timestamp seja convertido para string ISO
+      const lastUpdate = data.lastUpdate?.toDate ? data.lastUpdate.toDate().toISOString() : new Date().toISOString();
+      
+      const reports = data.reports?.map((report: any) => ({
+          ...report,
+          timestamp: report.timestamp?.toDate ? report.timestamp.toDate().toISOString() : (report.timestamp || new Date().toISOString()),
+      })) || [];
+
       return {
         id: doc.id,
         ...data,
-        lastUpdate: data.lastUpdate?.toDate?.().toISOString() || new Date().toISOString(),
-        reports: data.reports?.map((report: any) => ({
-          ...report,
-          timestamp: report.timestamp?.toDate?.().toISOString() || report.timestamp || new Date().toISOString(),
-        })) || [],
+        lastUpdate: lastUpdate,
+        reports: reports,
       } as Atm;
     });
     return atms;
@@ -78,15 +82,20 @@ export async function getAtmById(id: string): Promise<Atm | null> {
   
     const data = atmDoc.data()!;
       
+    // Correção: Garante que o timestamp seja convertido para string ISO
+    const lastUpdate = data.lastUpdate?.toDate ? data.lastUpdate.toDate().toISOString() : new Date().toISOString();
+    
+    const reports = data.reports?.map((report: any) => ({
+      ...report,
+      timestamp: report.timestamp?.toDate ? report.timestamp.toDate().toISOString() : (report.timestamp || new Date().toISOString()),
+    })) || [];
+
     return {
       id: atmDoc.id,
       ...data,
       details: data.details || null,
-      lastUpdate: data.lastUpdate?.toDate?.().toISOString() || new Date().toISOString(),
-      reports: data.reports?.map((report: any) => ({
-        ...report,
-        timestamp: report.timestamp?.toDate?.().toISOString() || report.timestamp || new Date().toISOString(),
-      })) || [],
+      lastUpdate: lastUpdate,
+      reports: reports,
     } as Atm;
   
   } catch (error) {
