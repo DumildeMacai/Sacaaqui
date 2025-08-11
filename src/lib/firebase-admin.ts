@@ -1,25 +1,15 @@
 // src/lib/firebase-admin.ts
 import * as admin from 'firebase-admin';
 import type { Atm } from '@/types';
+import serviceAccount from '@/firebase/serviceAccountKey.json';
 
 // Garante que a inicialização ocorra apenas uma vez.
 if (!admin.apps.length) {
   try {
-    // A chave privada precisa ter os caracteres de nova linha corretamente escapados.
-    const privateKey = (process.env.FIREBASE_ADMIN_PRIVATE_KEY || '').replace(/\\n/g, '\n');
-    
-    if (!process.env.FIREBASE_PROJECT_ID || !privateKey || !process.env.FIREBASE_CLIENT_EMAIL) {
-        throw new Error("As credenciais de serviço do Firebase Admin estão em falta ou incompletas.");
-    }
-
     admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        privateKey: privateKey,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      }),
+      credential: admin.credential.cert(serviceAccount),
     });
-     console.log("Firebase Admin SDK inicializado com sucesso.");
+     console.log("Firebase Admin SDK inicializado com sucesso a partir do ficheiro JSON.");
   } catch (error: any) {
     console.error("Erro CRÍTICO ao inicializar o Firebase Admin SDK:", error.message);
   }
