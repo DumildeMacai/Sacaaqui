@@ -5,6 +5,7 @@ import type { Atm } from '@/types';
 // Garante que a inicialização ocorra apenas uma vez.
 if (!admin.apps.length) {
   try {
+    // A chave privada precisa ter os caracteres de nova linha corretamente escapados.
     const privateKey = (process.env.FIREBASE_ADMIN_PRIVATE_KEY || '').replace(/\\n/g, '\n');
     
     if (!process.env.FIREBASE_PROJECT_ID || !privateKey || !process.env.FIREBASE_CLIENT_EMAIL) {
