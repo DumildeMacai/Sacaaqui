@@ -1,11 +1,14 @@
 // src/lib/firebase-admin.ts
 import * as admin from 'firebase-admin';
 import type { Atm } from '@/types';
-import serviceAccount from '@/firebase/serviceAccountKey.json';
+import serviceAccountJson from '@/firebase/serviceAccountKey.json';
 
 // Garante que a inicialização ocorra apenas uma vez.
 if (!admin.apps.length) {
   try {
+    // Tipagem explícita do service account para garantir o formato correto.
+    const serviceAccount = serviceAccountJson as admin.ServiceAccount;
+    
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
