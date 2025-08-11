@@ -47,10 +47,8 @@ export async function updateAtm(id: string, atmData: Partial<Omit<Atm, 'id'>>): 
     const atmRef = db.collection('atms').doc(id);
     const updateData = { ...atmData };
 
-    // Se lastUpdate estiver a ser atualizado, use o timestamp do servidor
-    if (Object.prototype.hasOwnProperty.call(updateData, 'lastUpdate')) {
-      updateData.lastUpdate = admin.firestore.FieldValue.serverTimestamp() as any;
-    }
+    // Assegura que lastUpdate seja atualizado com o timestamp do servidor
+    updateData.lastUpdate = admin.firestore.FieldValue.serverTimestamp() as any;
 
 
     await atmRef.update(updateData);
@@ -67,14 +65,21 @@ export async function getAtms(): Promise<Atm[]> {
 
     const atms = atmsSnapshot.docs.map(doc => {
       const data = doc.data();
-      // Correção: Garante que o timestamp seja convertido para string ISO
+      
       const lastUpdate = data.lastUpdate?.toDate ? data.lastUpdate.toDate().toISOString() : new Date().toISOString();
       
-      const reports = (data.reports || []).map((report: any) => ({
-          ...report,
-          // Garante que o timestamp do relatório também seja convertido corretamente.
-          timestamp: report.timestamp?.toDate ? report.timestamp.toDate().toISOString() : (report.timestamp || new Date().toISOString()),
-      }));
+      const reports = (data.reports || []).map((report: any) => {
+          let timestamp = new Date().toISOString();
+          if (report.timestamp?.toDate) { // Firestore Timestamp
+              timestamp = report.timestamp.toDate().toISOString();
+          } else if (typeof report.timestamp === 'string') { // Already a string
+              timestamp = report.timestamp;
+          }
+          return {
+              ...report,
+              timestamp,
+          };
+      });
 
       return {
         id: doc.id,
@@ -87,7 +92,7 @@ export async function getAtms(): Promise<Atm[]> {
     return atms;
   } catch (error) {
     console.error("Erro ao buscar ATMs no Firestore:", error);
-    return []; 
+    throw new Error('Falha ao buscar ATMs do Firestore.');
   }
 }
 
@@ -102,14 +107,20 @@ export async function getAtmById(id: string): Promise<Atm | null> {
   
     const data = atmDoc.data()!;
       
-    // Correção: Garante que o timestamp seja convertido para string ISO
     const lastUpdate = data.lastUpdate?.toDate ? data.lastUpdate.toDate().toISOString() : new Date().toISOString();
     
-    const reports = (data.reports || []).map((report: any) => ({
-      ...report,
-      // Garante que o timestamp do relatório também seja convertido corretamente.
-      timestamp: report.timestamp?.toDate ? report.timestamp.toDate().toISOString() : (report.timestamp || new Date().toISOString()),
-    }));
+    const reports = (data.reports || []).map((report: any) => {
+        let timestamp = new Date().toISOString();
+        if (report.timestamp?.toDate) { // Firestore Timestamp
+            timestamp = report.timestamp.toDate().toISOString();
+        } else if (typeof report.timestamp === 'string') { // Already a string
+            timestamp = report.timestamp;
+        }
+        return {
+            ...report,
+            timestamp,
+        };
+    });
 
     return {
       id: atmDoc.id,
@@ -121,6 +132,6 @@ export async function getAtmById(id: string): Promise<Atm | null> {
   
   } catch (error) {
     console.error(`Erro ao buscar ATM com id ${id}:`, error);
-    return null;
+    throw new Error(`Falha ao buscar o ATM ${id} do Firestore.`);
   }
 }
