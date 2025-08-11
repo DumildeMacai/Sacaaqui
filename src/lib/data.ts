@@ -5,10 +5,6 @@ import type { Atm } from '@/types';
 
 export async function getAtms(): Promise<Atm[]> {
   const adminDb = await getAdminDb();
-  if (!adminDb) {
-    console.error("Firestore Admin não está disponível.");
-    return [];
-  }
 
   try {
     const atmsSnapshot = await adminDb.collection('atms').get();
@@ -26,7 +22,7 @@ export async function getAtms(): Promise<Atm[]> {
         lastUpdate: data.lastUpdate?.toDate?.().toISOString() || new Date().toISOString(),
         reports: data.reports?.map((report: any) => ({
           ...report,
-          timestamp: report.timestamp?.toDate?.().toISOString() || new Date().toISOString(),
+          timestamp: report.timestamp?.toDate?.().toISOString() || report.timestamp || new Date().toISOString(),
         })) || [],
       } as Atm;
     });
@@ -39,10 +35,6 @@ export async function getAtms(): Promise<Atm[]> {
 
 export async function getAtmById(id: string): Promise<Atm | null> {
     const adminDb = await getAdminDb();
-    if (!adminDb) {
-      console.error("Firestore Admin não está disponível.");
-      return null;
-    }
   
     try {
       const atmDoc = await adminDb.collection('atms').doc(id).get();
@@ -61,7 +53,7 @@ export async function getAtmById(id: string): Promise<Atm | null> {
          lastUpdate: data.lastUpdate?.toDate?.().toISOString() || new Date().toISOString(),
          reports: data.reports?.map((report: any) => ({
            ...report,
-           timestamp: report.timestamp?.toDate?.().toISOString() || new Date().toISOString(),
+           timestamp: report.timestamp?.toDate?.().toISOString() || report.timestamp || new Date().toISOString(),
          })) || [],
       } as Atm;
   
