@@ -1,18 +1,25 @@
 // src/lib/firebase-admin.ts
 import * as admin from 'firebase-admin';
 import type { Atm } from '@/types';
-import serviceAccountJson from '@/firebase/serviceAccountKey.json';
+import 'dotenv/config'; // Garante que as variáveis de ambiente sejam carregadas
 
 // Garante que a inicialização ocorra apenas uma vez.
 if (!admin.apps.length) {
   try {
-    // Tipagem explícita do service account para garantir o formato correto.
-    const serviceAccount = serviceAccountJson as admin.ServiceAccount;
-    
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+    if (!process.env.FIREBASE_PROJECT_ID || !privateKey || !process.env.FIREBASE_CLIENT_EMAIL) {
+        throw new Error('As credenciais do Firebase Admin não estão completas no ambiente.');
+    }
+
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+      credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        privateKey: privateKey,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      }),
     });
-     console.log("Firebase Admin SDK inicializado com sucesso a partir do ficheiro JSON.");
+    console.log("Firebase Admin SDK inicializado com sucesso.");
   } catch (error: any) {
     console.error("Erro CRÍTICO ao inicializar o Firebase Admin SDK:", error.message);
   }
@@ -43,7 +50,6 @@ export async function getAtms(): Promise<Atm[]> {
     return atms;
   } catch (error) {
     console.error("Erro ao buscar ATMs no Firestore:", error);
-    // Em caso de erro, retorna um array vazio para não quebrar a aplicação
     return []; 
   }
 }
@@ -62,7 +68,7 @@ export async function getAtmById(id: string): Promise<Atm | null> {
     return {
       id: atmDoc.id,
       ...data,
-      details: data.details || null, // Garante que o campo details seja retornado
+      details: data.details || null,
       lastUpdate: data.lastUpdate?.toDate?.().toISOString() || new Date().toISOString(),
       reports: data.reports?.map((report: any) => ({
         ...report,
