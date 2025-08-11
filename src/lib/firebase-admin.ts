@@ -36,7 +36,7 @@ export async function addAtm(atmData: Omit<Atm, 'id' | 'status' | 'lastUpdate' |
         ...atmData,
         status: 'desconhecido', // Initial status
         lastUpdate: admin.firestore.FieldValue.serverTimestamp(), // Use server timestamp
-        reports: [],
+        reports: [], // Garante que reports seja sempre um array vazio ao criar
         details: atmData.details || '', // Garante que 'details' seja sempre uma string
     };
     await newAtmRef.set(newAtm);
@@ -47,9 +47,11 @@ export async function updateAtm(id: string, atmData: Partial<Omit<Atm, 'id'>>): 
     const atmRef = db.collection('atms').doc(id);
     const updateData = { ...atmData };
 
-    if (updateData.lastUpdate) {
-        updateData.lastUpdate = admin.firestore.FieldValue.serverTimestamp() as any;
+    // Se lastUpdate estiver a ser atualizado, use o timestamp do servidor
+    if (Object.prototype.hasOwnProperty.call(updateData, 'lastUpdate')) {
+      updateData.lastUpdate = admin.firestore.FieldValue.serverTimestamp() as any;
     }
+
 
     await atmRef.update(updateData);
 }
@@ -68,17 +70,18 @@ export async function getAtms(): Promise<Atm[]> {
       // Correção: Garante que o timestamp seja convertido para string ISO
       const lastUpdate = data.lastUpdate?.toDate ? data.lastUpdate.toDate().toISOString() : new Date().toISOString();
       
-      const reports = data.reports?.map((report: any) => ({
+      const reports = (data.reports || []).map((report: any) => ({
           ...report,
           // Garante que o timestamp do relatório também seja convertido corretamente.
           timestamp: report.timestamp?.toDate ? report.timestamp.toDate().toISOString() : (report.timestamp || new Date().toISOString()),
-      })) || [];
+      }));
 
       return {
         id: doc.id,
         ...data,
         lastUpdate: lastUpdate,
         reports: reports,
+        details: data.details || '',
       } as Atm;
     });
     return atms;
@@ -102,11 +105,11 @@ export async function getAtmById(id: string): Promise<Atm | null> {
     // Correção: Garante que o timestamp seja convertido para string ISO
     const lastUpdate = data.lastUpdate?.toDate ? data.lastUpdate.toDate().toISOString() : new Date().toISOString();
     
-    const reports = data.reports?.map((report: any) => ({
+    const reports = (data.reports || []).map((report: any) => ({
       ...report,
       // Garante que o timestamp do relatório também seja convertido corretamente.
       timestamp: report.timestamp?.toDate ? report.timestamp.toDate().toISOString() : (report.timestamp || new Date().toISOString()),
-    })) || [];
+    }));
 
     return {
       id: atmDoc.id,

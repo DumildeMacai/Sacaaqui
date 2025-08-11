@@ -35,20 +35,22 @@ export async function PUT(
       return NextResponse.json({ error: 'ATM ID is required' }, { status: 400 });
     }
 
-    const body = await request.json();
+    const body: Partial<Omit<Atm, 'id'>> = await request.json();
 
     // Validação robusta dos dados recebidos
     if (!body.name || !body.address || !body.location || typeof body.location.lat !== 'number' || typeof body.location.lng !== 'number') {
         return NextResponse.json({ error: 'Missing or invalid required ATM fields: name, address, location (lat, lng).' }, { status: 400 });
     }
     
-    const atmData: Omit<Atm, 'id' | 'status' | 'lastUpdate' | 'reports'> = {
+    // Assegura que `details` é uma string, mesmo que não seja fornecido
+    const atmData: Partial<Omit<Atm, 'id'>> = {
         name: body.name,
         address: body.address,
         location: body.location,
         details: body.details || '',
     };
 
+    // A função updateAtm já lida com o lastUpdate
     await updateAtm(id, atmData);
 
     return NextResponse.json({ message: 'ATM updated successfully' }, { status: 200 });
