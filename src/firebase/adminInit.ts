@@ -36,4 +36,11 @@ function initializeAdmin() {
 }
 
 const app = initializeAdmin();
-export const adminDb = app ? admin.firestore() : null;
+const db = app ? admin.firestore() : null;
+
+export async function getAdminDb() {
+  if (!db) {
+    throw new Error("O Firestore Admin não está disponível. A inicialização do Admin SDK pode ter falhado.");
+  }
+  return db;
+}

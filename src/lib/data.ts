@@ -1,9 +1,10 @@
 'use server'
 
-import { adminDb } from '@/firebase/adminInit';
+import { getAdminDb } from '@/firebase/adminInit';
 import type { Atm } from '@/types';
 
 export async function getAtms(): Promise<Atm[]> {
+  const adminDb = await getAdminDb();
   if (!adminDb) {
     console.error("Firestore Admin não está disponível.");
     return [];
@@ -37,6 +38,7 @@ export async function getAtms(): Promise<Atm[]> {
 }
 
 export async function getAtmById(id: string): Promise<Atm | null> {
+    const adminDb = await getAdminDb();
     if (!adminDb) {
       console.error("Firestore Admin não está disponível.");
       return null;
