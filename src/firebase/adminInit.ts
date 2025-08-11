@@ -5,6 +5,7 @@ import * as admin from 'firebase-admin';
 let db: admin.firestore.Firestore | null = null;
 
 function initializeAdmin() {
+  // Evita reinicializações
   if (admin.apps.length > 0) {
     if (!db) {
       db = admin.firestore();
@@ -15,16 +16,17 @@ function initializeAdmin() {
   try {
     const serviceAccount = {
       projectId: process.env.FIREBASE_PROJECT_ID,
-      privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      // A chave privada precisa que os `\n` literais sejam substituídos por novas linhas reais.
+      privateKey: (process.env.FIREBASE_ADMIN_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
     };
 
+    // Validação explícita das credenciais
     if (!serviceAccount.projectId || !serviceAccount.privateKey || !serviceAccount.clientEmail) {
-      // Esta verificação agora é mais um fallback, pois esperamos que o .env.local funcione.
-      // Removendo o console.error para não poluir o log com um erro que já conhecemos.
-      return;
+       console.error("As credenciais de serviço do Firebase Admin estão em falta ou incompletas. Verifique as suas variáveis de ambiente (.env.local).");
+       return; // Sai se as credenciais estiverem incompletas
     }
-
+    
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
@@ -37,17 +39,13 @@ function initializeAdmin() {
   }
 }
 
-// Chame a inicialização no nível superior para garantir que seja executada uma vez.
+// Inicializa no momento em que o módulo é carregado
 initializeAdmin();
 
 export async function getAdminDb() {
   if (!db) {
-    // Tenta reinicializar se a primeira tentativa falhou
-    console.warn("Instância do DB não encontrada, tentando reinicializar...");
-    initializeAdmin();
-    if (!db) {
-        throw new Error("O Firestore Admin não está disponível. A inicialização do Admin SDK pode ter falhado.");
-    }
+    // A inicialização no nível superior falhou, não há como recuperar aqui.
+    throw new Error("O Firestore Admin não está disponível. A inicialização do Admin SDK pode ter falhado. Verifique os logs do servidor para erros críticos.");
   }
   return db;
 }
