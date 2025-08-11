@@ -62,6 +62,7 @@ export async function getAtmById(id: string): Promise<Atm | null> {
     return {
       id: atmDoc.id,
       ...data,
+      details: data.details || null, // Garante que o campo details seja retornado
       lastUpdate: data.lastUpdate?.toDate?.().toISOString() || new Date().toISOString(),
       reports: data.reports?.map((report: any) => ({
         ...report,

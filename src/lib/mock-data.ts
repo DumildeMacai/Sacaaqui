@@ -8,6 +8,7 @@ export const mockAtms: Atm[] = [
     address: 'Largo da Mutamba, Luanda, Angola',
     status: 'com_dinheiro',
     lastUpdate: '2025-07-15T09:00:00Z',
+    details: 'Localizado perto da entrada principal. Disponível 24/7.',
     reports: [
       { userId: 'user123', status: 'com_dinheiro', timestamp: '2025-07-15T08:55:00Z' },
       { userId: 'user456', status: 'com_dinheiro', timestamp: '2025-07-15T08:30:00Z' },
@@ -21,6 +22,7 @@ export const mockAtms: Atm[] = [
     address: 'Aeroporto 4 de Fevereiro, Luanda, Angola',
     status: 'sem_dinheiro',
     lastUpdate: '2025-07-15T10:15:00Z',
+    details: 'Dentro da área de embarque, após a segurança.',
     reports: [
       { userId: 'userABC', status: 'sem_dinheiro', timestamp: '2025-07-15T10:15:00Z' },
       { userId: 'userDEF', status: 'sem_dinheiro', timestamp: '2025-07-15T09:45:00Z' },
@@ -33,6 +35,7 @@ export const mockAtms: Atm[] = [
     address: 'Av. Luanda Sul, Belas, Angola',
     status: 'desconhecido',
     lastUpdate: '2025-07-14T11:00:00Z',
+    details: 'No piso 1, ao lado da praça de alimentação.',
     reports: [
         { userId: 'userXYZ', status: 'com_dinheiro', timestamp: '2025-07-14T10:00:00Z' },
     ],

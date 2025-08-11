@@ -16,4 +16,5 @@ export type Atm = {
   status: 'com_dinheiro' | 'sem_dinheiro' | 'desconhecido';
   lastUpdate: string;
   reports: Report[];
+  details?: string; // Campo opcional para detalhes adicionais
 };

@@ -1,7 +1,7 @@
 import type { Atm } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, CircleSlash, HelpCircle, MapPin, Clock } from 'lucide-react';
+import { CheckCircle2, CircleSlash, HelpCircle, MapPin, Clock, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { AtmVerificationClient } from './atm-verification-client';
@@ -40,6 +40,20 @@ export function AtmDetail({ atm }: { atm: Atm }) {
                     </div>
                 </CardContent>
             </Card>
+
+            {atm.details && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-xl">
+                           <Info className="h-5 w-5" />
+                           Detalhes Adicionais
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground">{atm.details}</p>
+                    </CardContent>
+                </Card>
+            )}
 
             <Card>
                 <CardHeader>
