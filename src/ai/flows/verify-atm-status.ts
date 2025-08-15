@@ -18,8 +18,9 @@ const VerifyAtmStatusInputSchema = z.object({
       userId: z.string().describe('The ID of the user reporting the status.'),
       status: z.enum(['com_dinheiro', 'sem_dinheiro']).describe('The reported status of the ATM.'),
       timestamp: z.string().describe('The timestamp of the report in ISO format.'),
+      userReputation: z.number().int().describe("The reputation score of the user who made the report."),
     })
-  ).describe('An array of user reports for the ATM status.'),
+  ).describe('An array of user reports for the ATM status, including user reputation.'),
 });
 export type VerifyAtmStatusInput = z.infer<typeof VerifyAtmStatusInputSchema>;
 
@@ -40,20 +41,20 @@ const verifyAtmStatusPrompt = ai.definePrompt({
   output: {schema: VerifyAtmStatusOutputSchema},
   prompt: `You are an AI assistant tasked with verifying the status of ATMs based on user reports.
 
+  You must analyze the provided reports to determine the most likely current status of the ATM.
+  Your analysis should be weighted by two key factors:
+  1.  **User Reputation**: Reports from users with higher reputation scores are more trustworthy.
+  2.  **Recency**: More recent reports are more likely to reflect the current state of the ATM.
+
   Given the following ATM ID: {{{atmId}}}
   And the following user reports:
   {{#each reports}}
-  - User ID: {{{userId}}}, Status: {{{status}}}, Timestamp: {{{timestamp}}}
+  - User ID: {{{userId}}}, Status: {{{status}}}, Timestamp: {{{timestamp}}}, Reputation: {{{userReputation}}}
   {{/each}}
 
-  Analyze the reports, taking into account potential biases, user reputation (which is not provided but should be assumed), and the recency of the reports.
+  Based on your weighted analysis, determine the most likely status of the ATM (com_dinheiro, sem_dinheiro, or desconhecido). Provide a confidence score (from 0 to 1) and a brief reasoning for your decision, explaining how reputation and recency influenced the outcome.
 
-  Determine the most likely status of the ATM (com_dinheiro, sem_dinheiro, or desconhecido) and provide a confidence score (0 to 1) for your assessment.
-
-  Also, provide a brief reasoning for your decision.
-
-  Output in JSON format:
-  { "verifiedStatus": "<status>", "confidenceScore": <score>, "reasoning": "<reason>" }`,
+  Output in JSON format.`,
 });
 
 const verifyAtmStatusFlow = ai.defineFlow(

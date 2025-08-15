@@ -36,7 +36,7 @@ export function AtmDetail({ atm }: { atm: Atm }) {
                 </CardHeader>
                 <CardContent>
                     <div className="text-sm text-muted-foreground">
-                        <p>Última atualização: {format(new Date(atm.lastUpdate), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
+                        <p><span className="text-green-500">Última atualização: {format(new Date(atm.lastUpdate), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</span></p>
                     </div>
                 </CardContent>
             </Card>

@@ -4,13 +4,15 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Loader2, BrainCircuit, ShieldCheck, HelpCircle } from 'lucide-react';
-import type { Atm } from '@/types';
+import type { Atm, Report, User } from '@/types';
 import { verifyAtmStatusAction } from '@/actions/verify-status';
 import type { VerifyAtmStatusOutput } from '@/ai/flows/verify-atm-status';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Badge } from './ui/badge';
 import { updateUserReputationAction } from '@/actions/update-reputation';
 import { useToast } from '@/hooks/use-toast';
+import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { db } from '@/firebase/init';
 
 
 export function AtmVerificationClient({ atm }: { atm: Atm }) {
@@ -24,23 +26,44 @@ export function AtmVerificationClient({ atm }: { atm: Atm }) {
         setError(null);
         setResult(null);
 
+        if (atm.reports.length === 0) {
+            setError("Não há relatórios para verificar.");
+            setLoading(false);
+            return;
+        }
+
         try {
-            // Step 1: Verify the ATM's status
+            // Step 1: Fetch reputation for all users who reported
+            const userIds = [...new Set(atm.reports.map(r => r.userId))];
+            const usersRef = collection(db, 'users');
+            const usersQuery = query(usersRef, where('__name__', 'in', userIds));
+            const usersSnapshot = await getDocs(usersQuery);
+            const userReputations = new Map<string, number>();
+            usersSnapshot.forEach(doc => {
+                userReputations.set(doc.id, (doc.data() as User).reputation || 0);
+            });
+
+            // Step 2: Augment reports with reputation
+            const reportsWithReputation = atm.reports.map(report => ({
+                ...report,
+                userReputation: userReputations.get(report.userId) ?? 0, // Default to 0 if user not found
+            }));
+
+            // Step 3: Verify the ATM's status
             const verificationResult = await verifyAtmStatusAction({
                 atmId: atm.id,
-                reports: atm.reports,
+                reports: reportsWithReputation,
             });
             setResult(verificationResult);
 
-            // Step 2: If verification is successful and a conclusive status is found,
+            // Step 4: If verification is successful and a conclusive status is found,
             // trigger the reputation update in the background.
             if (verificationResult.verifiedStatus !== 'desconhecido') {
                 toast({
                     title: "Atualizando Reputação",
                     description: "A reputação dos utilizadores que reportaram está a ser ajustada com base na verificação."
                 });
-                // This is a fire-and-forget call. We don't need to wait for it.
-                // The server action will handle logging any errors.
+                // This is a fire-and-forget call.
                 updateUserReputationAction({
                     verifiedStatus: verificationResult.verifiedStatus,
                     reports: atm.reports.map(r => ({ userId: r.userId, status: r.status })),

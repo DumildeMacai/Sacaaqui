@@ -3,6 +3,7 @@ export type Report = {
   status: 'com_dinheiro' | 'sem_dinheiro';
   timestamp: string;
   userName?: string; 
+  userReputation?: number;
 };
 
 export type Atm = {
