@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,8 @@ export default function AdminLoginPage() {
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        if (password === 'admin123') {
+        // Senha estática para acesso direto ao painel de admin
+        if (password === 'admin123') { 
             router.replace('/admin/panel');
         } else {
             toast({
