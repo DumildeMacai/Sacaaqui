@@ -6,16 +6,14 @@ import type { Atm } from '@/types';
 // Garante que a inicialização ocorra apenas uma vez.
 if (!admin.apps.length) {
     try {
-        // Verifica se a variável de ambiente está definida
         const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
         if (!serviceAccountString) {
             throw new Error('A variável de ambiente FIREBASE_SERVICE_ACCOUNT_KEY não está definida.');
         }
 
-        // Faz o parse da string JSON para um objeto
         const serviceAccount = JSON.parse(serviceAccountString);
 
-        // A correção crucial: Formata a chave privada para substituir '\\n' por '\n'
+        // Formatação correta da chave privada
         serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
 
         admin.initializeApp({
@@ -25,7 +23,7 @@ if (!admin.apps.length) {
 
     } catch (error: any) {
         console.error("Erro CRÍTICO ao inicializar o Firebase Admin SDK:", error.message);
-        // Em um ambiente de produção, você pode querer lidar com isso de forma mais graciosa.
+        // Lançar um erro para interromper a execução se a inicialização falhar.
         throw new Error(`Falha na inicialização do Firebase Admin: ${error.message}`);
     }
 }
@@ -37,10 +35,10 @@ export async function addAtm(atmData: Omit<Atm, 'id' | 'status' | 'lastUpdate' |
     const newAtmRef = db.collection('atms').doc();
     const newAtm = {
         ...atmData,
-        status: 'desconhecido', // Initial status
-        lastUpdate: admin.firestore.FieldValue.serverTimestamp(), // Use server timestamp
-        reports: [], // Garante que reports seja sempre um array vazio ao criar
-        details: atmData.details || '', // Garante que 'details' seja sempre uma string
+        status: 'desconhecido', 
+        lastUpdate: admin.firestore.FieldValue.serverTimestamp(),
+        reports: [], 
+        details: atmData.details || '',
     };
     await newAtmRef.set(newAtm);
     return newAtmRef.id;
@@ -48,29 +46,21 @@ export async function addAtm(atmData: Omit<Atm, 'id' | 'status' | 'lastUpdate' |
 
 export async function updateAtm(id: string, atmData: Partial<Omit<Atm, 'id'>>): Promise<void> {
     const atmRef = db.collection('atms').doc(id);
-    const updateData = { ...atmData };
-
-    // Assegura que lastUpdate seja atualizado com o timestamp do servidor
-    updateData.lastUpdate = admin.firestore.FieldValue.serverTimestamp() as any;
-
-
+    const updateData = { ...atmData, lastUpdate: admin.firestore.FieldValue.serverTimestamp() };
     await atmRef.update(updateData);
 }
 
-
-// Função auxiliar robusta para converter Timestamps
 const convertTimestampToString = (timestamp: any): string => {
-    if (timestamp && typeof timestamp.toDate === 'function') {
+    if (!timestamp) return new Date().toISOString();
+    if (timestamp instanceof admin.firestore.Timestamp) {
         return timestamp.toDate().toISOString();
     }
     if (typeof timestamp === 'string') {
-        // Tenta validar se é um formato de data válido, se não, retorna uma data padrão
         const date = new Date(timestamp);
         if (!isNaN(date.getTime())) {
             return date.toISOString();
         }
     }
-    // Retorna a data atual como um fallback seguro
     return new Date().toISOString();
 };
 
@@ -79,16 +69,11 @@ export async function getAtms(): Promise<Atm[]> {
   try {
     const atmsSnapshot = await db.collection('atms').get();
     if (atmsSnapshot.empty) {
-      console.log("Nenhum ATM encontrado no Firestore.");
       return [];
     }
 
     const atms = atmsSnapshot.docs.map(doc => {
       const data = doc.data();
-      
-      const lastUpdate = convertTimestampToString(data.lastUpdate);
-      
-      // Garante que 'reports' seja sempre um array antes de mapear
       const reports = (data.reports || []).map((report: any) => ({
           ...report,
           timestamp: convertTimestampToString(report.timestamp),
@@ -96,10 +81,13 @@ export async function getAtms(): Promise<Atm[]> {
 
       return {
         id: doc.id,
-        ...data,
-        lastUpdate: lastUpdate,
-        reports: reports,
+        name: data.name || '',
+        address: data.address || '',
+        location: data.location || { lat: 0, lng: 0 },
+        status: data.status || 'desconhecido',
         details: data.details || '',
+        lastUpdate: convertTimestampToString(data.lastUpdate),
+        reports: reports,
       } as Atm;
     });
     return atms;
@@ -114,15 +102,10 @@ export async function getAtmById(id: string): Promise<Atm | null> {
     const atmDoc = await db.collection('atms').doc(id).get();
   
     if (!atmDoc.exists) {
-      console.log(`ATM com id ${id} não encontrado.`);
       return null;
     }
   
     const data = atmDoc.data()!;
-      
-    const lastUpdate = convertTimestampToString(data.lastUpdate);
-    
-    // Garante que 'reports' seja sempre um array antes de mapear
     const reports = (data.reports || []).map((report: any) => ({
         ...report,
         timestamp: convertTimestampToString(report.timestamp),
@@ -130,9 +113,12 @@ export async function getAtmById(id: string): Promise<Atm | null> {
 
     return {
       id: atmDoc.id,
-      ...data,
+      name: data.name || '',
+      address: data.address || '',
+      location: data.location || { lat: 0, lng: 0 },
+      status: data.status || 'desconhecido',
       details: data.details || '',
-      lastUpdate: lastUpdate,
+      lastUpdate: convertTimestampToString(data.lastUpdate),
       reports: reports,
     } as Atm;
   
