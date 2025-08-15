@@ -1,4 +1,3 @@
-
 // src/lib/firebase-admin.ts
 import * as admin from 'firebase-admin';
 import type { Atm } from '@/types';
@@ -6,21 +5,10 @@ import type { Atm } from '@/types';
 // Garante que a inicialização ocorra apenas uma vez.
 if (!admin.apps.length) {
     try {
-        const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-        if (!serviceAccountString) {
-            throw new Error('A variável de ambiente FIREBASE_SERVICE_ACCOUNT_KEY não está definida.');
-        }
-
-        const serviceAccount = JSON.parse(serviceAccountString);
-
-        // Formatação correta da chave privada
-        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
-
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-        });
+        // A inicialização padrão lê as credenciais das variáveis de ambiente
+        // (GOOGLE_APPLICATION_CREDENTIALS) ou de outras configurações do ambiente.
+        admin.initializeApp();
         console.log("Firebase Admin SDK inicializado com sucesso.");
-
     } catch (error: any) {
         console.error("Erro CRÍTICO ao inicializar o Firebase Admin SDK:", error.message);
         // Lançar um erro para interromper a execução se a inicialização falhar.
@@ -28,40 +16,20 @@ if (!admin.apps.length) {
     }
 }
 
-
 const db = admin.firestore();
 
-export async function addAtm(atmData: Omit<Atm, 'id' | 'status' | 'lastUpdate' | 'reports'>): Promise<string> {
-    const newAtmRef = db.collection('atms').doc();
-    const newAtm = {
-        ...atmData,
-        status: 'desconhecido', 
-        lastUpdate: admin.firestore.FieldValue.serverTimestamp(),
-        reports: [], 
-        details: atmData.details || '',
-    };
-    await newAtmRef.set(newAtm);
-    return newAtmRef.id;
-}
-
-export async function updateAtm(id: string, atmData: Partial<Omit<Atm, 'id'>>): Promise<void> {
-    const atmRef = db.collection('atms').doc(id);
-    const updateData = { ...atmData, lastUpdate: admin.firestore.FieldValue.serverTimestamp() };
-    await atmRef.update(updateData);
-}
-
 const convertTimestampToString = (timestamp: any): string => {
-    if (!timestamp) return new Date().toISOString();
+    if (!timestamp) {
+        // Retorna um valor padrão ou lança um erro, dependendo da sua lógica.
+        // Usar a data atual como fallback pode ser uma opção.
+        return new Date().toISOString();
+    }
     if (timestamp instanceof admin.firestore.Timestamp) {
         return timestamp.toDate().toISOString();
     }
-    if (typeof timestamp === 'string') {
-        const date = new Date(timestamp);
-        if (!isNaN(date.getTime())) {
-            return date.toISOString();
-        }
-    }
-    return new Date().toISOString();
+    // Se já for uma string (ou outro tipo), apenas retorna.
+    // Adicione validação extra se necessário.
+    return timestamp.toString();
 };
 
 
@@ -126,4 +94,23 @@ export async function getAtmById(id: string): Promise<Atm | null> {
     console.error(`Erro ao buscar ATM com id ${id}:`, error);
     throw new Error(`Falha ao buscar o ATM ${id} do Firestore.`);
   }
+}
+
+export async function addAtm(atmData: Omit<Atm, 'id' | 'status' | 'lastUpdate' | 'reports'>): Promise<string> {
+    const newAtmRef = db.collection('atms').doc();
+    const newAtm = {
+        ...atmData,
+        status: 'desconhecido',
+        lastUpdate: admin.firestore.FieldValue.serverTimestamp(),
+        reports: [],
+        details: atmData.details || '',
+    };
+    await newAtmRef.set(newAtm);
+    return newAtmRef.id;
+}
+
+export async function updateAtm(id: string, atmData: Partial<Omit<Atm, 'id'>>): Promise<void> {
+    const atmRef = db.collection('atms').doc(id);
+    const updateData = { ...atmData, lastUpdate: admin.firestore.FieldValue.serverTimestamp() };
+    await atmRef.update(updateData);
 }
