@@ -1,101 +1,117 @@
 
 'use client'
 
-import { AtmDataTable } from "@/components/admin/atm-data-table";
+import { useEffect, useState } from "react";
+import { collection, getDocs, query } from 'firebase/firestore';
+import { db } from '@/firebase/init';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CreditCard, Users, BarChart } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Atm } from "@/types";
-import { useEffect, useState } from "react";
-import { db } from '@/firebase/init';
-import { collection, getDocs, query } from 'firebase/firestore';
-
-
-// Helper to convert Firestore Timestamps to ISO strings safely
-const convertTimestampToString = (timestamp: any): string => {
-  if (timestamp && typeof timestamp.toDate === 'function') {
-    return timestamp.toDate().toISOString();
-  }
-  if (typeof timestamp === 'string') {
-    return timestamp;
-  }
-  return new Date(0).toISOString();
-};
-
+import { AtmStatusChart, type ChartData } from "@/components/admin/atm-status-chart";
 
 export default function AdminPanelPage() {
-    const [atms, setAtms] = useState<Atm[]>([]);
+    const [atmCount, setAtmCount] = useState(0);
+    const [userCount, setUserCount] = useState(0);
+    const [chartData, setChartData] = useState<ChartData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchAtms = async () => {
+        const fetchData = async () => {
             try {
                 setLoading(true);
-                const q = query(collection(db, "atms"));
-                const atmsSnapshot = await getDocs(q);
+                const atmsQuery = query(collection(db, "atms"));
+                const usersQuery = query(collection(db, "users"));
 
-                if (atmsSnapshot.empty) {
-                    setAtms([]);
-                } else {
-                     const atmsData: Atm[] = atmsSnapshot.docs.map(doc => {
-                        const data = doc.data();
-                        const reports = (data.reports || []).map((report: any) => ({
-                            ...report,
-                            timestamp: convertTimestampToString(report.timestamp),
-                        }));
+                const [atmsSnapshot, usersSnapshot] = await Promise.all([
+                    getDocs(atmsQuery),
+                    getDocs(usersQuery)
+                ]);
 
-                        return {
-                            id: doc.id,
-                            name: data.name || '',
-                            address: data.address || '',
-                            location: data.location || { lat: 0, lng: 0 },
-                            status: data.status || 'desconhecido',
-                            details: data.details || '',
-                            lastUpdate: convertTimestampToString(data.lastUpdate),
-                            reports: reports,
-                        };
-                    });
-                    setAtms(atmsData);
-                }
+                // ATM Data
+                setAtmCount(atmsSnapshot.size);
+                
+                const statusCounts: { [key in Atm['status']]: number } = {
+                    com_dinheiro: 0,
+                    sem_dinheiro: 0,
+                    desconhecido: 0,
+                };
+
+                atmsSnapshot.forEach(doc => {
+                    const atm = doc.data() as Atm;
+                    if (statusCounts[atm.status] !== undefined) {
+                        statusCounts[atm.status]++;
+                    }
+                });
+
+                const formattedChartData = [
+                    { name: 'Com Dinheiro', value: statusCounts.com_dinheiro, fill: "var(--color-com_dinheiro)" },
+                    { name: 'Sem Dinheiro', value: statusCounts.sem_dinheiro, fill: "var(--color-sem_dinheiro)"  },
+                    { name: 'Desconhecido', value: statusCounts.desconhecido, fill: "var(--color-desconhecido)"  },
+                ];
+                setChartData(formattedChartData);
+
+
+                // User Data
+                setUserCount(usersSnapshot.size);
+
             } catch (err: any) {
                 console.error(err);
-                setError('Failed to fetch ATMs');
+                setError('Failed to fetch dashboard data');
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchAtms();
+        fetchData();
     }, []);
 
-
     if (error) {
-        return <div className="text-destructive text-center">Erro ao carregar os ATMs. Tente novamente mais tarde.</div>;
-    }
-
-    if (loading) {
-        return (
-            <div className="space-y-4">
-                 <div className="flex items-center justify-between py-4">
-                    <div>
-                        <Skeleton className="h-8 w-64" />
-                        <Skeleton className="h-4 w-80 mt-2" />
-                    </div>
-                    <Skeleton className="h-10 w-36" />
-                </div>
-                <div className="rounded-md border bg-card">
-                    <div className="p-4 space-y-3">
-                        <Skeleton className="h-12 w-full" />
-                        <Skeleton className="h-12 w-full" />
-                        <Skeleton className="h-12 w-full" />
-                    </div>
-                </div>
-            </div>
-        )
+        return <div className="text-destructive text-center">Erro ao carregar os dados do dashboard. Tente novamente mais tarde.</div>;
     }
 
     return (
-        <div>
-            <AtmDataTable data={atms} />
+        <div className="space-y-6">
+            <h1 className="text-3xl font-bold tracking-tight font-headline">Admin Dashboard</h1>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total de ATMs</CardTitle>
+                        <CreditCard className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        {loading ? <Skeleton className="h-8 w-1/4" /> : <div className="text-2xl font-bold">{atmCount}</div>}
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total de Usuários</CardTitle>
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                         {loading ? <Skeleton className="h-8 w-1/4" /> : <div className="text-2xl font-bold">{userCount}</div>}
+                    </CardContent>
+                </Card>
+            </div>
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <BarChart className="h-5 w-5 text-muted-foreground" />
+                        Status dos ATMs
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {loading ? (
+                        <Skeleton className="h-64 w-full" />
+                    ) : (
+                       <AtmStatusChart data={chartData} />
+                    )}
+                </CardContent>
+            </Card>
+
         </div>
     )
 }
