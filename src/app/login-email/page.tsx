@@ -26,7 +26,7 @@ export default function LoginPhone() {
 
     } catch (err: any) {
       console.error('Erro no login:', err);
-      setError(`Erro no login: ${err.message}`); // Exibe a mensagem de erro exata do Firebase
+      setError(`Erro no login: ${err.message}`); // Atualiza o estado de erro com a mensagem do Firebase
     }
   };
 
