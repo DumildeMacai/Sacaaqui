@@ -90,7 +90,7 @@ const EditAtmPage = () => {
             router.refresh();
 
         } catch (error) {
-            console.error(error);
+            console.error('Error updating ATM with Firestore Client:', error);
             toast({
                 variant: 'destructive',
                 title: 'Erro',
