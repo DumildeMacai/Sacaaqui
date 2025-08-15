@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/firebase/init';
 
 const AddAtmPage = () => {
     const [name, setName] = useState('');
@@ -24,7 +26,7 @@ const AddAtmPage = () => {
         e.preventDefault();
         setIsLoading(true);
 
-        const newAtm = {
+        const newAtmPayload = {
             name,
             address,
             location: {
@@ -32,20 +34,13 @@ const AddAtmPage = () => {
                 lng: parseFloat(lng),
             },
             details,
+            status: 'desconhecido',
+            lastUpdate: serverTimestamp(),
+            reports: [],
         };
 
         try {
-            const response = await fetch('/api/atms', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newAtm),
-            });
-
-            if (!response.ok) {
-                throw new Error('Falha ao adicionar o ATM');
-            }
+            await addDoc(collection(db, 'atms'), newAtmPayload);
 
             toast({
                 title: 'Sucesso!',
@@ -53,10 +48,10 @@ const AddAtmPage = () => {
             });
 
             router.push('/admin/panel');
-            router.refresh(); // To show the new ATM in the list
+            router.refresh();
 
         } catch (error) {
-            console.error(error);
+            console.error('Error adding ATM with Firestore Client:', error);
             toast({
                 variant: 'destructive',
                 title: 'Erro',
