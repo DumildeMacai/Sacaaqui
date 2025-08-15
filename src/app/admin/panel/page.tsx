@@ -5,6 +5,21 @@ import { AtmDataTable } from "@/components/admin/atm-data-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Atm } from "@/types";
 import { useEffect, useState } from "react";
+import { db } from '@/firebase/init';
+import { collection, getDocs, query } from 'firebase/firestore';
+
+
+// Helper to convert Firestore Timestamps to ISO strings safely
+const convertTimestampToString = (timestamp: any): string => {
+  if (timestamp && typeof timestamp.toDate === 'function') {
+    return timestamp.toDate().toISOString();
+  }
+  if (typeof timestamp === 'string') {
+    return timestamp;
+  }
+  return new Date(0).toISOString();
+};
+
 
 export default function AdminPanelPage() {
     const [atms, setAtms] = useState<Atm[]>([]);
@@ -15,15 +30,35 @@ export default function AdminPanelPage() {
         const fetchAtms = async () => {
             try {
                 setLoading(true);
-                const response = await fetch('/api/atms');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch ATMs');
+                const q = query(collection(db, "atms"));
+                const atmsSnapshot = await getDocs(q);
+
+                if (atmsSnapshot.empty) {
+                    setAtms([]);
+                } else {
+                     const atmsData: Atm[] = atmsSnapshot.docs.map(doc => {
+                        const data = doc.data();
+                        const reports = (data.reports || []).map((report: any) => ({
+                            ...report,
+                            timestamp: convertTimestampToString(report.timestamp),
+                        }));
+
+                        return {
+                            id: doc.id,
+                            name: data.name || '',
+                            address: data.address || '',
+                            location: data.location || { lat: 0, lng: 0 },
+                            status: data.status || 'desconhecido',
+                            details: data.details || '',
+                            lastUpdate: convertTimestampToString(data.lastUpdate),
+                            reports: reports,
+                        };
+                    });
+                    setAtms(atmsData);
                 }
-                const data: Atm[] = await response.json();
-                setAtms(data);
             } catch (err: any) {
                 console.error(err);
-                setError(err.message);
+                setError('Failed to fetch ATMs');
             } finally {
                 setLoading(false);
             }

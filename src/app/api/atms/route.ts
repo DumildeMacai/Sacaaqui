@@ -4,19 +4,8 @@ import { collection, getDocs, addDoc, serverTimestamp, query } from 'firebase/fi
 import { NextResponse, type NextRequest } from 'next/server';
 import type { Atm } from '@/types';
 
-// Helper to convert Firestore Timestamps to ISO strings safely
-const convertTimestampToString = (timestamp: any): string => {
-  if (timestamp && typeof timestamp.toDate === 'function') {
-    return timestamp.toDate().toISOString();
-  }
-  if (typeof timestamp === 'string') {
-    return timestamp;
-  }
-  // Return a default or placeholder if the timestamp is invalid
-  return new Date(0).toISOString(); 
-};
-
-
+// This GET endpoint is no longer used by the frontend pages, but is kept for potential future use or direct API access.
+// The frontend now fetches data directly using the Firebase Client SDK.
 export async function GET(request: NextRequest) {
   try {
     const q = query(collection(db, "atms"));
@@ -25,6 +14,16 @@ export async function GET(request: NextRequest) {
     if (atmsSnapshot.empty) {
       return NextResponse.json([]);
     }
+
+    const convertTimestampToString = (timestamp: any): string => {
+        if (timestamp && typeof timestamp.toDate === 'function') {
+            return timestamp.toDate().toISOString();
+        }
+        if (typeof timestamp === 'string') {
+            return timestamp;
+        }
+        return new Date(0).toISOString(); 
+    };
 
     const atms: Atm[] = atmsSnapshot.docs.map(doc => {
       const data = doc.data();
