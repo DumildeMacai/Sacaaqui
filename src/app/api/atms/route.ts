@@ -1,7 +1,7 @@
 // src/app/api/atms/route.ts
 import { db } from '@/firebase/init';
-import { collection, getDocs, addDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
-import { NextResponse } from 'next/server';
+import { collection, getDocs, addDoc, serverTimestamp, query } from 'firebase/firestore';
+import { NextResponse, type NextRequest } from 'next/server';
 import type { Atm } from '@/types';
 
 // Helper to convert Firestore Timestamps to ISO strings safely
@@ -17,9 +17,9 @@ const convertTimestampToString = (timestamp: any): string => {
 };
 
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const q = query(collection(db, "atms"), orderBy("name"));
+    const q = query(collection(db, "atms"));
     const atmsSnapshot = await getDocs(q);
     
     if (atmsSnapshot.empty) {
@@ -47,7 +47,7 @@ export async function GET() {
 
     return NextResponse.json(atms);
   } catch (error) {
-    console.error('Error fetching ATMs from Firestore Client:', error);
+    console.error('Error fetching ATMs from Firestore:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
     return NextResponse.json({ error: 'Internal Server Error', details: errorMessage }, { status: 500 });
   }
