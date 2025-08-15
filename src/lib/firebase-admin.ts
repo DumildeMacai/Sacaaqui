@@ -1,37 +1,51 @@
 // src/lib/firebase-admin.ts
 import * as admin from 'firebase-admin';
+import type { ServiceAccount } from 'firebase-admin';
 import type { Atm } from '@/types';
+import dotenv from 'dotenv';
+import expand from 'dotenv-expand';
 
-// Garante que a inicialização ocorra apenas uma vez.
+// Load and expand environment variables
+const env = dotenv.config();
+expand.expand(env);
+
+// Explicitly type the service account credentials
+const serviceAccount: ServiceAccount = {
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+  clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+};
+
+// Ensure that Firebase is initialized only once
 if (!admin.apps.length) {
-    try {
-        // A inicialização padrão lê as credenciais das variáveis de ambiente
-        // (GOOGLE_APPLICATION_CREDENTIALS) ou de outras configurações do ambiente.
-        admin.initializeApp();
-        console.log("Firebase Admin SDK inicializado com sucesso.");
-    } catch (error: any) {
-        console.error("Erro CRÍTICO ao inicializar o Firebase Admin SDK:", error.message);
-        // Lançar um erro para interromper a execução se a inicialização falhar.
-        throw new Error(`Falha na inicialização do Firebase Admin: ${error.message}`);
-    }
+  try {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+    console.log('Firebase Admin SDK initialized successfully.');
+  } catch (error) {
+    console.error('CRITICAL: Error initializing Firebase Admin SDK:', error);
+    // Throw an error to prevent the application from running with a misconfigured Firebase connection
+    throw new Error('Firebase Admin initialization failed');
+  }
 }
 
 const db = admin.firestore();
 
+// Helper function to safely convert Firestore Timestamps to ISO strings
 const convertTimestampToString = (timestamp: any): string => {
-    if (!timestamp) {
-        // Retorna um valor padrão ou lança um erro, dependendo da sua lógica.
-        // Usar a data atual como fallback pode ser uma opção.
-        return new Date().toISOString();
-    }
-    if (timestamp instanceof admin.firestore.Timestamp) {
-        return timestamp.toDate().toISOString();
-    }
-    // Se já for uma string (ou outro tipo), apenas retorna.
-    // Adicione validação extra se necessário.
-    return timestamp.toString();
+  if (timestamp instanceof admin.firestore.Timestamp) {
+    return timestamp.toDate().toISOString();
+  }
+  if (typeof timestamp === 'string') {
+    // If it's already a string, assume it's in the correct format or a format that can be handled.
+    // This handles data from mock sources or already converted data.
+    return timestamp;
+  }
+  // Return a default or a well-known invalid format string for easy debugging.
+  // Using the current time as a fallback can hide issues.
+  return new Date().toISOString(); 
 };
-
 
 export async function getAtms(): Promise<Atm[]> {
   try {
@@ -42,9 +56,10 @@ export async function getAtms(): Promise<Atm[]> {
 
     const atms = atmsSnapshot.docs.map(doc => {
       const data = doc.data();
+      // Ensure reports is always an array, and its timestamps are converted
       const reports = (data.reports || []).map((report: any) => ({
-          ...report,
-          timestamp: convertTimestampToString(report.timestamp),
+        ...report,
+        timestamp: convertTimestampToString(report.timestamp),
       }));
 
       return {
@@ -60,19 +75,18 @@ export async function getAtms(): Promise<Atm[]> {
     });
     return atms;
   } catch (error) {
-    console.error("Erro ao buscar ATMs no Firestore:", error);
-    throw new Error('Falha ao buscar ATMs do Firestore.');
+    console.error("Error fetching ATMs from Firestore:", error);
+    throw new Error('Failed to fetch ATMs from Firestore.');
   }
 }
 
 export async function getAtmById(id: string): Promise<Atm | null> {
   try {
     const atmDoc = await db.collection('atms').doc(id).get();
-  
     if (!atmDoc.exists) {
       return null;
     }
-  
+
     const data = atmDoc.data()!;
     const reports = (data.reports || []).map((report: any) => ({
         ...report,
@@ -89,10 +103,9 @@ export async function getAtmById(id: string): Promise<Atm | null> {
       lastUpdate: convertTimestampToString(data.lastUpdate),
       reports: reports,
     } as Atm;
-  
   } catch (error) {
-    console.error(`Erro ao buscar ATM com id ${id}:`, error);
-    throw new Error(`Falha ao buscar o ATM ${id} do Firestore.`);
+    console.error(`Error fetching ATM with id ${id}:`, error);
+    throw new Error(`Failed to fetch ATM ${id} from Firestore.`);
   }
 }
 
@@ -102,7 +115,7 @@ export async function addAtm(atmData: Omit<Atm, 'id' | 'status' | 'lastUpdate' |
         ...atmData,
         status: 'desconhecido',
         lastUpdate: admin.firestore.FieldValue.serverTimestamp(),
-        reports: [],
+        reports: [], // Ensure reports is initialized as an empty array
         details: atmData.details || '',
     };
     await newAtmRef.set(newAtm);
