@@ -13,6 +13,7 @@ import type { Atm } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/firebase/init';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const EditAtmPage = () => {
     const [name, setName] = useState('');
@@ -20,6 +21,7 @@ const EditAtmPage = () => {
     const [lat, setLat] = useState('');
     const [lng, setLng] = useState('');
     const [details, setDetails] = useState('');
+    const [status, setStatus] = useState<Atm['status']>('desconhecido');
     const [isLoading, setIsLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(true);
     const router = useRouter();
@@ -46,6 +48,7 @@ const EditAtmPage = () => {
                 setLat(atm.location.lat.toString());
                 setLng(atm.location.lng.toString());
                 setDetails(atm.details || '');
+                setStatus(atm.status);
 
             } catch (error) {
                 console.error(error);
@@ -74,6 +77,7 @@ const EditAtmPage = () => {
                 lng: parseFloat(lng),
             },
             details,
+            status,
             lastUpdate: serverTimestamp(),
         };
 
@@ -86,7 +90,7 @@ const EditAtmPage = () => {
                 description: 'Dados do ATM atualizados com sucesso.',
             });
 
-            router.push('/admin/panel');
+            router.push('/admin/atms');
             router.refresh();
 
         } catch (error) {
@@ -164,6 +168,19 @@ const EditAtmPage = () => {
                             <Label htmlFor="lng">Longitude</Label>
                             <Input id="lng" type="number" value={lng} onChange={(e) => setLng(e.target.value)} required />
                         </div>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="status">Status</Label>
+                        <Select value={status} onValueChange={(value: Atm['status']) => setStatus(value)}>
+                            <SelectTrigger id="status">
+                                <SelectValue placeholder="Selecione o status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="com_dinheiro">Com Dinheiro</SelectItem>
+                                <SelectItem value="sem_dinheiro">Sem Dinheiro</SelectItem>
+                                <SelectItem value="desconhecido">Desconhecido</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="details">Detalhes Adicionais</Label>
