@@ -4,12 +4,12 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: "atm-locator-nbjla.firebaseapp.com",
   projectId: "atm-locator-nbjla",
+  appId: "1:717294013912:web:8efc3fc8530e0920c6b6ad",
   storageBucket: "atm-locator-nbjla.firebasestorage.app",
-  messagingSenderId: "717294013912",
-  appId: "1:717294013912:web:b2016cf45688da0fc6b6ad"
+  apiKey: "AIzaSyAEC8Imf55z2TcJBLh4k01tN4ZEYA4a8S4",
+  authDomain: "atm-locator-nbjla.firebaseapp.com",
+  messagingSenderId: "717294013912"
 };
 
 // Initialize Firebase

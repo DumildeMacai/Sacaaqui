@@ -18,7 +18,7 @@ export default function LoginPhone() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       // Login bem-sucedido, redirecionar
-      if (email === 'admin@admin.com' && password === '1dumilde1@A') {
+      if (email === 'admin@admin.com') {
         router.push('/admin/panel');
       } else {
         router.push('/dashboard');
