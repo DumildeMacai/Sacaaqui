@@ -7,7 +7,9 @@ export async function verifyAtmStatusAction(input: VerifyAtmStatusInput): Promis
         const result = await verifyAtmStatus(input);
         return result;
     } catch (error) {
-        console.error("Error verifying ATM status with AI:", error); // Log the full error object
-        throw new Error("AI verification failed.");
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        console.error("Error verifying ATM status with AI:", errorMessage);
+        console.error("Full error object:", error);
+        throw new Error(`AI verification failed: ${errorMessage}`);
     }
 }

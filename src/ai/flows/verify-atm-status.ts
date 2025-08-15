@@ -39,22 +39,24 @@ const verifyAtmStatusPrompt = ai.definePrompt({
   name: 'verifyAtmStatusPrompt',
   input: {schema: VerifyAtmStatusInputSchema},
   output: {schema: VerifyAtmStatusOutputSchema},
-  prompt: `You are an AI assistant tasked with verifying the status of ATMs based on user reports.
+  prompt: `You are an AI assistant for an ATM locator app. Your task is to determine the most likely status of an ATM based on a series of user reports.
 
-  You must analyze the provided reports to determine the most likely current status of the ATM.
-  Your analysis should be weighted by two key factors:
-  1.  **User Reputation**: Reports from users with higher reputation scores are more trustworthy.
-  2.  **Recency**: More recent reports are more likely to reflect the current state of the ATM.
+  You must weigh the reports based on two main factors:
+  1.  **Recency**: Newer reports are more valuable than older ones. A report from 5 minutes ago is more significant than one from 2 days ago.
+  2.  **User Reputation**: Reports from users with a higher reputation score are more trustworthy. A user with a reputation of 10 is more reliable than a user with a reputation of 1.
 
-  Given the following ATM ID: {{{atmId}}}
-  And the following user reports:
+  Analyze the following reports for ATM ID {{{atmId}}}:
   {{#each reports}}
-  - User ID: {{{userId}}}, Status: {{{status}}}, Timestamp: {{{timestamp}}}, Reputation: {{{userReputation}}}
+  - Report: Status="{{{status}}}", Timestamp="{{{timestamp}}}", UserReputation={{userReputation}}
   {{/each}}
 
-  Based on your weighted analysis, determine the most likely status of the ATM (com_dinheiro, sem_dinheiro, or desconhecido). Provide a confidence score (from 0 to 1) and a brief reasoning for your decision, explaining how reputation and recency influenced the outcome.
+  Based on a weighted analysis of recency and reputation, decide the most probable status: 'com_dinheiro', 'sem_dinheiro', or 'desconhecido' if there isn't enough information or the data is too conflicting.
 
-  Output in JSON format.`,
+  Provide your final decision in JSON format with a confidence score (0.0 to 1.0) and a brief reasoning for your conclusion.
+  
+  Example reasoning: "The most recent reports, including one from a high-reputation user, indicate the ATM has cash. Conflicting older reports were given less weight."
+  
+  `,
 });
 
 const verifyAtmStatusFlow = ai.defineFlow(
@@ -65,6 +67,9 @@ const verifyAtmStatusFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await verifyAtmStatusPrompt(input);
-    return output!;
+    if (!output) {
+        throw new Error('The AI model failed to produce a valid output.');
+    }
+    return output;
   }
 );
