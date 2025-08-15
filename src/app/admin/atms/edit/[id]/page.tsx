@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import type { Atm } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/firebase/init';
 
 const EditAtmPage = () => {
     const [name, setName] = useState('');
@@ -31,16 +33,20 @@ const EditAtmPage = () => {
         const fetchAtmData = async () => {
             setIsFetching(true);
             try {
-                const response = await fetch(`/api/atms/${atmId}`);
-                if (!response.ok) {
-                    throw new Error('Falha ao buscar os dados do ATM');
+                const atmRef = doc(db, 'atms', atmId);
+                const atmDoc = await getDoc(atmRef);
+
+                if (!atmDoc.exists()) {
+                     throw new Error('ATM não encontrado.');
                 }
-                const atm: Atm = await response.json();
+                
+                const atm = atmDoc.data() as Omit<Atm, 'id'>;
                 setName(atm.name);
                 setAddress(atm.address);
                 setLat(atm.location.lat.toString());
                 setLng(atm.location.lng.toString());
                 setDetails(atm.details || '');
+
             } catch (error) {
                 console.error(error);
                 toast({
@@ -71,6 +77,8 @@ const EditAtmPage = () => {
         };
 
         try {
+            // A chamada PUT à API continua a ser usada para a atualização,
+            // pois envolve uma operação de escrita segura no servidor.
             const response = await fetch(`/api/atms/${atmId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
