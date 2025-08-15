@@ -4,6 +4,22 @@ import { notFound, useParams } from 'next/navigation';
 import type { Atm } from '@/types';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/firebase/init';
+
+
+// Helper to convert Firestore Timestamps to ISO strings safely
+const convertTimestampToString = (timestamp: any): string => {
+  if (timestamp && typeof timestamp.toDate === 'function') {
+    return timestamp.toDate().toISOString();
+  }
+  if (typeof timestamp === 'string') {
+    return timestamp;
+  }
+  // Fallback for null, undefined, or other types
+  return new Date(0).toISOString();
+};
+
 
 export default function AtmDetailPage() {
   const params = useParams();
@@ -18,18 +34,36 @@ export default function AtmDetailPage() {
     const fetchAtm = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/atms/${atmId}`);
-        if (!response.ok) {
-          if (response.status === 404) {
-            notFound();
-          }
-          throw new Error('Failed to fetch ATM data');
+        const atmRef = doc(db, 'atms', atmId);
+        const atmDoc = await getDoc(atmRef);
+
+        if (!atmDoc.exists()) {
+          notFound();
+          return;
         }
-        const data: Atm = await response.json();
-        setAtmData(data);
+        
+        const data = atmDoc.data();
+        const reports = (data.reports || []).map((report: any) => ({
+            ...report,
+            timestamp: convertTimestampToString(report.timestamp),
+        }));
+
+        const atm: Atm = {
+            id: atmDoc.id,
+            name: data.name || '',
+            address: data.address || '',
+            location: data.location || { lat: 0, lng: 0 },
+            status: data.status || 'desconhecido',
+            details: data.details || '',
+            lastUpdate: convertTimestampToString(data.lastUpdate),
+            reports: reports,
+        };
+
+        setAtmData(atm);
+
       } catch (err: any) {
         console.error(err);
-        setError(err.message);
+        setError('Failed to fetch ATM data');
       } finally {
         setLoading(false);
       }
