@@ -1,36 +1,30 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Regras para a coleção 'atms'
-    match /atms/{atmId} {
-      // Leitura: Qualquer utilizador autenticado pode ler os dados de um ATM.
-      allow read: if request.auth != null;
-
-      // Escrita (Criação e Atualização):
-      // - A criação de novos ATMs é permitida apenas ao administrador.
-      // - A atualização é permitida a qualquer utilizador autenticado (para reportar status).
-      allow write: if request.auth != null;
-      
-      // Apagar: Apenas o administrador pode apagar um ATM.
-      allow delete: if request.auth != null && request.auth.token.email == 'admin@admin.com';
-    }
-
     // Regras para a coleção 'users'
     match /users/{userId} {
-      // Leitura: Um utilizador só pode ler os seus próprios dados.
-      allow read: if request.auth != null && request.auth.uid == userId;
+      // Qualquer pessoa pode criar um utilizador (para o registo)
+      allow create: if true;
+      
+      // Apenas o próprio utilizador autenticado pode ler ou atualizar os seus próprios dados
+      allow read, update: if request.auth != null && request.auth.uid == userId;
+    }
 
-      // Criação: Um utilizador pode criar o seu próprio documento (durante o registo).
-      allow create: if request.auth != null && request.auth.uid == userId;
+    // Regras para a coleção 'atms'
+    match /atms/{atmId} {
+      // Qualquer utilizador autenticado pode ler a lista de ATMs e os seus detalhes
+      allow list, get: if request.auth != null;
 
-      // Atualização: Um utilizador só pode atualizar os seus próprios dados.
-      allow update: if request.auth != null && request.auth.uid == userId;
+      // Qualquer utilizador autenticado pode atualizar um ATM (para reportar status)
+      allow update: if request.auth != null;
 
-      // Apagar: Não é permitido que os utilizadores apaguem as suas contas através da app.
-      allow delete: if false;
+      // Apenas um administrador pode criar ou apagar um ATM
+      function isAdmin() {
+        return request.auth != null && request.auth.token.email == 'admin@admin.com';
+      }
+      allow create, delete: if isAdmin();
     }
   }
 }
