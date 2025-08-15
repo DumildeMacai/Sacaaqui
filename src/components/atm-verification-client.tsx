@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -35,18 +36,23 @@ export function AtmVerificationClient({ atm }: { atm: Atm }) {
         try {
             // Step 1: Fetch reputation for all users who reported
             const userIds = [...new Set(atm.reports.map(r => r.userId))];
-            const usersRef = collection(db, 'users');
-            const usersQuery = query(usersRef, where('__name__', 'in', userIds));
-            const usersSnapshot = await getDocs(usersQuery);
             const userReputations = new Map<string, number>();
-            usersSnapshot.forEach(doc => {
-                userReputations.set(doc.id, (doc.data() as User).reputation || 0);
-            });
 
+            // Fetch each user document to get their reputation
+            for (const userId of userIds) {
+                const userRef = doc(db, 'users', userId);
+                const userDoc = await getDoc(userRef);
+                if (userDoc.exists()) {
+                    userReputations.set(userId, (userDoc.data() as User).reputation || 0);
+                } else {
+                    userReputations.set(userId, 0); // Default to 0 if user not found
+                }
+            }
+            
             // Step 2: Augment reports with reputation
             const reportsWithReputation = atm.reports.map(report => ({
                 ...report,
-                userReputation: userReputations.get(report.userId) ?? 0, // Default to 0 if user not found
+                userReputation: userReputations.get(report.userId) ?? 0,
             }));
 
             // Step 3: Verify the ATM's status
@@ -58,12 +64,13 @@ export function AtmVerificationClient({ atm }: { atm: Atm }) {
 
             // Step 4: If verification is successful and a conclusive status is found,
             // trigger the reputation update in the background.
-            if (verificationResult.verifiedStatus !== 'desconhecido') {
+            if (verificationResult && verificationResult.verifiedStatus !== 'desconhecido') {
                 toast({
                     title: "Atualizando Reputação",
                     description: "A reputação dos utilizadores que reportaram está a ser ajustada com base na verificação."
                 });
-                // This is a fire-and-forget call.
+                
+                // This is a fire-and-forget call. We don't need to await it.
                 updateUserReputationAction({
                     verifiedStatus: verificationResult.verifiedStatus,
                     reports: atm.reports.map(r => ({ userId: r.userId, status: r.status })),
@@ -126,3 +133,4 @@ export function AtmVerificationClient({ atm }: { atm: Atm }) {
         </Card>
     );
 }
+
