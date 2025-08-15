@@ -9,123 +9,101 @@ import { doc, updateDoc, arrayUnion, serverTimestamp, getDoc, setDoc, collection
 import { Skeleton } from '@/components/ui/skeleton'; // Importar componente Skeleton para estado de carregamento
 import { onAuthStateChanged, type User } from 'firebase/auth';
 
-export function AtmList({ initialAtms }: { initialAtms: Atm[] }) {
-  const [atms, setAtms] = useState<Atm[]>(initialAtms); // Começa com os dados do servidor
-  const [loading, setLoading] = useState(false); // Não começa carregando, pois já tem os dados
+export function AtmList({ atms }: { atms: Atm[] }) {
+  const [internalAtms, setInternalAtms] = useState<Atm[]>(atms);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [currentUserName, setCurrentUserName] = useState(''); // Corrigido para setCurrentUserName
+  const [currentUserName, setCurrentUserName] = useState('');
+
+  useEffect(() => {
+    setInternalAtms(atms);
+  }, [atms]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       if (user) {
-        setCurrentUserName(user.displayName || user.email || '');
+        // Busca o nome do Firestore para garantir consistência
+        const userDocRef = doc(db, 'users', user.uid);
+        getDoc(userDocRef).then(userDoc => {
+            if (userDoc.exists()) {
+                setCurrentUserName(userDoc.data().name);
+            } else {
+                // Fallback para displayName ou email se o documento não for encontrado
+                setCurrentUserName(user.displayName || user.email || '');
+            }
+        });
       } else {
         setCurrentUserName('');
       }
     });
     
     return () => unsubscribe(); // Cleanup da autenticação
-  }, []); // Array de dependências vazio para rodar apenas uma vez na montagem
+  }, []);
 
-  const handleStatusUpdate = async (atmId: string, status: 'com_dinheiro' | 'sem_dinheiro') => { // Torne a função assíncrona
+  const handleStatusUpdate = async (atmId: string, status: 'com_dinheiro' | 'sem_dinheiro') => {
     if (!currentUser) {
       console.warn('Usuário não logado, não pode atualizar o status.');
+      // Opcional: Adicionar um toast para notificar o usuário
       return;
     }
 
     try {
       const atmRef = doc(db, 'atms', atmId);
-
-      // Verifica se o documento existe
       const docSnap = await getDoc(atmRef);
 
       if (!docSnap.exists()) {
-        // Se o documento não existe, cria-o com os dados iniciais do mock
-        const initialAtm = mockAtms.find(atm => atm.id === atmId);
-        if (initialAtm) {
-          await setDoc(atmRef, {
-            ...initialAtm,
-            status: status,
-            lastUpdate: serverTimestamp(),
-            reports: [], // Inicializa o array de relatórios
-          });
-        } else {
-          return;
-        }
+        console.error("Documento do ATM não encontrado para atualização.");
+        return; 
       }
 
       const newReport = {
         userId: currentUser.uid,
         status,
-        timestamp: new Date().toISOString(), // Use new Date() para um carimbo de data/hora local
+        timestamp: new Date().toISOString(),
         userName: currentUserName,
       };
 
-      // Agora atualiza o documento (que agora sabemos que existe)
       await updateDoc(atmRef, {
         status: status,
         lastUpdate: serverTimestamp(),
         reports: arrayUnion(newReport),
       });
 
-
-      // --- Modificação: Buscar dados atualizados do Firestore ---
       const updatedDocSnap = await getDoc(atmRef);
       if (updatedDocSnap.exists()) {
-        const updatedAtm = updatedDocSnap.data() as any;
+        const updatedAtm = updatedDocSnap.data();
 
-        // --- Modificação: Converter Firestore Timestamp para Date ---
-        // Verifica se lastUpdate existe e não é uma string antes de converter
-        if (updatedAtm.lastUpdate && typeof updatedAtm.lastUpdate !== 'string') {
-            // Assumimos que se não é string e existe, é um Timestamp do Firestore
-            updatedAtm.lastUpdate = (updatedAtm.lastUpdate as any).toDate().toISOString();
+        if (updatedAtm.lastUpdate && typeof updatedAtm.lastUpdate.toDate === 'function') {
+            updatedAtm.lastUpdate = updatedAtm.lastUpdate.toDate().toISOString();
         }
-        // --- Fim da Modificação ---
 
-        setAtms(currentAtms =>
+        const reports = (updatedAtm.reports || []).map((report: any) => ({
+            ...report,
+            timestamp: report.timestamp, 
+        }));
+
+        setInternalAtms(currentAtms =>
           currentAtms.map(atm =>
             atm.id === atmId
-              ? { ...updatedAtm, id: atmId } as Atm // Use os dados completos e atualizados do Firestore
+              ? { ...atm, ...updatedAtm, id: atmId, reports } as Atm
               : atm
           )
         );
       }
-      // --- Fim da Modificação ---
-
     } catch (error) {
       console.error('Erro ao atualizar status do ATM no Firestore:', error);
     }
   };
 
-  return (
-    <>
-      {loading ? (
-        // --- Modificação: Exibir esqueleto de carregamento ---
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Skeleton className="h-[220px] w-full rounded-xl" />
-          <Skeleton className="h-[220px] w-full rounded-xl" />
-          <Skeleton className="h-[220px] w-full rounded-xl" />
-        </div>
-      ) : (
-        // --- Modificação: Exibir lista de ATMs após o carregamento ---
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {atms.map(atm => {
-            // Adiciona uma verificação para garantir que 'atm' não é nulo ou indefinido
-            if (!atm) {
-              return null; // Não renderiza o AtmCard para itens inválidos
-            }
-            // Adiciona uma verificação para garantir que 'status' existe e é válido
-            if (!atm.status || !['com_dinheiro', 'sem_dinheiro', 'desconhecido'].includes(atm.status as any)) {
-               return null; // Não renderiza o AtmCard para ATMs com status inválido
-            }
+  if (internalAtms.length === 0) {
+    return <div className="text-center text-muted-foreground col-span-full">Nenhum ATM encontrado. Tente um termo de pesquisa diferente.</div>;
+  }
 
-            return (
-              <AtmCard key={atm.id} atm={atm} onStatusUpdate={handleStatusUpdate} />
-            );
-          })}
-        </div>
-      )}
-    </>
+  return (
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {internalAtms.map(atm => (
+        <AtmCard key={atm.id} atm={atm} onStatusUpdate={handleStatusUpdate} />
+      ))}
+    </div>
   );
 }

@@ -2,10 +2,12 @@
 import type { Atm } from '@/types'; 
 import { AtmList } from '@/components/atm-list';
 import { LogoutButton } from '@/components/logout-button';
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useMemo, Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { db } from '@/firebase/init';
 import { collection, getDocs, query } from 'firebase/firestore';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 // Helper to convert Firestore Timestamps to ISO strings safely
 const convertTimestampToString = (timestamp: any): string => {
@@ -23,6 +25,7 @@ export default function DashboardPage() {
   const [atms, setAtms] = useState<Atm[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchAtms = async () => {
@@ -66,6 +69,17 @@ export default function DashboardPage() {
     fetchAtms();
   }, []);
 
+  const filteredAtms = useMemo(() => {
+    if (!searchTerm) {
+      return atms;
+    }
+    return atms.filter(atm =>
+      atm.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      atm.address.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [atms, searchTerm]);
+
+
   if (error) {
     return <div className="text-destructive text-center">Erro ao carregar os ATMs. Tente novamente mais tarde.</div>;
   }
@@ -79,6 +93,19 @@ export default function DashboardPage() {
         </div>
         <LogoutButton /> 
       </div>
+
+       <div className="relative mb-8">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+                type="search"
+                placeholder="Pesquisar por nome ou endereço..."
+                className="w-full pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
+        </div>
+
+
       <Suspense fallback={
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               <Skeleton className="h-[220px] w-full rounded-xl" />
@@ -93,7 +120,7 @@ export default function DashboardPage() {
                 <Skeleton className="h-[220px] w-full rounded-xl" />
              </div>
         ) : (
-            <AtmList initialAtms={atms} />
+            <AtmList atms={filteredAtms} />
         )}
       </Suspense>
     </div>
