@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Shield } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/firebase/init';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '@/firebase/init';
 
 export default function DashboardLayout({
   children,
@@ -15,22 +16,44 @@ export default function DashboardLayout({
 }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState('');
-
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.email === 'admin@admin.com') {
-        setIsAdmin(true);
-      } else {
-        setIsAdmin(false);
-      }
-    });
-
-    onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUserName(user.displayName || user.email || '');
+        setCurrentUser(user);
+        // Prioritize displayName from Auth, but fetch from Firestore as a robust fallback.
+        if (user.displayName) {
+          setUserName(user.displayName);
+        } else {
+            try {
+                const userDocRef = doc(db, 'users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists()) {
+                    setUserName(userDoc.data().name);
+                } else {
+                    // Fallback to email if Firestore doc doesn't exist
+                    setUserName(user.email || '');
+                }
+            } catch (error) {
+                console.error("Error fetching user data from Firestore:", error);
+                // Fallback to email on error
+                setUserName(user.email || '');
+            }
+        }
+        
+        // Check for admin
+        if (user.email === 'admin@admin.com') {
+            setIsAdmin(true);
+        } else {
+            setIsAdmin(false);
+        }
+
       } else {
+        // User is signed out
+        setCurrentUser(null);
         setUserName('');
+        setIsAdmin(false);
       }
     });
 
@@ -53,12 +76,12 @@ export default function DashboardLayout({
               <span className="mr-4 text-sm font-medium text-gray-300">Olá, {userName}</span>
             )}
             {isAdmin && (
- <Button asChild variant="outline" size="sm">
- <Link href="/admin/login">
- <Shield className="mr-2 h-4 w-4" />
- Admin Panel
- </Link>
- </Button>
+                <Button asChild variant="outline" size="sm">
+                <Link href="/admin/login">
+                <Shield className="mr-2 h-4 w-4" />
+                Admin Panel
+                </Link>
+                </Button>
             )}
            <ThemeToggle />
         </div>
@@ -69,4 +92,3 @@ export default function DashboardLayout({
     </div>
   );
 }
-
