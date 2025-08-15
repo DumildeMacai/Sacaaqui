@@ -73,7 +73,7 @@ export default function DashboardLayout({
                 {/* Search could go here */}
             </div>
             {userName && (
-              <span className="mr-4 text-sm font-medium text-gray-300">Olá, {userName}</span>
+              <span className="mr-4 text-sm font-medium text-foreground">Olá, {userName}</span>
             )}
             {isAdmin && (
                 <Button asChild variant="outline" size="sm">
