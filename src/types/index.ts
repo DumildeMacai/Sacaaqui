@@ -25,5 +25,5 @@ export type User = {
     email: string;
     dateOfBirth: string;
     phoneNumber: string;
-    reputation: number; // 0: Baixa, 1: Normal, 2: Alta, etc.
+    reputation: number;
 };
