@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import type { Atm } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/firebase/init';
 
 const EditAtmPage = () => {
@@ -74,20 +74,12 @@ const EditAtmPage = () => {
                 lng: parseFloat(lng),
             },
             details,
+            lastUpdate: serverTimestamp(),
         };
 
         try {
-            // A chamada PUT à API continua a ser usada para a atualização,
-            // pois envolve uma operação de escrita segura no servidor.
-            const response = await fetch(`/api/atms/${atmId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedAtm),
-            });
-
-            if (!response.ok) {
-                throw new Error('Falha ao atualizar o ATM');
-            }
+            const atmRef = doc(db, 'atms', atmId);
+            await updateDoc(atmRef, updatedAtm);
 
             toast({
                 title: 'Sucesso!',
