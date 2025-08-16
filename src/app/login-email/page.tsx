@@ -5,21 +5,28 @@ import { useRouter } from 'next/navigation';
 import {
   signInWithEmailAndPassword
 } from 'firebase/auth';
-import { auth } from '@/firebase/init'; // ajuste esse caminho conforme a estrutura do seu projeto
+import { auth } from '@/firebase/init'; 
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function LoginPhone() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async () => {
-    setError(''); // Limpa erros anteriores
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(''); 
+    setIsLoading(true);
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // Login bem-sucedido, redirecionar
+      
       if (email === 'admin@admin.com') {
         router.push('/admin/panel');
       } else {
@@ -28,56 +35,64 @@ export default function LoginPhone() {
 
     } catch (err: any) {
       console.error('Erro no login:', err);
-      setError(`Erro no login: ${err.message}`); // Atualiza o estado de erro com a mensagem do Firebase
+      let errorMessage = 'Ocorreu um erro ao tentar fazer o login.';
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        errorMessage = 'Credenciais inválidas. Verifique o seu e-mail e senha.';
+      }
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative">
-        <Button 
-            variant="ghost" 
-            className="absolute top-4 left-4"
-            onClick={() => router.back()}
-        >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar
-        </Button>
-      <div className="max-w-sm w-full space-y-4">
-        <h2 className="text-2xl font-bold mb-2 text-center">Login via E-mail</h2>
-
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-300">Email</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 rounded bg-gray-700 text-white"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-300">Senha</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 rounded bg-gray-700 text-white"
-            required
-          />
-        </div>
-
-        <button
-          onClick={handleLogin}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Entrar
-        </button>
-
-        {error && <p className="text-red-400">{error}</p>}
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-muted/40 p-4">
+      <Button 
+          variant="ghost" 
+          className="absolute top-4 left-4"
+          onClick={() => router.back()}
+      >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Voltar
+      </Button>
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl font-headline">Login</CardTitle>
+          <CardDescription>
+            Introduza o seu e-mail e senha para aceder à sua conta.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="seu@email.com"
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">Senha</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+            </div>
+             {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'A entrar...' : 'Entrar'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
