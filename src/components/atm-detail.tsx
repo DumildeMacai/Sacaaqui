@@ -17,6 +17,9 @@ const statusMap: { [key in Atm['status']]: { text: string; variant: StatusVarian
 export function AtmDetail({ atm }: { atm: Atm }) {
   const statusInfo = statusMap[atm.status];
 
+  // Ordena os relatórios, do mais recente para o mais antigo
+  const sortedReports = [...atm.reports].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
   return (
     <div className="grid gap-8 md:grid-cols-3">
         <div className="md:col-span-2 space-y-8">
@@ -61,7 +64,7 @@ export function AtmDetail({ atm }: { atm: Atm }) {
                 </CardHeader>
                 <CardContent>
                     <ul className="space-y-4">
-                        {atm.reports.map((report, index) => (
+                        {sortedReports.map((report, index) => (
                             <li key={index} className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     {report.status === 'com_dinheiro' ? <CheckCircle2 className="h-5 w-5 text-accent" /> : <CircleSlash className="h-5 w-5 text-destructive" />}
