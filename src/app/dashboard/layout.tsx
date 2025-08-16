@@ -2,13 +2,17 @@
 import { MacaiLogo } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
-import { Shield } from 'lucide-react';
+import { Shield, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { onAuthStateChanged, type User } from 'firebase/auth';
+import { onAuthStateChanged, type User, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/firebase/init';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { Skeleton } from '@/components/ui/skeleton';
 import { LogoutButton } from '@/components/logout-button';
+
 
 export default function DashboardLayout({
   children,
@@ -18,6 +22,9 @@ export default function DashboardLayout({
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState('');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true); // Adicionado estado de loading
+  const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -25,22 +32,18 @@ export default function DashboardLayout({
         setCurrentUser(user);
         
         try {
-            // Prioritize fetching the user's name from their Firestore document
             const userDocRef = doc(db, 'users', user.uid);
             const userDoc = await getDoc(userDocRef);
             if (userDoc.exists()) {
                 setUserName(userDoc.data().name);
             } else {
-                // Fallback to displayName from Auth, then to email
                 setUserName(user.displayName || user.email || '');
             }
         } catch (error) {
             console.error("Error fetching user data from Firestore:", error);
-            // Fallback to displayName or email on error
             setUserName(user.displayName || user.email || '');
         }
         
-        // Check for admin
         if (user.email === 'admin@admin.com') {
             setIsAdmin(true);
         } else {
@@ -48,15 +51,52 @@ export default function DashboardLayout({
         }
 
       } else {
-        // User is signed out
         setCurrentUser(null);
         setUserName('');
         setIsAdmin(false);
       }
+      setLoading(false); // Carregamento concluído
     });
 
     return () => unsubscribe();
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({
+        title: "Sessão Terminada",
+        description: "Você saiu da sua conta com sucesso.",
+      });
+      router.push('/');
+    } catch (error) {
+      console.error("Erro ao fazer logout no dashboard:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível sair. Tente novamente.",
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen w-full flex-col">
+        <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 z-50">
+           <Skeleton className="h-8 w-24" />
+           <div className="ml-auto flex items-center gap-4">
+              <Skeleton className="h-8 w-20" />
+              <Skeleton className="h-9 w-24" />
+              <Skeleton className="h-9 w-9" />
+              <Skeleton className="h-9 w-16" />
+           </div>
+        </header>
+        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+          <Skeleton className="h-96 w-full" />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col">
