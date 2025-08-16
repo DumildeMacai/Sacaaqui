@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/firebase/init';
+import { LogoutButton } from '@/components/logout-button';
 
 export default function DashboardLayout({
   children,
@@ -84,6 +85,7 @@ export default function DashboardLayout({
                 </Button>
             )}
            <ThemeToggle />
+           <LogoutButton />
         </div>
       </header>
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">

@@ -1,7 +1,6 @@
 'use client';
 import type { Atm } from '@/types'; 
 import { AtmList } from '@/components/atm-list';
-import { LogoutButton } from '@/components/logout-button';
 import { useEffect, useState, useMemo, Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { db } from '@/firebase/init';
@@ -91,7 +90,6 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-bold tracking-tight font-headline">ATMs Próximos</h1>
           <p className="text-muted-foreground">Veja o status dos caixas e ajude a comunidade.</p> 
         </div>
-        <LogoutButton /> 
       </div>
 
        <div className="relative mb-8">
