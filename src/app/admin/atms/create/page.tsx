@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/firebase/init';
 
@@ -47,7 +47,7 @@ const AddAtmPage = () => {
                 description: 'Novo ATM adicionado com sucesso.',
             });
 
-            router.push('/admin/panel');
+            router.push('/admin/atms');
             router.refresh();
 
         } catch (error) {
@@ -65,8 +65,16 @@ const AddAtmPage = () => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Adicionar Novo ATM</CardTitle>
-                <CardDescription>Preencha os detalhes do novo caixa eletrônico.</CardDescription>
+                <div className='flex justify-between items-start'>
+                    <div>
+                        <CardTitle>Adicionar Novo ATM</CardTitle>
+                        <CardDescription>Preencha os detalhes do novo caixa eletrônico.</CardDescription>
+                    </div>
+                    <Button variant="outline" onClick={() => router.back()}>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Voltar
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSubmit} className="grid gap-6">

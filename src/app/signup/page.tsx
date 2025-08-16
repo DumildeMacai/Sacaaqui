@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from '@/firebase/init';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -60,9 +62,17 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center text-white px-4">
+    <div className="min-h-screen flex items-center justify-center text-white px-4 relative">
+        <Button 
+            variant="ghost" 
+            className="absolute top-4 left-4"
+            onClick={() => router.back()}
+        >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar
+        </Button>
       <div className="max-w-sm w-full space-y-4">
-        <h2 className="text-2xl font-bold mb-2">Criar Conta</h2>
+        <h2 className="text-2xl font-bold mb-2 text-center">Criar Conta</h2>
 
         <form onSubmit={handleSignup} className="space-y-4">
 

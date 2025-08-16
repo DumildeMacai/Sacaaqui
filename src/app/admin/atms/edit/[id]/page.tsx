@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import type { Atm } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
@@ -146,8 +146,16 @@ const EditAtmPage = () => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Editar ATM</CardTitle>
-                <CardDescription>Atualize os detalhes do caixa eletrônico.</CardDescription>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <CardTitle>Editar ATM</CardTitle>
+                        <CardDescription>Atualize os detalhes do caixa eletrônico.</CardDescription>
+                    </div>
+                     <Button variant="outline" onClick={() => router.back()}>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Voltar
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSubmit} className="grid gap-6">

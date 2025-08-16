@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   signInWithEmailAndPassword
 } from 'firebase/auth';
 import { auth } from '@/firebase/init'; // ajuste esse caminho conforme a estrutura do seu projeto
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 export default function LoginPhone() {
   const router = useRouter();
@@ -31,9 +33,17 @@ export default function LoginPhone() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4 relative">
+        <Button 
+            variant="ghost" 
+            className="absolute top-4 left-4"
+            onClick={() => router.back()}
+        >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar
+        </Button>
       <div className="max-w-sm w-full space-y-4">
-        <h2 className="text-2xl font-bold mb-2">Login via E-mail</h2>
+        <h2 className="text-2xl font-bold mb-2 text-center">Login via E-mail</h2>
 
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-300">Email</label>
