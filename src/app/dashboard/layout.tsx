@@ -23,24 +23,21 @@ export default function DashboardLayout({
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
-        // Prioritize displayName from Auth, but fetch from Firestore as a robust fallback.
-        if (user.displayName) {
-          setUserName(user.displayName);
-        } else {
-            try {
-                const userDocRef = doc(db, 'users', user.uid);
-                const userDoc = await getDoc(userDocRef);
-                if (userDoc.exists()) {
-                    setUserName(userDoc.data().name);
-                } else {
-                    // Fallback to email if Firestore doc doesn't exist
-                    setUserName(user.email || '');
-                }
-            } catch (error) {
-                console.error("Error fetching user data from Firestore:", error);
-                // Fallback to email on error
-                setUserName(user.email || '');
+        
+        try {
+            // Prioritize fetching the user's name from their Firestore document
+            const userDocRef = doc(db, 'users', user.uid);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists()) {
+                setUserName(userDoc.data().name);
+            } else {
+                // Fallback to displayName from Auth, then to email
+                setUserName(user.displayName || user.email || '');
             }
+        } catch (error) {
+            console.error("Error fetching user data from Firestore:", error);
+            // Fallback to displayName or email on error
+            setUserName(user.displayName || user.email || '');
         }
         
         // Check for admin
