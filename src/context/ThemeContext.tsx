@@ -1,3 +1,4 @@
+
 // src/context/ThemeContext.tsx
 "use client";
 
@@ -13,36 +14,18 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setTheme] = useState<Theme>("dark"); // Define um tema inicial padrão para o servidor
-  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<Theme>("light"); // O tema padrão é agora "claro"
 
   useEffect(() => {
-    // Define o tema real apenas no cliente após a montagem
-    const savedTheme = localStorage.getItem("theme") as Theme;
-    if (savedTheme) {
-      setTheme(savedTheme);
+    // Aplica a classe ao elemento <html> sempre que o tema mudar
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
     }
-    setMounted(true); // Define mounted como true após ler do localStorage
-  }, []);
-
-  useEffect(() => {
-    if (mounted) {
-      if (theme === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-      localStorage.setItem("theme", theme);
-    }
-  }, [theme, mounted]);
+  }, [theme]);
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
-
-  // Renderiza um placeholder ou nada até o componente estar montado no cliente
-  // para evitar o piscar de conteúdo (flicker) e erros de hidratação.
-  if (!mounted) {
-    return null; 
-  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>
