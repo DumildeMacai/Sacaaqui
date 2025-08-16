@@ -1,14 +1,76 @@
+
 'use client';
 
 import { useTheme } from '@/context/ThemeContext';
 import { useRouter } from 'next/navigation';
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Loader2 } from "lucide-react";
 import { GoogleSignInButton } from '@/components/google-signin-button';
+import { useEffect, useState } from 'react';
+import { getRedirectResult } from 'firebase/auth';
+import { auth, db } from '@/firebase/init';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Home() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
+  const { toast } = useToast();
+  const [isVerifying, setIsVerifying] = useState(true);
   const isDarkMode = theme === 'dark';
+
+  useEffect(() => {
+    const checkRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          // User has just been redirected from Google Sign-In
+          const user = result.user;
+          const userDocRef = doc(db, 'users', user.uid);
+          const userDoc = await getDoc(userDocRef);
+
+          if (!userDoc.exists()) {
+            // Create a new user document if it doesn't exist
+            await setDoc(userDocRef, {
+              name: user.displayName,
+              email: user.email,
+              dateOfBirth: '',
+              phoneNumber: user.phoneNumber || '',
+              reputation: 1, // Initial reputation
+            });
+          }
+          
+          toast({
+              title: 'Login Bem-sucedido!',
+              description: `Bem-vindo de volta, ${user.displayName || user.email}!`,
+          });
+          router.push('/dashboard');
+        } else {
+            setIsVerifying(false);
+        }
+      } catch (error: any) {
+        console.error("Erro ao obter resultado do redirecionamento:", error);
+        toast({
+          variant: 'destructive',
+          title: 'Erro de Login',
+          description: error.message,
+        });
+        setIsVerifying(false);
+      }
+    };
+
+    checkRedirectResult();
+  }, [router, toast]);
+
+
+  if (isVerifying) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">A verificar autenticação...</p>
+      </div>
+    );
+  }
+
 
   return (
     <div>
