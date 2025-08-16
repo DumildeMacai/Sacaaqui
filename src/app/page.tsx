@@ -10,6 +10,7 @@ import { getRedirectResult } from 'firebase/auth';
 import { auth, db } from '@/firebase/init';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+import { FacebookSignInButton } from '@/components/facebook-signin-button';
 
 export default function Home() {
   const router = useRouter();
@@ -91,6 +92,7 @@ export default function Home() {
 
         <div className="flex flex-col gap-4 w-full max-w-xs">
           <GoogleSignInButton />
+          <FacebookSignInButton />
           <button
             className="bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl shadow-lg transition-all text-sm font-medium"
             onClick={() => router.push('/login-email')}
