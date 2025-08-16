@@ -1,9 +1,8 @@
 'use client';
 
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { GoogleAuthProvider, signInWithRedirect } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { auth, db } from '@/firebase/init';
+import { auth } from '@/firebase/init';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,41 +18,19 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 export function GoogleSignInButton() {
-    const router = useRouter();
     const { toast } = useToast();
 
     const handleSignIn = async () => {
         const provider = new GoogleAuthProvider();
         try {
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-
-            // Check if user exists in Firestore
-            const userDocRef = doc(db, 'users', user.uid);
-            const userDoc = await getDoc(userDocRef);
-
-            if (!userDoc.exists()) {
-                // Create a new user document in Firestore
-                await setDoc(userDocRef, {
-                    name: user.displayName,
-                    email: user.email,
-                    dateOfBirth: '', // Google Auth doesn't provide this
-                    phoneNumber: user.phoneNumber || '', // May or may not be available
-                    reputation: 1, // Initial reputation
-                });
-            }
-
-            toast({
-                title: 'Login Bem-sucedido!',
-                description: `Bem-vindo de volta, ${user.displayName || user.email}!`,
-            });
-            router.push('/dashboard');
+            // Inicia o processo de redirecionamento
+            await signInWithRedirect(auth, provider);
         } catch (error: any) {
-            console.error("Erro no login com Google:", error);
+            console.error("Erro ao iniciar o redirecionamento com Google:", error);
             toast({
                 variant: 'destructive',
                 title: 'Erro de Login',
-                description: error.message,
+                description: `Não foi possível iniciar o login com Google: ${error.message}`,
             });
         }
     };
