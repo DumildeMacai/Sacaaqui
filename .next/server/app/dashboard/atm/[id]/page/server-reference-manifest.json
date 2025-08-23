@@ -1,0 +1,27 @@
+{
+  "node": {
+    "401fbe705ad27fd5f69581e88ae6e4e533182f705f": {
+      "workers": {
+        "app/dashboard/atm/[id]/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/atm/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/verify-status.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/actions/update-reputation.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/dashboard/atm/[id]/page": "action-browser"
+      }
+    },
+    "40a8ceb396dd971a9ce36bb6bdaac71e7f687ec624": {
+      "workers": {
+        "app/dashboard/atm/[id]/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/atm/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/verify-status.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/actions/update-reputation.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/dashboard/atm/[id]/page": "action-browser"
+      }
+    }
+  },
+  "edge": {}
+}
