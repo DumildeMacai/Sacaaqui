@@ -12,6 +12,7 @@ export default {
       // Configure 'Inter' as the default sans-serif font
       fontFamily: {
         headline: ['Inter', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
