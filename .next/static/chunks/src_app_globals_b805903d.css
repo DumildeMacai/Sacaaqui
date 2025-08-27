@@ -1384,6 +1384,16 @@ body {
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
 }
 
+.bg-\[\#28a745\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(40 167 69 / var(--tw-bg-opacity, 1));
+}
+
+.bg-\[\#8A2BE2\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(138 43 226 / var(--tw-bg-opacity, 1));
+}
+
 .fill-current {
   fill: currentColor;
 }
@@ -2060,6 +2070,16 @@ body {
 
 .hover\:bg-sidebar-accent:hover {
   background-color: hsl(var(--sidebar-accent));
+}
+
+.hover\:bg-\[\#218838\]:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(33 136 56 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-\[\#7B1FA2\]:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(123 31 162 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:text-accent-foreground:hover {
