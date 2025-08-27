@@ -76,7 +76,7 @@ export default function Home() {
   return (
     <div>
       <div className="flex justify-between items-center px-6 py-4">
-        <h1 className="text-2xl font-bold">🌐 Macai ATM Locator</h1>
+        <h1 className="text-2xl font-bold">🌐 Dumilde Macai </h1>
         <button
           onClick={toggleTheme}
           className="p-2 rounded-full hover:bg-gray-700 hover:text-white dark:hover:bg-gray-200 dark:hover:text-gray-800 transition"
@@ -87,7 +87,7 @@ export default function Home() {
       </div>
 
       <main className="flex flex-col items-center justify-center min-h-screen px-4">
-        <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-center">Bem-vindo ao <span className="text-green-400">ATM Locator</span></h2>
+        <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-center">Bem-vindo ao <span className="text-green-400">Sacaaqui</span></h2>
         <p className="text-md sm:text-lg text-center mb-8 opacity-80">Escolha uma opção para continuar</p>
 
         <div className="flex flex-col gap-4 w-full max-w-xs">
