@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { AtmDataTable } from "@/components/admin/atm-data-table";
