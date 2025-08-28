@@ -23,11 +23,9 @@ export function Sidebar() {
           <Link
             key={href}
             href={href}
-            target={href === '/dashboard' ? '_blank' : '_self'}
-            rel={href === '/dashboard' ? 'noopener noreferrer' : ''}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-              pathname.startsWith(href) && href !== '/dashboard' && "bg-muted text-primary"
+              pathname.startsWith(href) && "bg-muted text-primary"
             )}
           >
             <Icon className="h-4 w-4" />
