@@ -1,3 +1,4 @@
+
 'use client';
 
 import { mockAtms } from '@/lib/mock-data'; // Manter importação caso ainda seja necessário para a criação inicial
@@ -8,6 +9,8 @@ import { auth, db } from '@/firebase/init'; // Importe 'db'
 import { doc, updateDoc, arrayUnion, serverTimestamp, getDoc, setDoc, collection, getDocs } from 'firebase/firestore'; // Importe as funções do Firestore
 import { Skeleton } from '@/components/ui/skeleton'; // Importar componente Skeleton para estado de carregamento
 import { onAuthStateChanged, type User } from 'firebase/auth';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Info } from 'lucide-react';
 
 export function AtmList({ atms }: { atms: Atm[] }) {
   const [internalAtms, setInternalAtms] = useState<Atm[]>(atms);
@@ -96,7 +99,22 @@ export function AtmList({ atms }: { atms: Atm[] }) {
   };
 
   if (internalAtms.length === 0) {
-    return <div className="text-center text-muted-foreground col-span-full">Nenhum ATM encontrado. Tente um termo de pesquisa diferente.</div>;
+    return (
+        <Card className="col-span-full">
+            <CardHeader className='flex-row items-center gap-4'>
+                <Info className="h-8 w-8 text-primary" />
+                <div>
+                    <CardTitle>Nenhum ATM encontrado</CardTitle>
+                    <CardDescription>A sua pesquisa não retornou resultados.</CardDescription>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <p className="text-muted-foreground">
+                    Se na sua região existem caixas eletrônicos que não estão listados, por favor, contacte o administrador da aplicação para sugerir a sua adição.
+                </p>
+            </CardContent>
+        </Card>
+    );
   }
 
   return (
