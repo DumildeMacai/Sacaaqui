@@ -160,6 +160,13 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 ;
 ;
 async function handleApproveSuggestion(input) {
+    // Validação para garantir que os campos obrigatórios existem
+    if (!input.name || !input.address || !input.lat || !input.lng) {
+        return {
+            success: false,
+            error: "Nome, endereço, latitude e longitude são obrigatórios."
+        };
+    }
     try {
         // 1. Create the new ATM document
         const newAtmPayload = {

@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 
 interface ApproveSuggestionInput {
     suggestionId: string;
-    userId: string; 
+    userId: string;
     name: string;
     address: string;
     lat: number;
@@ -31,7 +31,7 @@ export async function handleApproveSuggestion(input: ApproveSuggestionInput) {
                 lng: input.lng,
             },
             details: input.details || '',
-            status: 'desconhecido', 
+            status: 'desconhecido',
             lastUpdate: serverTimestamp(),
             reports: [],
         };
