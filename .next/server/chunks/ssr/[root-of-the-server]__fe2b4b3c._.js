@@ -303,7 +303,7 @@ function AdminLoginPage() {
             // Salvar um item no sessionStorage para indicar que o admin está "logado"
             // Isto é uma segurança muito básica e não deve ser usado para dados sensíveis.
             sessionStorage.setItem('isAdminAuthenticated', 'true');
-            router.replace('/admin/atms');
+            router.replace('/admin/dashboard');
         } else {
             toast({
                 variant: "destructive",

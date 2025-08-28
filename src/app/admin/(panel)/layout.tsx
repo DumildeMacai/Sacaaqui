@@ -6,10 +6,12 @@ import { MacaiLogo } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, LogOut } from 'lucide-react';
+import { auth } from '@/firebase/init';
+import { onAuthStateChanged } from 'firebase/auth';
+import { Menu, LogOut, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function AdminPanelLayout({
   children,
@@ -17,19 +19,37 @@ export default function AdminPanelLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Este código só corre no lado do cliente
-    const isAuthenticated = sessionStorage.getItem('isAdminAuthenticated');
-    if (isAuthenticated !== 'true') {
-      router.replace('/admin/login');
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      // Check if user is logged in and is the admin
+      if (user && user.email === 'admin@admin.com') {
+        setIsLoading(false);
+      } else {
+        // If not admin or not logged in, redirect to home
+        router.replace('/');
+      }
+    });
+
+    return () => unsubscribe();
   }, [router]);
 
   const handleLogout = () => {
-    sessionStorage.removeItem('isAdminAuthenticated');
-    router.push('/');
+     signOut(auth).then(() => {
+        router.push('/');
+    }).catch((error) => {
+        console.error('Logout Error:', error);
+    });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
 
   return (

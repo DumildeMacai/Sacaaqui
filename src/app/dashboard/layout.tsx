@@ -97,7 +97,7 @@ export default function DashboardLayout({
             {currentUser && <Notifications userId={currentUser.uid} />}
             {isAdmin && (
                 <Button asChild variant="outline" size="sm">
-                <Link href="/admin/login">
+                <Link href="/admin/dashboard">
                 <Shield className="mr-2 h-4 w-4" />
                 Admin Panel
                 </Link>
