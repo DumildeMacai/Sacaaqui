@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Sidebar } from '@/components/admin/admin-sidebar';
@@ -41,14 +42,15 @@ export default function AdminPanelLayout({
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      <div className="hidden border-r bg-card md:block">
+      <div className="hidden border-r bg-muted/40 md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
             <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
                 <Link href="/admin/panel" className="flex items-center gap-2 font-semibold">
                     <MacaiLogo />
+                    <span className="">Admin</span>
                 </Link>
             </div>
-            <div className="flex-1">
+            <div className="flex-1 overflow-auto py-2">
                 <Sidebar />
             </div>
         </div>
@@ -64,11 +66,12 @@ export default function AdminPanelLayout({
                 </SheetTrigger>
                 <SheetContent side="left" className="flex flex-col p-0">
                      <div className="flex h-14 items-center border-b px-4">
-                        <Link href="/admin/panel">
+                        <Link href="/admin/panel" className="flex items-center gap-2 font-semibold">
                             <MacaiLogo />
+                             <span className="">Admin</span>
                         </Link>
                     </div>
-                    <div className="flex-1 py-2">
+                    <div className="flex-1 py-2 overflow-auto">
                       <Sidebar />
                     </div>
                 </SheetContent>
@@ -77,9 +80,9 @@ export default function AdminPanelLayout({
                 {/* Optional: Add search here */}
             </div>
             <ThemeToggle />
-             <Button variant="ghost" size="sm" onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Sair
+             <Button variant="ghost" size="icon" onClick={handleLogout}>
+                <LogOut className="h-5 w-5" />
+                 <span className="sr-only">Sair</span>
             </Button>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/40">

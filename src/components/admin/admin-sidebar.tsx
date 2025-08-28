@@ -1,9 +1,10 @@
+
 "use client";
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, Users, CreditCard } from "lucide-react"
+import { Home, Users, CreditCard, Lightbulb } from "lucide-react"
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -12,29 +13,24 @@ export function Sidebar() {
     { href: "/admin/panel", label: "Dashboard", icon: Home },
     { href: "/admin/atms", label: "ATMs", icon: CreditCard },
     { href: "/admin/users", label: "Usuários", icon: Users },
+    { href: "/admin/suggestions", label: "Sugestões", icon: Lightbulb },
   ]
 
   return (
-    <div className="p-4 w-60 border-r bg-background h-screen">
-      <h1 className="text-2xl font-bold text-primary mb-6">Macai</h1>
-      <nav className="space-y-2">
+    <nav className="flex flex-col gap-2 p-2">
         {links.map(({ href, label, icon: Icon }) => (
           <Link
             key={href}
             href={href}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
-              pathname === href
-                ? "bg-muted text-primary font-semibold"
-                : "text-muted-foreground hover:bg-muted"
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+              pathname.startsWith(href) && "bg-muted text-primary"
             )}
           >
-            <Icon className="w-5 h-5" />
+            <Icon className="h-4 w-4" />
             {label}
           </Link>
         ))}
-      </nav>
-    </div>
+    </nav>
   )
 }
-

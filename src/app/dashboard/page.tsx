@@ -1,3 +1,4 @@
+
 'use client';
 import type { Atm } from '@/types'; 
 import { AtmList } from '@/components/atm-list';
@@ -6,7 +7,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { db } from '@/firebase/init';
 import { collection, getDocs, query } from 'firebase/firestore';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, PlusCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 // Helper to convert Firestore Timestamps to ISO strings safely
 const convertTimestampToString = (timestamp: any): string => {
@@ -84,15 +87,21 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen p-8"> 
-      <div className="flex justify-between items-center mb-8"> 
-        <div className="mb-8"> 
+    <div className="space-y-8"> 
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"> 
+        <div> 
           <h1 className="text-3xl font-bold tracking-tight font-headline">ATMs Próximos</h1>
           <p className="text-muted-foreground">Veja o status dos caixas e ajude a comunidade.</p> 
         </div>
+        <Button asChild>
+            <Link href="/dashboard/suggest-atm">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Sugerir um ATM
+            </Link>
+        </Button>
       </div>
 
-       <div className="relative mb-8">
+       <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
                 type="search"

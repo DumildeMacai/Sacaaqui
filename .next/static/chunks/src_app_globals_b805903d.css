@@ -910,6 +910,10 @@ body {
   max-width: 20rem;
 }
 
+.max-w-2xl {
+  max-width: 42rem;
+}
+
 .flex-1 {
   flex: 1;
 }
@@ -1028,6 +1032,10 @@ body {
 
 .select-none {
   user-select: none;
+}
+
+.resize-none {
+  resize: none;
 }
 
 .list-inside {
@@ -2054,6 +2062,10 @@ body {
   color: hsl(var(--sidebar-accent-foreground));
 }
 
+.hover\:text-primary:hover {
+  color: hsl(var(--primary));
+}
+
 .hover\:underline:hover {
   text-decoration-line: underline;
 }
@@ -2715,6 +2727,10 @@ body {
 
   .sm\:flex-col {
     flex-direction: column;
+  }
+
+  .sm\:items-center {
+    align-items: center;
   }
 
   .sm\:justify-end {
