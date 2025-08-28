@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { auth, db } from '@/firebase/init';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
 const suggestionSchema = z.object({
     name: z.string().min(5, { message: "O nome deve ter pelo menos 5 caracteres." }),
@@ -26,8 +29,31 @@ type SuggestionFormValues = z.infer<typeof suggestionSchema>;
 
 const SuggestAtmPage = () => {
     const [isLoading, setIsLoading] = useState(false);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [currentUserName, setCurrentUserName] = useState('');
     const router = useRouter();
     const { toast } = useToast();
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                setCurrentUser(user);
+                const userDocRef = doc(db, 'users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists()) {
+                    setCurrentUserName(userDoc.data().name);
+                } else {
+                    setCurrentUserName(user.displayName || 'Utilizador Anónimo');
+                }
+            } else {
+                // Se o utilizador não estiver logado, redirecione ou mostre uma mensagem.
+                toast({ variant: 'destructive', title: 'Acesso Negado', description: 'Você precisa estar logado para fazer uma sugestão.' });
+                router.push('/login-email');
+            }
+        });
+        return () => unsubscribe();
+    }, [router, toast]);
+
 
     const form = useForm<SuggestionFormValues>({
         resolver: zodResolver(suggestionSchema),
@@ -39,9 +65,18 @@ const SuggestAtmPage = () => {
     });
 
     const handleSubmit = async (values: SuggestionFormValues) => {
+        if (!currentUser) {
+            toast({ variant: 'destructive', title: 'Erro', description: 'Utilizador não autenticado. Faça login novamente.' });
+            return;
+        }
+
         setIsLoading(true);
         try {
-            await submitAtmSuggestion(values);
+            await submitAtmSuggestion({
+                ...values,
+                userId: currentUser.uid,
+                userName: currentUserName,
+            });
             toast({
                 title: 'Obrigado pela sua sugestão!',
                 description: 'A sua sugestão foi enviada para revisão pelo administrador.',
@@ -49,10 +84,11 @@ const SuggestAtmPage = () => {
             router.push('/dashboard');
         } catch (error) {
             console.error('Error submitting suggestion:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Não foi possível enviar a sua sugestão. Tente novamente.';
             toast({
                 variant: 'destructive',
                 title: 'Erro',
-                description: 'Não foi possível enviar a sua sugestão. Tente novamente.',
+                description: errorMessage,
             });
         } finally {
             setIsLoading(false);
@@ -115,7 +151,7 @@ const SuggestAtmPage = () => {
                                 )}
                             />
                             <div className="flex justify-end">
-                                <Button type="submit" disabled={isLoading}>
+                                <Button type="submit" disabled={isLoading || !currentUser}>
                                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     Enviar Sugestão
                                 </Button>
