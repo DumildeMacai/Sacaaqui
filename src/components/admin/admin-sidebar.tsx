@@ -4,13 +4,12 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, Users, CreditCard, Lightbulb } from "lucide-react"
+import { Users, CreditCard, Lightbulb } from "lucide-react"
 
 export function Sidebar() {
   const pathname = usePathname()
 
   const links = [
-    { href: "/admin/panel", label: "Dashboard", icon: Home },
     { href: "/admin/atms", label: "ATMs", icon: CreditCard },
     { href: "/admin/users", label: "Usuários", icon: Users },
     { href: "/admin/suggestions", label: "Sugestões", icon: Lightbulb },
