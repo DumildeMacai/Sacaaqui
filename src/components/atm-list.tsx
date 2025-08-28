@@ -110,7 +110,7 @@ export function AtmList({ atms }: { atms: Atm[] }) {
             </CardHeader>
             <CardContent>
                 <p className="text-muted-foreground">
-                    Se na sua região existem caixas eletrônicos que não estão listados, por favor, contacte o administrador da aplicação através do e-mail <strong className="text-foreground">dumildemacai@gmail.com</strong> para sugerir a sua adição.
+                    Nenhum ATM encontrado. Se na sua região existem caixas eletrônicos que não estão listados, por favor, de um clique no botão sugerir um ATM situado no lado direito da aplicação para sugerir ao administrador adição do ATM em falta.
                 </p>
             </CardContent>
         </Card>
