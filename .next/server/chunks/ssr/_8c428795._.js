@@ -508,19 +508,8 @@ function AtmList({ atms }) {
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                         className: "text-muted-foreground",
-                        children: [
-                            "Se na sua região existem caixas eletrônicos que não estão listados, por favor, contacte o administrador da aplicação através do e-mail ",
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("strong", {
-                                className: "text-foreground",
-                                children: "dumildemacai@gmail.com"
-                            }, void 0, false, {
-                                fileName: "[project]/src/components/atm-list.tsx",
-                                lineNumber: 113,
-                                columnNumber: 156
-                            }, this),
-                            " para sugerir a sua adição."
-                        ]
-                    }, void 0, true, {
+                        children: "Nenhum ATM encontrado. Se na sua região existem caixas eletrônicos que não estão listados, por favor, de um clique no botão sugerir um ATM situado no lado direito da aplicação para sugerir ao administrador adição do ATM em falta."
+                    }, void 0, false, {
                         fileName: "[project]/src/components/atm-list.tsx",
                         lineNumber: 112,
                         columnNumber: 17

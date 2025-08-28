@@ -1,3 +1,4 @@
+
 export type Report = {
   userId: string;
   status: 'com_dinheiro' | 'sem_dinheiro';
@@ -28,3 +29,25 @@ export type User = {
     phoneNumber: string;
     reputation: number;
 };
+
+export type Suggestion = {
+    id: string;
+    name: string;
+    address: string;
+    details?: string;
+    userId: string;
+    userName: string;
+    status: 'pending' | 'approved' | 'rejected';
+    createdAt: string;
+};
+
+export type Notification = {
+    id: string;
+    userId: string;
+    title: string;
+    message: string;
+    read: boolean;
+    createdAt: string; // ISO string
+    type: 'suggestion_approved' | 'suggestion_rejected' | 'generic';
+};
+

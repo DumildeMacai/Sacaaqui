@@ -1,17 +1,17 @@
+
 'use client';
 import { MacaiLogo } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
-import { Shield, LogOut } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { onAuthStateChanged, type User, signOut } from 'firebase/auth';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/firebase/init';
-import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LogoutButton } from '@/components/logout-button';
+import { Notifications } from '@/components/notifications';
 
 
 export default function DashboardLayout({
@@ -22,9 +22,7 @@ export default function DashboardLayout({
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState('');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true); // Adicionado estado de loading
-  const router = useRouter();
-  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -55,29 +53,11 @@ export default function DashboardLayout({
         setUserName('');
         setIsAdmin(false);
       }
-      setLoading(false); // Carregamento concluído
+      setLoading(false); 
     });
 
     return () => unsubscribe();
   }, []);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      toast({
-        title: "Sessão Terminada",
-        description: "Você saiu da sua conta com sucesso.",
-      });
-      router.push('/');
-    } catch (error) {
-      console.error("Erro ao fazer logout no dashboard:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível sair. Tente novamente.",
-      });
-    }
-  };
 
   if (loading) {
     return (
@@ -87,6 +67,7 @@ export default function DashboardLayout({
            <div className="ml-auto flex items-center gap-4">
               <Skeleton className="h-8 w-20" />
               <Skeleton className="h-9 w-24" />
+              <Skeleton className="h-9 w-9" />
               <Skeleton className="h-9 w-9" />
               <Skeleton className="h-9 w-16" />
            </div>
@@ -113,6 +94,7 @@ export default function DashboardLayout({
             {userName && (
               <span className="mr-4 text-sm font-medium text-foreground">Olá, {userName}</span>
             )}
+            {currentUser && <Notifications userId={currentUser.uid} />}
             {isAdmin && (
                 <Button asChild variant="outline" size="sm">
                 <Link href="/admin/login">

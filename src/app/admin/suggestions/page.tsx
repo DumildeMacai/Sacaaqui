@@ -10,16 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Badge } from "@/components/ui/badge";
-
-interface Suggestion {
-    id: string;
-    name: string;
-    address: string;
-    details?: string;
-    userName: string;
-    status: 'pending' | 'approved' | 'rejected';
-    createdAt: string;
-}
+import type { Suggestion } from "@/types";
+import { SuggestionActions } from "@/components/admin/suggestion-actions";
 
 const convertTimestampToString = (timestamp: any): string => {
   if (timestamp && typeof timestamp.toDate === 'function') {
@@ -44,44 +36,50 @@ export default function AdminSuggestionsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchSuggestions = async () => {
-            try {
-                setLoading(true);
-                const q = query(collection(db, "atm_suggestions"), orderBy("createdAt", "desc"));
-                const snapshot = await getDocs(q);
+    const fetchSuggestions = async () => {
+        try {
+            setLoading(true);
+            const q = query(collection(db, "atm_suggestions"), orderBy("createdAt", "desc"));
+            const snapshot = await getDocs(q);
 
-                if (snapshot.empty) {
-                    setSuggestions([]);
-                } else {
-                     const data: Suggestion[] = snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        name: doc.data().name || '',
-                        address: doc.data().address || '',
-                        details: doc.data().details || '',
-                        userName: doc.data().userName || 'Desconhecido',
-                        status: doc.data().status || 'pending',
-                        createdAt: convertTimestampToString(doc.data().createdAt),
-                    }));
-                    setSuggestions(data);
-                }
-            } catch (err: any) {
-                console.error(err);
-                setError('Failed to fetch suggestions');
-            } finally {
-                setLoading(false);
+            if (snapshot.empty) {
+                setSuggestions([]);
+            } else {
+                 const data: Suggestion[] = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    name: doc.data().name || '',
+                    address: doc.data().address || '',
+                    details: doc.data().details || '',
+                    userId: doc.data().userId || '',
+                    userName: doc.data().userName || 'Desconhecido',
+                    status: doc.data().status || 'pending',
+                    createdAt: convertTimestampToString(doc.data().createdAt),
+                }));
+                setSuggestions(data);
             }
-        };
+        } catch (err: any) {
+            console.error(err);
+            setError('Failed to fetch suggestions');
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchSuggestions();
     }, []);
+
+    const handleSuggestionUpdate = () => {
+        // Re-fetch suggestions after an update
+        fetchSuggestions();
+    };
 
     const getStatusBadge = (status: Suggestion['status']) => {
         switch (status) {
             case 'pending':
                 return <Badge variant="secondary">Pendente</Badge>;
             case 'approved':
-                return <Badge variant="default">Aprovado</Badge>;
+                return <Badge className="bg-accent text-accent-foreground">Aprovado</Badge>;
             case 'rejected':
                 return <Badge variant="destructive">Rejeitado</Badge>;
             default:
@@ -99,7 +97,7 @@ export default function AdminSuggestionsPage() {
         <Card>
             <CardHeader>
                 <CardTitle>Sugestões de Novos ATMs</CardTitle>
-                <CardDescription>Reveja as sugestões enviadas pelos utilizadores.</CardDescription>
+                <CardDescription>Reveja, aprove ou rejeite as sugestões enviadas pelos utilizadores.</CardDescription>
             </CardHeader>
             <CardContent>
                 {loading ? (
@@ -118,20 +116,21 @@ export default function AdminSuggestionsPage() {
                                 <TableHead>Sugerido por</TableHead>
                                 <TableHead>Data</TableHead>
                                 <TableHead>Status</TableHead>
-                                {/* <TableHead>Ações</TableHead> */}
+                                <TableHead className="text-right">Ações</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {suggestions.length > 0 ? (
                                 suggestions.map((suggestion) => (
-                                <TableRow key={suggestion.id}>
+                                <TableRow key={suggestion.id} className={suggestion.status !== 'pending' ? 'bg-muted/50' : ''}>
                                     <TableCell className="font-medium">{suggestion.name}</TableCell>
                                     <TableCell>{suggestion.address}</TableCell>
                                     <TableCell>{suggestion.userName}</TableCell>
                                     <TableCell>{formatDate(suggestion.createdAt)}</TableCell>
                                     <TableCell>{getStatusBadge(suggestion.status)}</TableCell>
-                                    {/* TODO: Add Approve/Reject buttons */}
-                                    {/* <TableCell>Ações</TableCell> */}
+                                    <TableCell className="text-right">
+                                       <SuggestionActions suggestion={suggestion} onSuggestionUpdate={handleSuggestionUpdate} />
+                                    </TableCell>
                                 </TableRow>
                                 ))
                             ) : (
