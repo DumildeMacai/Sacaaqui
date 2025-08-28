@@ -180,15 +180,17 @@ async function handleApproveSuggestion(input) {
         await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["updateDoc"])(suggestionRef, {
             status: 'approved'
         });
-        // 3. Create a notification for the user
-        await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["addDoc"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"], 'notifications'), {
-            userId: input.userId,
-            title: 'Sugestão Aprovada!',
-            message: `O ATM "${input.name}" que você sugeriu foi aprovado e adicionado ao mapa. Obrigado por sua contribuição!`,
-            read: false,
-            createdAt: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["serverTimestamp"])(),
-            type: 'suggestion_approved'
-        });
+        // 3. Create a notification for the user, only if userId is present
+        if (input.userId) {
+            await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["addDoc"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"], 'notifications'), {
+                userId: input.userId,
+                title: 'Sugestão Aprovada!',
+                message: `O ATM "${input.name}" que você sugeriu foi aprovado e adicionado ao mapa. Obrigado por sua contribuição!`,
+                read: false,
+                createdAt: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["serverTimestamp"])(),
+                type: 'suggestion_approved'
+            });
+        }
         (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$cache$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["revalidatePath"])('/admin/suggestions');
         (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$cache$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["revalidatePath"])('/dashboard');
         return {
@@ -209,15 +211,17 @@ async function handleRejectSuggestion(input) {
         await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["updateDoc"])(suggestionRef, {
             status: 'rejected'
         });
-        // 2. Create a notification for the user
-        await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["addDoc"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"], 'notifications'), {
-            userId: input.userId,
-            title: 'Sugestão Rejeitada',
-            message: `A sua sugestão para o ATM "${input.suggestionName}" foi revista mas não pôde ser aprovada neste momento.`,
-            read: false,
-            createdAt: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["serverTimestamp"])(),
-            type: 'suggestion_rejected'
-        });
+        // 2. Create a notification for the user, only if userId is present
+        if (input.userId) {
+            await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["addDoc"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"], 'notifications'), {
+                userId: input.userId,
+                title: 'Sugestão Rejeitada',
+                message: `A sua sugestão para o ATM "${input.suggestionName}" foi revista mas não pôde ser aprovada neste momento.`,
+                read: false,
+                createdAt: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["serverTimestamp"])(),
+                type: 'suggestion_rejected'
+            });
+        }
         (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$cache$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["revalidatePath"])('/admin/suggestions');
         return {
             success: true

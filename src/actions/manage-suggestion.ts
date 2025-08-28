@@ -16,6 +16,11 @@ interface ApproveSuggestionInput {
 }
 
 export async function handleApproveSuggestion(input: ApproveSuggestionInput) {
+    // Validação para garantir que os campos obrigatórios existem
+    if (!input.name || !input.address || !input.lat || !input.lng) {
+        return { success: false, error: "Nome, endereço, latitude e longitude são obrigatórios." };
+    }
+
     try {
         // 1. Create the new ATM document
         const newAtmPayload = {
