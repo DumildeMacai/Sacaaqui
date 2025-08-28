@@ -2,10 +2,8 @@
 'use server';
 
 import { z } from 'zod';
-import { auth, db } from '@/firebase/init';
-import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
-import { User } from '@/types';
-import { getAuth } from 'firebase/auth';
+import { db } from '@/firebase/init';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const suggestionSchema = z.object({
     name: z.string().min(1),
