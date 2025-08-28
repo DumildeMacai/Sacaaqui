@@ -10,14 +10,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import { submitAtmSuggestion } from '@/actions/suggest-atm';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { auth, db } from '@/firebase/init';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const suggestionSchema = z.object({
     name: z.string().min(5, { message: "O nome deve ter pelo menos 5 caracteres." }),
@@ -46,7 +45,6 @@ const SuggestAtmPage = () => {
                     setCurrentUserName(user.displayName || 'Utilizador Anónimo');
                 }
             } else {
-                // Se o utilizador não estiver logado, redirecione ou mostre uma mensagem.
                 toast({ variant: 'destructive', title: 'Acesso Negado', description: 'Você precisa estar logado para fazer uma sugestão.' });
                 router.push('/login-email');
             }
@@ -71,24 +69,28 @@ const SuggestAtmPage = () => {
         }
 
         setIsLoading(true);
+
+        const newSuggestion = {
+            ...values,
+            userId: currentUser.uid,
+            userName: currentUserName,
+            status: 'pending',
+            createdAt: serverTimestamp(),
+        };
+
         try {
-            await submitAtmSuggestion({
-                ...values,
-                userId: currentUser.uid,
-                userName: currentUserName,
-            });
+            await addDoc(collection(db, 'atm_suggestions'), newSuggestion);
             toast({
                 title: 'Obrigado pela sua sugestão!',
                 description: 'A sua sugestão foi enviada para revisão pelo administrador.',
             });
             router.push('/dashboard');
         } catch (error) {
-            console.error('Error submitting suggestion:', error);
-            const errorMessage = error instanceof Error ? error.message : 'Não foi possível enviar a sua sugestão. Tente novamente.';
+            console.error('Error adding ATM suggestion:', error);
             toast({
                 variant: 'destructive',
                 title: 'Erro',
-                description: errorMessage,
+                description: 'Falha ao guardar a sugestão no servidor. Tente novamente mais tarde.',
             });
         } finally {
             setIsLoading(false);
