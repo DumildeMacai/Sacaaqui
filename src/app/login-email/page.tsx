@@ -26,11 +26,8 @@ export default function LoginPhone() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       
-      if (email === 'admin@admin.com') {
-        router.push('/admin/panel');
-      } else {
-        router.push('/dashboard');
-      }
+      // A lógica de login do admin foi removida daqui para usar apenas /admin/login
+      router.push('/dashboard');
 
     } catch (err: any) {
       console.error('Erro no login:', err);
