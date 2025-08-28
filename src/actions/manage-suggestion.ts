@@ -38,15 +38,17 @@ export async function handleApproveSuggestion(input: ApproveSuggestionInput) {
             status: 'approved'
         });
 
-        // 3. Create a notification for the user
-        await addDoc(collection(db, 'notifications'), {
-            userId: input.userId,
-            title: 'Sugestão Aprovada!',
-            message: `O ATM "${input.name}" que você sugeriu foi aprovado e adicionado ao mapa. Obrigado por sua contribuição!`,
-            read: false,
-            createdAt: serverTimestamp(),
-            type: 'suggestion_approved'
-        });
+        // 3. Create a notification for the user, only if userId is present
+        if (input.userId) {
+            await addDoc(collection(db, 'notifications'), {
+                userId: input.userId,
+                title: 'Sugestão Aprovada!',
+                message: `O ATM "${input.name}" que você sugeriu foi aprovado e adicionado ao mapa. Obrigado por sua contribuição!`,
+                read: false,
+                createdAt: serverTimestamp(),
+                type: 'suggestion_approved'
+            });
+        }
 
         revalidatePath('/admin/suggestions');
         revalidatePath('/dashboard');
@@ -74,15 +76,17 @@ export async function handleRejectSuggestion(input: RejectSuggestionInput) {
             status: 'rejected'
         });
 
-        // 2. Create a notification for the user
-        await addDoc(collection(db, 'notifications'), {
-            userId: input.userId,
-            title: 'Sugestão Rejeitada',
-            message: `A sua sugestão para o ATM "${input.suggestionName}" foi revista mas não pôde ser aprovada neste momento.`,
-            read: false,
-            createdAt: serverTimestamp(),
-            type: 'suggestion_rejected'
-        });
+        // 2. Create a notification for the user, only if userId is present
+        if (input.userId) {
+            await addDoc(collection(db, 'notifications'), {
+                userId: input.userId,
+                title: 'Sugestão Rejeitada',
+                message: `A sua sugestão para o ATM "${input.suggestionName}" foi revista mas não pôde ser aprovada neste momento.`,
+                read: false,
+                createdAt: serverTimestamp(),
+                type: 'suggestion_rejected'
+            });
+        }
 
         revalidatePath('/admin/suggestions');
 

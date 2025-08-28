@@ -9,9 +9,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/firebase/init';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect } from 'react';
 
 export default function AdminPanelLayout({
   children,
@@ -19,24 +17,18 @@ export default function AdminPanelLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { toast } = useToast();
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      toast({
-        title: "Sessão Terminada",
-        description: "Você saiu da sua conta com sucesso.",
-      });
-      router.push('/');
-    } catch (error) {
-      console.error("Erro ao fazer logout no painel de admin:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível sair. Tente novamente.",
-      });
+  // Proteção básica para garantir que o admin fez "login"
+  useEffect(() => {
+    const isAuthenticated = sessionStorage.getItem('isAdminAuthenticated');
+    if (isAuthenticated !== 'true') {
+      router.replace('/admin/login');
     }
+  }, [router]);
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('isAdminAuthenticated');
+    router.push('/admin/login');
   };
 
 
@@ -80,7 +72,7 @@ export default function AdminPanelLayout({
                 {/* Optional: Add search here */}
             </div>
             <ThemeToggle />
-             <Button variant="ghost" size="icon" onClick={handleLogout}>
+             <Button variant="ghost" size="icon" onClick={handleLogout} title="Sair">
                 <LogOut className="h-5 w-5" />
                  <span className="sr-only">Sair</span>
             </Button>
