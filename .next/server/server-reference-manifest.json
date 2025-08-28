@@ -2,23 +2,33 @@
   "node": {
     "408cbc0cba845c177411416c89f0ebf240f0dbfabd": {
       "workers": {
+        "app/admin/(panel)/suggestions/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/suggestions/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/manage-suggestion.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        },
         "app/admin/suggestions/page": {
           "moduleId": "[project]/.next-internal/server/app/admin/suggestions/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/manage-suggestion.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
         }
       },
       "layer": {
+        "app/admin/(panel)/suggestions/page": "action-browser",
         "app/admin/suggestions/page": "action-browser"
       }
     },
     "40bd35e0421fcdfe86e5e3d617a874443e7a41d37f": {
       "workers": {
+        "app/admin/(panel)/suggestions/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/suggestions/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/manage-suggestion.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        },
         "app/admin/suggestions/page": {
           "moduleId": "[project]/.next-internal/server/app/admin/suggestions/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/manage-suggestion.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
         }
       },
       "layer": {
+        "app/admin/(panel)/suggestions/page": "action-browser",
         "app/admin/suggestions/page": "action-browser"
       }
     }

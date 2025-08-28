@@ -28,7 +28,7 @@ export default function AdminPanelLayout({
 
   const handleLogout = () => {
     sessionStorage.removeItem('isAdminAuthenticated');
-    router.push('/admin/login');
+    router.push('/');
   };
 
 
