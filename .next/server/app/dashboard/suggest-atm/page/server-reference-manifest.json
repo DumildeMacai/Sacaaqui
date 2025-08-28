@@ -1,16 +1,4 @@
 {
-  "node": {
-    "40473c62fca2189f5faadb066ee7a02ddf1c569fbf": {
-      "workers": {
-        "app/dashboard/suggest-atm/page": {
-          "moduleId": "[project]/.next-internal/server/app/dashboard/suggest-atm/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/suggest-atm.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/dashboard/suggest-atm/page": "action-browser"
-      }
-    }
-  },
+  "node": {},
   "edge": {}
 }

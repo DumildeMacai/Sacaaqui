@@ -468,7 +468,7 @@ function Home() {
                                         columnNumber: 283
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
-                                        d: "M12 12a5 5_ 0 1 0 0 10 5 5 0 0 0 0-10z"
+                                        d: "M12 12a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/page.tsx",
                                         lineNumber: 81,
@@ -479,7 +479,7 @@ function Home() {
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/page.tsx",
                                         lineNumber: 81,
-                                        columnNumber: 394
+                                        columnNumber: 393
                                     }, this)
                                 ]
                             }, void 0, true, {

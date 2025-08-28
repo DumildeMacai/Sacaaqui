@@ -78,7 +78,7 @@ export default function Home() {
     <div className='bg-background text-foreground'>
       <div className="flex justify-between items-center px-6 py-4">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"></path><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10z"></path><path d="M12 12a5 5_ 0 1 0 0 10 5 5 0 0 0 0-10z"></path><path d="M2 12h20"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"></path><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10z"></path><path d="M12 12a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"></path><path d="M2 12h20"></path></svg>
             Dumilde Macai
         </h1>
         <button
