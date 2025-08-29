@@ -1,9 +1,8 @@
 
 'use server';
 
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/firebase/init";
-import type { Atm } from "@/types";
+import { getAdminDb } from '@/firebase/admin';
+import type { Atm } from '@/types';
 
 export interface DashboardData {
     atmCount: number;
@@ -17,12 +16,13 @@ export interface DashboardData {
 
 export async function getDashboardData(): Promise<DashboardData> {
     try {
-        const atmsRef = collection(db, "atms");
-        const usersRef = collection(db, "users");
+        const adminDb = getAdminDb();
+        const atmsRef = adminDb.collection("atms");
+        const usersRef = adminDb.collection("users");
 
         const [atmsSnapshot, usersSnapshot] = await Promise.all([
-            getDocs(atmsRef),
-            getDocs(usersRef)
+            atmsRef.get(),
+            usersRef.get()
         ]);
 
         const atmCount = atmsSnapshot.size;
@@ -47,7 +47,6 @@ export async function getDashboardData(): Promise<DashboardData> {
             { name: 'Desconhecido', value: statusCounts.desconhecido, fill: "var(--color-desconhecido)"  },
         ];
 
-
         return {
             atmCount,
             userCount,
@@ -55,8 +54,9 @@ export async function getDashboardData(): Promise<DashboardData> {
         };
 
     } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        console.error("Error fetching dashboard data with Admin SDK:", error);
+        // Provide a more specific error message if possible
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-        throw new Error(`Failed to fetch dashboard data. Check server logs and Firestore permissions. Details: ${errorMessage}`);
+        throw new Error(`Failed to fetch dashboard data. Check server logs and Firestore permissions for the service account. Details: ${errorMessage}`);
     }
 }
