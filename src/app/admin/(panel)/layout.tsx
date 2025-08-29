@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { auth } from '@/firebase/init';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { Menu, LogOut, Loader2 } from 'lucide-react';
+import { Menu, LogOut, Loader2, Home } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -90,6 +90,12 @@ export default function AdminPanelLayout({
             </Sheet>
             <div className="w-full flex-1">
             </div>
+            <Button asChild variant="outline" size="sm">
+                <Link href="/dashboard">
+                    <Home className="mr-2 h-4 w-4" />
+                    Painel do Utilizador
+                </Link>
+            </Button>
             <ThemeToggle />
              <Button variant="ghost" size="icon" onClick={handleLogout} title="Sair">
                 <LogOut className="h-5 w-5" />
