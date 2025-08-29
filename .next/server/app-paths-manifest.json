@@ -1,3 +1,6 @@
 {
+  "/dashboard/atm/[id]/page": "app/dashboard/atm/[id]/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/login-email/page": "app/login-email/page.js",
   "/page": "app/page.js"
 }
