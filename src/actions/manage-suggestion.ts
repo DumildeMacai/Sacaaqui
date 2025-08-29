@@ -16,13 +16,11 @@ interface ApproveSuggestionInput {
 }
 
 export async function handleApproveSuggestion(input: ApproveSuggestionInput) {
-    // Validação robustecida para garantir que os campos obrigatórios existem e são números válidos
     if (!input.name || !input.address || isNaN(input.lat) || isNaN(input.lng)) {
         return { success: false, error: "Nome, endereço, latitude e longitude válidos são obrigatórios." };
     }
 
     try {
-        // 1. Create the new ATM document
         const newAtmPayload = {
             name: input.name,
             address: input.address,
@@ -30,20 +28,18 @@ export async function handleApproveSuggestion(input: ApproveSuggestionInput) {
                 lat: input.lat, 
                 lng: input.lng,
             },
-            details: input.details || '', // Garante que não é undefined
+            details: input.details || '',
             status: 'desconhecido',
-            lastUpdate: serverTimestamp(), // <-- CAUSA DO ERRO CORRIGIDA
+            lastUpdate: serverTimestamp(),
             reports: [],
         };
         await addDoc(collection(db, 'atms'), newAtmPayload);
 
-        // 2. Update the suggestion status to 'approved'
         const suggestionRef = doc(db, 'atm_suggestions', input.suggestionId);
         await updateDoc(suggestionRef, {
             status: 'approved'
         });
 
-        // 3. Create a notification for the user, only if userId is present
         if (input.userId) {
             await addDoc(collection(db, 'notifications'), {
                 userId: input.userId,
@@ -75,13 +71,11 @@ interface RejectSuggestionInput {
 
 export async function handleRejectSuggestion(input: RejectSuggestionInput) {
     try {
-        // 1. Update the suggestion status to 'rejected'
         const suggestionRef = doc(db, 'atm_suggestions', input.suggestionId);
         await updateDoc(suggestionRef, {
             status: 'rejected'
         });
 
-        // 2. Create a notification for the user, only if userId is present
         if (input.userId) {
             await addDoc(collection(db, 'notifications'), {
                 userId: input.userId,
