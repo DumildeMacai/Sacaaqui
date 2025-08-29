@@ -31,14 +31,23 @@ export function SuggestionActions({ suggestion, onSuggestionUpdate }: Suggestion
 
     const handleApprove = async () => {
         setIsLoading(true);
+
+        const latNumber = parseFloat(lat);
+        const lngNumber = parseFloat(lng);
+
+        if (isNaN(latNumber) || isNaN(lngNumber)) {
+            toast({ variant: 'destructive', title: 'Erro de Validação', description: 'Latitude e longitude devem ser números válidos.' });
+            setIsLoading(false);
+            return;
+        }
         
         const result = await handleApproveSuggestion({
             suggestionId: suggestion.id,
             userId: suggestion.userId,
             name,
             address,
-            lat: parseFloat(lat),
-            lng: parseFloat(lng),
+            lat: latNumber,
+            lng: lngNumber,
             details,
         });
 

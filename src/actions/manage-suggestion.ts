@@ -30,7 +30,7 @@ export async function handleApproveSuggestion(input: ApproveSuggestionInput) {
                 lat: input.lat, // Já é um número
                 lng: input.lng, // Já é um número
             },
-            details: input.details || '',
+            details: input.details || '', // Garante que não é undefined
             status: 'desconhecido',
             lastUpdate: serverTimestamp(),
             reports: [],
