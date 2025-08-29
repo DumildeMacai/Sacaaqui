@@ -336,9 +336,9 @@ function GoogleSignInButton() {
             });
             router.push('/dashboard');
         } catch (error) {
-            // Silently handle popup closed by user error
-            if (error.code === 'auth/popup-closed-by-user') {
-                console.log("Google sign-in popup closed by user.");
+            // Silently handle popup closed by user or cancelled requests
+            if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+                console.log("Google sign-in popup closed or cancelled by user.");
                 return;
             }
             console.error("Erro durante o login com Google:", error);
@@ -442,9 +442,9 @@ function FacebookSignInButton() {
             });
             router.push('/dashboard');
         } catch (error) {
-            // Silently handle popup closed by user error
-            if (error.code === 'auth/popup-closed-by-user') {
-                console.log("Facebook sign-in popup closed by user.");
+            // Silently handle popup closed by user or cancelled requests
+            if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+                console.log("Facebook sign-in popup closed or cancelled by user.");
                 return;
             }
             console.error("Erro durante o login com Facebook:", error);
