@@ -67,7 +67,7 @@ export default function Home() {
 
         <div className="flex flex-col gap-4 w-full max-w-xs">
           <GoogleSignInButton />
-          
+          <FacebookSignInButton />
           <Button
             className="bg-[#28a745] hover:bg-[#218838] text-white"
             onClick={() => router.push('/login-email')}
