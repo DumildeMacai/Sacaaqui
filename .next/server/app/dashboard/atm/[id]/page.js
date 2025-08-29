@@ -8,7 +8,7 @@ runtime.loadChunk("server/chunks/ssr/node_modules_96715ba7._.js");
 runtime.loadChunk("server/chunks/ssr/node_modules_next_dist_client_components_forbidden-error_ea7ea172.js");
 runtime.loadChunk("server/chunks/ssr/node_modules_next_dist_client_components_unauthorized-error_c8949b27.js");
 runtime.loadChunk("server/chunks/ssr/src_app_dashboard_layout_tsx_057b2174._.js");
-runtime.loadChunk("server/chunks/ssr/node_modules_node-fetch_src_index_938c2ec0.js");
+runtime.loadChunk("server/chunks/ssr/node_modules_node-fetch_src_index_a647d1ce.js");
 runtime.loadChunk("server/chunks/ssr/node_modules_next_dist_1c418d34._.js");
 runtime.loadChunk("server/chunks/ssr/node_modules_@genkit-ai_core_lib_b4b8dea8._.js");
 runtime.loadChunk("server/chunks/ssr/node_modules_zod_6294a4bd._.js");

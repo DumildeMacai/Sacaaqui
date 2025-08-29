@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { collection, getDocs, query } from 'firebase/firestore';
 import { db } from '@/firebase/init';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Atm } from "@/types";
 import { AtmStatusChart, type ChartData } from "@/components/admin/atm-status-chart";
 
-export default function AdminDashboardPage() {
+function DashboardContent() {
     const [atmCount, setAtmCount] = useState(0);
     const [userCount, setUserCount] = useState(0);
     const [chartData, setChartData] = useState<ChartData[]>([]);
@@ -21,6 +21,8 @@ export default function AdminDashboardPage() {
         const fetchData = async () => {
             try {
                 setLoading(true);
+                setError(null);
+
                 const atmsQuery = query(collection(db, "atms"));
                 const usersQuery = query(collection(db, "users"));
 
@@ -39,7 +41,7 @@ export default function AdminDashboardPage() {
                 };
 
                 atmsSnapshot.forEach(doc => {
-                    const atm = doc.data() as Atm;
+                    const atm = doc.data() as Omit<Atm, 'id'>;
                     if (statusCounts[atm.status] !== undefined) {
                         statusCounts[atm.status]++;
                     }
@@ -57,8 +59,8 @@ export default function AdminDashboardPage() {
                 setUserCount(usersSnapshot.size);
 
             } catch (err: any) {
-                console.error(err);
-                setError('Failed to fetch dashboard data');
+                console.error("Error fetching dashboard data:", err);
+                setError('Failed to fetch dashboard data. Check Firestore security rules.');
             } finally {
                 setLoading(false);
             }
@@ -67,14 +69,16 @@ export default function AdminDashboardPage() {
         fetchData();
     }, []);
 
+    if (loading) {
+        return <DashboardSkeleton />;
+    }
+
     if (error) {
-        return <div className="text-destructive text-center">Erro ao carregar os dados do dashboard. Tente novamente mais tarde.</div>;
+        return <div className="text-destructive text-center p-4">{error}</div>;
     }
 
     return (
-        <div className="space-y-6">
-            <h1 className="text-3xl font-bold tracking-tight font-headline">Admin Dashboard</h1>
-
+        <>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -82,16 +86,16 @@ export default function AdminDashboardPage() {
                         <CreditCard className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        {loading ? <Skeleton className="h-8 w-1/4" /> : <div className="text-2xl font-bold">{atmCount}</div>}
+                        <div className="text-2xl font-bold">{atmCount}</div>
                     </CardContent>
                 </Card>
-                 <Card>
+                <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total de Usuários</CardTitle>
                         <Users className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                         {loading ? <Skeleton className="h-8 w-1/4" /> : <div className="text-2xl font-bold">{userCount}</div>}
+                        <div className="text-2xl font-bold">{userCount}</div>
                     </CardContent>
                 </Card>
             </div>
@@ -104,14 +108,60 @@ export default function AdminDashboardPage() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {loading ? (
-                        <Skeleton className="h-64 w-full" />
-                    ) : (
-                       <AtmStatusChart data={chartData} />
-                    )}
+                    <AtmStatusChart data={chartData} />
                 </CardContent>
             </Card>
+        </>
+    );
+}
 
+function DashboardSkeleton() {
+    return (
+        <>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total de ATMs</CardTitle>
+                        <CreditCard className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <Skeleton className="h-8 w-1/4" />
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total de Usuários</CardTitle>
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <Skeleton className="h-8 w-1/4" />
+                    </CardContent>
+                </Card>
+            </div>
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <BarChart className="h-5 w-5 text-muted-foreground" />
+                        Status dos ATMs
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Skeleton className="h-64 w-full" />
+                </CardContent>
+            </Card>
+        </>
+    );
+}
+
+
+export default function AdminDashboardPage() {
+    return (
+        <div className="space-y-6">
+            <h1 className="text-3xl font-bold tracking-tight font-headline">Admin Dashboard</h1>
+            <Suspense fallback={<DashboardSkeleton />}>
+                <DashboardContent />
+            </Suspense>
         </div>
-    )
+    );
 }

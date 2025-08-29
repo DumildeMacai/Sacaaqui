@@ -415,6 +415,22 @@ const SuggestAtmPage = ()=>{
             details: ''
         }
     });
+    // Function to get the admin user's ID
+    const getAdminUserId = async ()=>{
+        try {
+            const q = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["query"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["db"], 'users'), (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["where"])('email', '==', 'admin@admin.com'));
+            const querySnapshot = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getDocs"])(q);
+            if (!querySnapshot.empty) {
+                // Return the ID of the first admin found
+                return querySnapshot.docs[0].id;
+            }
+            console.warn("Admin user 'admin@admin.com' not found in users collection.");
+            return null;
+        } catch (error) {
+            console.error("Error fetching admin user ID:", error);
+            return null;
+        }
+    };
     const handleSubmit = async (values)=>{
         if (!currentUser) {
             toast({
@@ -425,15 +441,29 @@ const SuggestAtmPage = ()=>{
             return;
         }
         setIsLoading(true);
-        const newSuggestion = {
-            ...values,
-            userId: currentUser.uid,
-            userName: currentUserName,
-            status: 'pending',
-            createdAt: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["serverTimestamp"])()
-        };
         try {
+            // 1. Add the suggestion
+            const newSuggestion = {
+                ...values,
+                userId: currentUser.uid,
+                userName: currentUserName,
+                status: 'pending',
+                createdAt: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["serverTimestamp"])()
+            };
             await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["addDoc"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["db"], 'atm_suggestions'), newSuggestion);
+            // 2. Get admin ID
+            const adminId = await getAdminUserId();
+            // 3. Create a notification for the admin if adminId is found
+            if (adminId) {
+                await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["addDoc"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["db"], 'notifications'), {
+                    userId: adminId,
+                    title: 'Nova Sugestão de ATM',
+                    message: `O utilizador "${currentUserName}" sugeriu um novo ATM: "${values.name}".`,
+                    read: false,
+                    createdAt: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["serverTimestamp"])(),
+                    type: 'generic' // or a new type like 'new_suggestion'
+                });
+            }
             toast({
                 title: 'Obrigado pela sua sugestão!',
                 description: 'A sua sugestão foi enviada para revisão pelo administrador.'
@@ -462,14 +492,14 @@ const SuggestAtmPage = ()=>{
                         className: "mr-2 h-4 w-4"
                     }, void 0, false, {
                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                        lineNumber: 103,
+                        lineNumber: 138,
                         columnNumber: 17
                     }, this),
                     "Voltar"
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                lineNumber: 102,
+                lineNumber: 137,
                 columnNumber: 13
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -480,20 +510,20 @@ const SuggestAtmPage = ()=>{
                                 children: "Sugerir Novo ATM"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                lineNumber: 108,
+                                lineNumber: 143,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardDescription"], {
                                 children: "Não encontrou um ATM? Preencha os detalhes abaixo e ajude a comunidade. A sua sugestão será revista por um administrador."
                             }, void 0, false, {
                                 fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                lineNumber: 109,
+                                lineNumber: 144,
                                 columnNumber: 21
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                        lineNumber: 107,
+                        lineNumber: 142,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -512,7 +542,7 @@ const SuggestAtmPage = ()=>{
                                                         children: "Nome do ATM"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                        lineNumber: 121,
+                                                        lineNumber: 156,
                                                         columnNumber: 41
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FormControl"], {
@@ -521,28 +551,28 @@ const SuggestAtmPage = ()=>{
                                                             ...field
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                            lineNumber: 123,
+                                                            lineNumber: 158,
                                                             columnNumber: 45
                                                         }, void 0)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                        lineNumber: 122,
+                                                        lineNumber: 157,
                                                         columnNumber: 41
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                        lineNumber: 125,
+                                                        lineNumber: 160,
                                                         columnNumber: 41
                                                     }, void 0)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                lineNumber: 120,
+                                                lineNumber: 155,
                                                 columnNumber: 37
                                             }, void 0)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                        lineNumber: 116,
+                                        lineNumber: 151,
                                         columnNumber: 29
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FormField"], {
@@ -554,7 +584,7 @@ const SuggestAtmPage = ()=>{
                                                         children: "Endereço ou Ponto de Referência"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                        lineNumber: 134,
+                                                        lineNumber: 169,
                                                         columnNumber: 41
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FormControl"], {
@@ -563,28 +593,28 @@ const SuggestAtmPage = ()=>{
                                                             ...field
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                            lineNumber: 136,
+                                                            lineNumber: 171,
                                                             columnNumber: 45
                                                         }, void 0)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                        lineNumber: 135,
+                                                        lineNumber: 170,
                                                         columnNumber: 41
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                        lineNumber: 138,
+                                                        lineNumber: 173,
                                                         columnNumber: 41
                                                     }, void 0)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                lineNumber: 133,
+                                                lineNumber: 168,
                                                 columnNumber: 37
                                             }, void 0)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                        lineNumber: 129,
+                                        lineNumber: 164,
                                         columnNumber: 29
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FormField"], {
@@ -596,7 +626,7 @@ const SuggestAtmPage = ()=>{
                                                         children: "Detalhes Adicionais (Opcional)"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                        lineNumber: 147,
+                                                        lineNumber: 182,
                                                         columnNumber: 41
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FormControl"], {
@@ -606,28 +636,28 @@ const SuggestAtmPage = ()=>{
                                                             ...field
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                            lineNumber: 149,
+                                                            lineNumber: 184,
                                                             columnNumber: 45
                                                         }, void 0)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                        lineNumber: 148,
+                                                        lineNumber: 183,
                                                         columnNumber: 41
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                        lineNumber: 151,
+                                                        lineNumber: 186,
                                                         columnNumber: 41
                                                     }, void 0)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                lineNumber: 146,
+                                                lineNumber: 181,
                                                 columnNumber: 37
                                             }, void 0)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                        lineNumber: 142,
+                                        lineNumber: 177,
                                         columnNumber: 30
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -640,47 +670,47 @@ const SuggestAtmPage = ()=>{
                                                     className: "mr-2 h-4 w-4 animate-spin"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                                    lineNumber: 157,
+                                                    lineNumber: 192,
                                                     columnNumber: 51
                                                 }, this),
                                                 "Enviar Sugestão"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                            lineNumber: 156,
+                                            lineNumber: 191,
                                             columnNumber: 33
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                        lineNumber: 155,
+                                        lineNumber: 190,
                                         columnNumber: 29
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                                lineNumber: 115,
+                                lineNumber: 150,
                                 columnNumber: 25
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                            lineNumber: 114,
+                            lineNumber: 149,
                             columnNumber: 21
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                        lineNumber: 113,
+                        lineNumber: 148,
                         columnNumber: 17
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-                lineNumber: 106,
+                lineNumber: 141,
                 columnNumber: 13
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/dashboard/suggest-atm/page.tsx",
-        lineNumber: 101,
+        lineNumber: 136,
         columnNumber: 9
     }, this);
 };
