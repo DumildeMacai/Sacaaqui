@@ -1,27 +1,5 @@
 {
   "node": {
-    "401fbe705ad27fd5f69581e88ae6e4e533182f705f": {
-      "workers": {
-        "app/dashboard/atm/[id]/page": {
-          "moduleId": "[project]/.next-internal/server/app/dashboard/atm/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/verify-status.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/actions/update-reputation.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/dashboard/atm/[id]/page": "action-browser"
-      }
-    },
-    "40a8ceb396dd971a9ce36bb6bdaac71e7f687ec624": {
-      "workers": {
-        "app/dashboard/atm/[id]/page": {
-          "moduleId": "[project]/.next-internal/server/app/dashboard/atm/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/verify-status.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/actions/update-reputation.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/dashboard/atm/[id]/page": "action-browser"
-      }
-    },
     "00879f9357d3b42e2666da171427705e594fa57d78": {
       "workers": {
         "app/admin/(panel)/dashboard/page": {
@@ -31,39 +9,6 @@
       },
       "layer": {
         "app/admin/(panel)/dashboard/page": "action-browser"
-      }
-    },
-    "408cbc0cba845c177411416c89f0ebf240f0dbfabd": {
-      "workers": {
-        "app/admin/(panel)/suggestions/page": {
-          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/suggestions/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/manage-suggestion.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/actions/geocode-address.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/admin/(panel)/suggestions/page": "action-browser"
-      }
-    },
-    "40bd35e0421fcdfe86e5e3d617a874443e7a41d37f": {
-      "workers": {
-        "app/admin/(panel)/suggestions/page": {
-          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/suggestions/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/manage-suggestion.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/actions/geocode-address.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/admin/(panel)/suggestions/page": "action-browser"
-      }
-    },
-    "40a120578ee9bf31fe37699d6fb9705ec561252117": {
-      "workers": {
-        "app/admin/(panel)/suggestions/page": {
-          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/suggestions/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/manage-suggestion.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/actions/geocode-address.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/admin/(panel)/suggestions/page": "action-browser"
       }
     }
   },

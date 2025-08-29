@@ -2,7 +2,6 @@
 import { initializeApp, getApps, getApp, type FirebaseOptions } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import admin from 'firebase-admin';
 
 const firebaseConfig: FirebaseOptions = {
   projectId: "atm-locator-nbjla",
@@ -18,26 +17,4 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-
-// Admin SDK initialization (server-side only)
-const initAdmin = () => {
-    if (admin.apps.length > 0) {
-        return admin.app();
-    }
-    
-    // This requires GOOGLE_APPLICATION_CREDENTIALS to be set in the environment.
-    // In a managed environment like Cloud Run, this is handled automatically.
-    // For local development, you'd need to set this environment variable
-    // to point to your service account key file.
-    return admin.initializeApp({
-        credential: admin.credential.applicationDefault(),
-        databaseURL: `https://atm-locator-nbjla.firebaseio.com` // Optional but good practice
-    });
-};
-
-const getAdminDb = () => {
-    initAdmin();
-    return admin.firestore();
-};
-
-export { auth, db, getAdminDb };
+export { auth, db };

@@ -1,7 +1,7 @@
 
 'use server';
 
-import { getAdminDb } from "@/firebase/init";
+import { getAdminDb } from "@/firebase/admin";
 import type { Atm } from "@/types";
 
 export interface DashboardData {
