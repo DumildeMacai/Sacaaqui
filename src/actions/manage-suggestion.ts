@@ -16,11 +16,8 @@ interface ApproveSuggestionInput {
 }
 
 export async function handleApproveSuggestion(input: ApproveSuggestionInput) {
-    // Validação para garantir que os campos obrigatórios existem e são do tipo correto
-    const latNum = typeof input.lat === 'string' ? parseFloat(input.lat) : input.lat;
-    const lngNum = typeof input.lng === 'string' ? parseFloat(input.lng) : input.lng;
-
-    if (!input.name || !input.address || isNaN(latNum) || isNaN(lngNum)) {
+    // Validação robustecida para garantir que os campos obrigatórios existem e são números válidos
+    if (!input.name || !input.address || isNaN(input.lat) || isNaN(input.lng)) {
         return { success: false, error: "Nome, endereço, latitude e longitude válidos são obrigatórios." };
     }
 
@@ -30,8 +27,8 @@ export async function handleApproveSuggestion(input: ApproveSuggestionInput) {
             name: input.name,
             address: input.address,
             location: {
-                lat: latNum,
-                lng: lngNum,
+                lat: input.lat, // Já é um número
+                lng: input.lng, // Já é um número
             },
             details: input.details || '',
             status: 'desconhecido',

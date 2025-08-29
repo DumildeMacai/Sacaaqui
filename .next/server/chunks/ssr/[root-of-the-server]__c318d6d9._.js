@@ -160,11 +160,13 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 ;
 ;
 async function handleApproveSuggestion(input) {
-    // Validação para garantir que os campos obrigatórios existem
-    if (!input.name || !input.address || !input.lat || !input.lng) {
+    // Validação para garantir que os campos obrigatórios existem e são do tipo correto
+    const latNum = typeof input.lat === 'string' ? parseFloat(input.lat) : input.lat;
+    const lngNum = typeof input.lng === 'string' ? parseFloat(input.lng) : input.lng;
+    if (!input.name || !input.address || isNaN(latNum) || isNaN(lngNum)) {
         return {
             success: false,
-            error: "Nome, endereço, latitude e longitude são obrigatórios."
+            error: "Nome, endereço, latitude e longitude válidos são obrigatórios."
         };
     }
     try {
@@ -173,8 +175,8 @@ async function handleApproveSuggestion(input) {
             name: input.name,
             address: input.address,
             location: {
-                lat: input.lat,
-                lng: input.lng
+                lat: latNum,
+                lng: lngNum
             },
             details: input.details || '',
             status: 'desconhecido',

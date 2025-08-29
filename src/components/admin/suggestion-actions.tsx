@@ -31,22 +31,14 @@ export function SuggestionActions({ suggestion, onSuggestionUpdate }: Suggestion
 
     const handleApprove = async () => {
         setIsLoading(true);
-        const latNum = parseFloat(lat);
-        const lngNum = parseFloat(lng);
-
-        if (isNaN(latNum) || isNaN(lngNum)) {
-            toast({ variant: 'destructive', title: 'Erro de Validação', description: 'Latitude e Longitude devem ser números válidos.' });
-            setIsLoading(false);
-            return;
-        }
-
+        
         const result = await handleApproveSuggestion({
             suggestionId: suggestion.id,
             userId: suggestion.userId,
             name,
             address,
-            lat: latNum,
-            lng: lngNum,
+            lat: parseFloat(lat),
+            lng: parseFloat(lng),
             details,
         });
 
@@ -158,4 +150,3 @@ export function SuggestionActions({ suggestion, onSuggestionUpdate }: Suggestion
         </div>
     );
 }
-
