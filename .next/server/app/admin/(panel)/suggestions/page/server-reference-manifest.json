@@ -4,7 +4,7 @@
       "workers": {
         "app/admin/(panel)/suggestions/page": {
           "moduleId": "[project]/.next-internal/server/app/admin/(panel)/suggestions/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/manage-suggestion.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": true
+          "async": false
         }
       },
       "layer": {
@@ -15,7 +15,7 @@
       "workers": {
         "app/admin/(panel)/suggestions/page": {
           "moduleId": "[project]/.next-internal/server/app/admin/(panel)/suggestions/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/manage-suggestion.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": true
+          "async": false
         }
       },
       "layer": {

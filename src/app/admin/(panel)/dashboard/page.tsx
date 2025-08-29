@@ -2,18 +2,14 @@
 'use client'
 
 import { useEffect, useState, Suspense } from "react";
-import { collection, getDocs, query } from 'firebase/firestore';
-import { db } from '@/firebase/init';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreditCard, Users, BarChart } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Atm } from "@/types";
 import { AtmStatusChart, type ChartData } from "@/components/admin/atm-status-chart";
+import { getDashboardData, type DashboardData } from "@/actions/get-dashboard-data";
 
 function DashboardContent() {
-    const [atmCount, setAtmCount] = useState(0);
-    const [userCount, setUserCount] = useState(0);
-    const [chartData, setChartData] = useState<ChartData[]>([]);
+    const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -22,45 +18,11 @@ function DashboardContent() {
             try {
                 setLoading(true);
                 setError(null);
-
-                const atmsQuery = query(collection(db, "atms"));
-                const usersQuery = query(collection(db, "users"));
-
-                const [atmsSnapshot, usersSnapshot] = await Promise.all([
-                    getDocs(atmsQuery),
-                    getDocs(usersQuery)
-                ]);
-
-                // ATM Data
-                setAtmCount(atmsSnapshot.size);
-                
-                const statusCounts: { [key in Atm['status']]: number } = {
-                    com_dinheiro: 0,
-                    sem_dinheiro: 0,
-                    desconhecido: 0,
-                };
-
-                atmsSnapshot.forEach(doc => {
-                    const atm = doc.data() as Omit<Atm, 'id'>;
-                    if (statusCounts[atm.status] !== undefined) {
-                        statusCounts[atm.status]++;
-                    }
-                });
-
-                const formattedChartData = [
-                    { name: 'Com Dinheiro', value: statusCounts.com_dinheiro, fill: "var(--color-com_dinheiro)" },
-                    { name: 'Sem Dinheiro', value: statusCounts.sem_dinheiro, fill: "var(--color-sem_dinheiro)"  },
-                    { name: 'Desconhecido', value: statusCounts.desconhecido, fill: "var(--color-desconhecido)"  },
-                ];
-                setChartData(formattedChartData);
-
-
-                // User Data
-                setUserCount(usersSnapshot.size);
-
+                const dashboardData = await getDashboardData();
+                setData(dashboardData);
             } catch (err: any) {
                 console.error("Error fetching dashboard data:", err);
-                setError('Failed to fetch dashboard data. Check Firestore security rules.');
+                setError(err.message || 'Failed to fetch dashboard data. Please try again later.');
             } finally {
                 setLoading(false);
             }
@@ -77,6 +39,10 @@ function DashboardContent() {
         return <div className="text-destructive text-center p-4">{error}</div>;
     }
 
+    if (!data) {
+        return <div className="text-center p-4">No data available.</div>;
+    }
+
     return (
         <>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -86,7 +52,7 @@ function DashboardContent() {
                         <CreditCard className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{atmCount}</div>
+                        <div className="text-2xl font-bold">{data.atmCount}</div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -95,7 +61,7 @@ function DashboardContent() {
                         <Users className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{userCount}</div>
+                        <div className="text-2xl font-bold">{data.userCount}</div>
                     </CardContent>
                 </Card>
             </div>
@@ -108,7 +74,7 @@ function DashboardContent() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <AtmStatusChart data={chartData} />
+                    <AtmStatusChart data={data.chartData} />
                 </CardContent>
             </Card>
         </>

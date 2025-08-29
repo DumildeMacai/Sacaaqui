@@ -201,9 +201,10 @@ async function handleApproveSuggestion(input) {
         };
     } catch (error) {
         console.error("Error approving suggestion:", error);
+        const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
         return {
             success: false,
-            error: "Falha ao aprovar a sugestão."
+            error: `Falha ao aprovar a sugestão: ${errorMessage}`
         };
     }
 }
@@ -229,9 +230,10 @@ async function handleRejectSuggestion(input) {
         };
     } catch (error) {
         console.error("Error rejecting suggestion:", error);
+        const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
         return {
             success: false,
-            error: "Falha ao rejeitar a sugestão."
+            error: `Falha ao rejeitar a sugestão: ${errorMessage}`
         };
     }
 }
