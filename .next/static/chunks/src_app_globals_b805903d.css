@@ -726,12 +726,12 @@ body {
   height: 1px;
 }
 
-.h-svh {
-  height: 100svh;
-}
-
 .h-screen {
   height: 100vh;
+}
+
+.h-svh {
+  height: 100svh;
 }
 
 .max-h-96 {
@@ -2707,10 +2707,6 @@ body {
 
 .dark\:border-destructive:is(.dark *) {
   border-color: hsl(var(--destructive));
-}
-
-.dark\:bg-muted\/40:is(.dark *) {
-  background-color: hsl(var(--muted) / .4);
 }
 
 @media (width >= 640px) {
