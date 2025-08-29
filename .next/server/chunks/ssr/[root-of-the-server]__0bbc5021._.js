@@ -15,33 +15,31 @@ var { g: global, __dirname } = __turbopack_context__;
 {
 // src/firebase/admin.ts
 __turbopack_context__.s({
-    "getAdminAuth": (()=>getAdminAuth),
+    "adminAuth": (()=>adminAuth),
+    "adminDb": (()=>adminDb),
     "getAdminDb": (()=>getAdminDb)
 });
 var __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__ = __turbopack_context__.i("[externals]/firebase-admin [external] (firebase-admin, cjs)");
 ;
-const initAdmin = ()=>{
-    if (__TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["default"].apps.length > 0) {
-        return __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["default"].app();
-    }
+// This guard prevents re-initializing the app on hot reloads.
+if (!__TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["default"].apps.length) {
     try {
-        // Use application default credentials, which is the recommended way for most Google Cloud environments
-        return __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["default"].initializeApp({
+        // This is the recommended way for most Google Cloud environments
+        // It will automatically use the service account associated with the environment.
+        __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["default"].initializeApp({
             credential: __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["default"].credential.applicationDefault()
         });
-    } catch (defaultError) {
-        console.error("Failed to initialize Admin SDK with application default credentials.", defaultError);
-        throw new Error("Could not initialize Firebase Admin SDK. For local development, ensure you have run 'gcloud auth application-default login'.");
+    } catch (e) {
+        console.error('Failed to initialize Firebase Admin SDK:', e);
+        console.log("For local development, ensure you have run 'gcloud auth application-default login' or have the GOOGLE_APPLICATION_CREDENTIALS environment variable set.");
     }
-};
-const getAdminDb = ()=>{
-    initAdmin();
-    return __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["default"].firestore();
-};
-const getAdminAuth = ()=>{
-    initAdmin();
-    return __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["default"].auth();
-};
+}
+const adminDb = __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["default"].firestore();
+const adminAuth = __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["default"].auth();
+;
+function getAdminDb() {
+    return adminDb;
+}
 }}),
 "[project]/src/actions/get-dashboard-data.ts [app-rsc] (ecmascript)": ((__turbopack_context__) => {
 "use strict";
@@ -63,14 +61,12 @@ async function getDashboardData() {
         const adminDb = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$admin$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getAdminDb"])();
         const atmsRef = adminDb.collection("atms");
         const usersRef = adminDb.collection("users");
-        // Use get() and size for broader compatibility instead of count()
         const [atmsSnapshot, usersSnapshot] = await Promise.all([
             atmsRef.get(),
             usersRef.get()
         ]);
         const atmCount = atmsSnapshot.size;
         const userCount = usersSnapshot.size;
-        // Fetch all ATMs to calculate status distribution
         const statusCounts = {
             com_dinheiro: 0,
             sem_dinheiro: 0,
