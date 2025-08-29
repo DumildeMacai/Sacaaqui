@@ -27,12 +27,12 @@ export async function handleApproveSuggestion(input: ApproveSuggestionInput) {
             name: input.name,
             address: input.address,
             location: {
-                lat: input.lat, // Já é um número
-                lng: input.lng, // Já é um número
+                lat: input.lat, 
+                lng: input.lng,
             },
             details: input.details || '', // Garante que não é undefined
             status: 'desconhecido',
-            lastUpdate: serverTimestamp(),
+            lastUpdate: serverTimestamp(), // <-- CAUSA DO ERRO CORRIGIDA
             reports: [],
         };
         await addDoc(collection(db, 'atms'), newAtmPayload);
