@@ -8,20 +8,45 @@ import { GoogleSignInButton } from '@/components/google-signin-button';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/firebase/init';
-import { useToast } from '@/hooks/use-toast';
 import { FacebookSignInButton } from '@/components/facebook-signin-button';
 import { Button } from '@/components/ui/button';
 import { MacaiLogo } from '@/components/logo';
-import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
+const translations = {
+  'en-US': {
+    welcome: 'Welcome to <span class="text-green-400">ATM Locator</span>',
+    description: 'Choose an option to continue',
+    loginButton: 'Login with Email and Password',
+    signupButton: 'Create Account'
+  },
+  'pt-BR': {
+    welcome: 'Bem-vindo ao <span class="text-green-400">ATM Locator</span>',
+    description: 'Escolha uma opção para continuar',
+    loginButton: 'Entrar com Email e Senha',
+    signupButton: 'Criar Conta'
+  }
+};
 
 export default function Home() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const [isVerifying, setIsVerifying] = useState(true);
+  const [locale, setLocale] = useState('en-US');
   const isDarkMode = theme === 'dark';
-  const t = useTranslations('homepage');
+  
+  useEffect(() => {
+    if (typeof navigator !== 'undefined') {
+      const browserLang = navigator.language;
+      if (browserLang.startsWith('pt')) {
+        setLocale('pt-BR');
+      } else {
+        setLocale('en-US');
+      }
+    }
+  }, []);
+
+  const t = translations[locale as keyof typeof translations] || translations['en-US'];
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -60,8 +85,9 @@ export default function Home() {
       </div>
 
       <main className="flex flex-col items-center justify-center min-h-screen px-4 text-center -mt-16">
-        <h2 className="text-3xl sm:text-4xl font-semibold mb-4" dangerouslySetInnerHTML={{ __html: t.raw('welcome') }} />
-        <p className="text-md sm:text-lg text-muted-foreground mb-8">{t('description')}</p>
+        <h1 className="text-3xl sm:text-4xl font-semibold mb-4 text-primary">Macai ATM Locator</h1>
+        <h2 className="text-3xl sm:text-4xl font-semibold mb-4" dangerouslySetInnerHTML={{ __html: t.welcome }} />
+        <p className="text-md sm:text-lg text-muted-foreground mb-8">{t.description}</p>
 
         <div className="flex flex-col gap-4 w-full max-w-xs">
           <GoogleSignInButton />
@@ -70,13 +96,13 @@ export default function Home() {
             className="bg-[#28a745] hover:bg-[#218838] text-white"
             asChild
           >
-            <Link href="/login-email">{t('loginButton')}</Link>
+            <Link href="/login-email">{t.loginButton}</Link>
           </Button>
           <Button
             className="bg-[#8A2BE2] hover:bg-[#7B1FA2] text-white"
             asChild
           >
-            <Link href="/signup">{t('signupButton')}</Link>
+            <Link href="/signup">{t.signupButton}</Link>
           </Button>
         </div>
       </main>
