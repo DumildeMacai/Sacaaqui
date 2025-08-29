@@ -18,6 +18,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  devIndicators: {
+    allowedDevOrigins: [
+        'https://*.google.com',
+        'https://*.cloud.google.com',
+        'https://*.firebase.google.com',
+        'https://*.cloudworkstations.dev',
+    ],
+  }
 };
 
 export default nextConfig;
