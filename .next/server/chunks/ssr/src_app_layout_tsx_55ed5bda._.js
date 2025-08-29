@@ -5,12 +5,10 @@ module.exports = {
 
 var { g: global, __dirname } = __turbopack_context__;
 {
-// This layout is intentionally left simple. 
-// The main layout with providers is in [locale]/layout.tsx
-// as required by next-intl.
 __turbopack_context__.s({
     "default": (()=>RootLayout)
 });
+;
 function RootLayout({ children }) {
     return children;
 }

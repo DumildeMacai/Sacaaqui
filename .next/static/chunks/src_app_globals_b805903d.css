@@ -1573,7 +1573,7 @@ body {
   vertical-align: middle;
 }
 
-.font-body, .font-headline {
+.font-headline {
   font-family: Inter, sans-serif;
 }
 
@@ -1739,11 +1739,6 @@ body {
 
 .underline-offset-4 {
   text-underline-offset: 4px;
-}
-
-.antialiased {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 .opacity-0 {
