@@ -25,9 +25,13 @@ __turbopack_context__.s({
     "config": (()=>config),
     "default": (()=>__TURBOPACK__default__export__)
 });
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2d$intl$2f$dist$2f$middleware$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next-intl/dist/middleware.js [middleware-edge] (ecmascript)");
+(()=>{
+    const e = new Error("Cannot find module 'next-intl/middleware'");
+    e.code = 'MODULE_NOT_FOUND';
+    throw e;
+})();
 ;
-const __TURBOPACK__default__export__ = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2d$intl$2f$dist$2f$middleware$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["default"])({
+const __TURBOPACK__default__export__ = createMiddleware({
     // A list of all locales that are supported
     locales: [
         'en-US',

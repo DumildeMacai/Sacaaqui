@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///home/user/studio/src/app/layout.tsx"],"sourcesContent":["\n// This layout is intentionally left simple. \n// The main layout with providers is in [locale]/layout.tsx\n// as required by next-intl.\nexport default function RootLayout({\n  children,\n}: Readonly<{\n  children: React.ReactNode;\n}>) {\n  return children;\n}\n"],"names":[],"mappings":"AACA,6CAA6C;AAC7C,2DAA2D;AAC3D,4BAA4B;;;;AACb,SAAS,WAAW,EACjC,QAAQ,EAGR;IACA,OAAO;AACT","debugId":null}}]
+}

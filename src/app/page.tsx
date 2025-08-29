@@ -1,111 +1,28 @@
 
 'use client';
 
-import { useTheme } from '@/context/ThemeContext';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sun, Moon, Loader2 } from "lucide-react";
-import { GoogleSignInButton } from '@/components/google-signin-button';
-import { useEffect, useState } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth, db } from '@/firebase/init';
-import { FacebookSignInButton } from '@/components/facebook-signin-button';
-import { Button } from '@/components/ui/button';
-import { MacaiLogo } from '@/components/logo';
-import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
 
-const translations = {
-  'en-US': {
-    welcome: 'Welcome to <span class="text-green-400">ATM Locator</span>',
-    description: 'Choose an option to continue',
-    loginButton: 'Login with Email and Password',
-    signupButton: 'Create Account'
-  },
-  'pt-BR': {
-    welcome: 'Bem-vindo ao <span class="text-green-400">ATM Locator</span>',
-    description: 'Escolha uma opção para continuar',
-    loginButton: 'Entrar com Email e Senha',
-    signupButton: 'Criar Conta'
-  }
-};
-
-export default function Home() {
+// This is the new root page, which detects the user's language and redirects.
+export default function RootPage() {
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
-  const [isVerifying, setIsVerifying] = useState(true);
-  const [locale, setLocale] = useState('en-US');
-  const isDarkMode = theme === 'dark';
-  
+
   useEffect(() => {
-    if (typeof navigator !== 'undefined') {
-      const browserLang = navigator.language;
-      if (browserLang.startsWith('pt')) {
-        setLocale('pt-BR');
-      } else {
-        setLocale('en-US');
-      }
+    const browserLang = navigator.language || 'en-US';
+    // Redirect to the detected locale
+    if (browserLang.startsWith('pt')) {
+      router.replace('/pt-BR');
+    } else {
+      router.replace('/en-US');
     }
-  }, []);
-
-  const t = translations[locale as keyof typeof translations] || translations['en-US'];
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        router.push('/dashboard');
-      } else {
-        setIsVerifying(false);
-      }
-    });
-
-    return () => unsubscribe();
   }, [router]);
 
-
-  if (isVerifying) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">A verificar autenticação...</p>
-      </div>
-    );
-  }
-
-
+  // Render a loading state while redirecting
   return (
-    <div className='bg-background text-foreground'>
-      <div className="flex justify-between items-center px-6 py-4">
-        <MacaiLogo />
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-full hover:bg-muted"
-          aria-label="Toggle Dark Mode"
-        >
-          {isDarkMode ? <Sun className="text-yellow-400" /> : <Moon className="text-primary" />}
-        </button>
-      </div>
-
-      <main className="flex flex-col items-center justify-center min-h-screen px-4 text-center -mt-16">
-        <h1 className="text-3xl sm:text-4xl font-semibold mb-4 text-primary">Macai ATM Locator</h1>
-        <h2 className="text-3xl sm:text-4xl font-semibold mb-4" dangerouslySetInnerHTML={{ __html: t.welcome }} />
-        <p className="text-md sm:text-lg text-muted-foreground mb-8">{t.description}</p>
-
-        <div className="flex flex-col gap-4 w-full max-w-xs">
-          <GoogleSignInButton />
-          <FacebookSignInButton />
-          <Button
-            className="bg-[#28a745] hover:bg-[#218838] text-white"
-            asChild
-          >
-            <Link href="/login-email">{t.loginButton}</Link>
-          </Button>
-          <Button
-            className="bg-[#8A2BE2] hover:bg-[#7B1FA2] text-white"
-            asChild
-          >
-            <Link href="/signup">{t.signupButton}</Link>
-          </Button>
-        </div>
-      </main>
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <Loader2 className="h-12 w-12 animate-spin text-primary" />
     </div>
   );
 }
