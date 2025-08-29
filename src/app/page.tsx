@@ -6,9 +6,8 @@ import { useRouter } from 'next/navigation';
 import { Sun, Moon, Loader2 } from "lucide-react";
 import { GoogleSignInButton } from '@/components/google-signin-button';
 import { useEffect, useState } from 'react';
-import { getRedirectResult } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/firebase/init';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { FacebookSignInButton } from '@/components/facebook-signin-button';
 import { Button } from '@/components/ui/button';
@@ -16,52 +15,24 @@ import { Button } from '@/components/ui/button';
 export default function Home() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
-  const { toast } = useToast();
   const [isVerifying, setIsVerifying] = useState(true);
   const isDarkMode = theme === 'dark';
 
   useEffect(() => {
-    const checkRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result) {
-          // User has just been redirected from Google Sign-In
-          const user = result.user;
-          const userDocRef = doc(db, 'users', user.uid);
-          const userDoc = await getDoc(userDocRef);
-
-          if (!userDoc.exists()) {
-            // Create a new user document if it doesn't exist
-            await setDoc(userDocRef, {
-              name: user.displayName,
-              email: user.email,
-              dateOfBirth: '',
-              phoneNumber: user.phoneNumber || '',
-              reputation: 1, // Initial reputation
-            });
-          }
-          
-          toast({
-              title: 'Login Bem-sucedido!',
-              description: `Bem-vindo de volta, ${user.displayName || user.email}!`,
-          });
-          router.push('/dashboard');
-        } else {
-            setIsVerifying(false);
-        }
-      } catch (error: any) {
-        console.error("Erro ao obter resultado do redirecionamento:", error);
-        toast({
-          variant: 'destructive',
-          title: 'Erro de Login',
-          description: error.message,
-        });
+    // onAuthStateChanged is enough to check if the user is already logged in
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // If user object exists, they are logged in, redirect to dashboard
+        router.push('/dashboard');
+      } else {
+        // If no user, we can stop verifying and show the login page
         setIsVerifying(false);
       }
-    };
+    });
 
-    checkRedirectResult();
-  }, [router, toast]);
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [router]);
 
 
   if (isVerifying) {

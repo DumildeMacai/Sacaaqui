@@ -1,10 +1,12 @@
 
 'use client';
 
-import { FacebookAuthProvider, signInWithRedirect } from 'firebase/auth';
-import { auth } from '@/firebase/init';
+import { FacebookAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth, db } from '@/firebase/init';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
 
 // Custom SVG for Facebook Icon
 const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -13,22 +15,52 @@ const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-
 export function FacebookSignInButton() {
     const { toast } = useToast();
+    const router = useRouter();
 
     const handleSignIn = async () => {
         const provider = new FacebookAuthProvider();
         try {
-            // Inicia o processo de redirecionamento
-            await signInWithRedirect(auth, provider);
-        } catch (error: any) {
-            console.error("Erro ao iniciar o redirecionamento com Facebook:", error);
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+
+            // Check if user exists in Firestore, if not create a new document
+            const userDocRef = doc(db, 'users', user.uid);
+            const userDoc = await getDoc(userDocRef);
+
+            if (!userDoc.exists()) {
+                await setDoc(userDocRef, {
+                    name: user.displayName,
+                    email: user.email,
+                    dateOfBirth: '',
+                    phoneNumber: user.phoneNumber || '',
+                    reputation: 1, // Initial reputation
+                });
+            }
+
             toast({
-                variant: 'destructive',
-                title: 'Erro de Login',
-                description: `Não foi possível iniciar o login com Facebook: ${error.message}`,
+                title: 'Login Bem-sucedido!',
+                description: `Bem-vindo de volta, ${user.displayName || user.email}!`,
             });
+            router.push('/dashboard');
+
+        } catch (error: any) {
+            console.error("Erro durante o login com Facebook:", error);
+            // Handle specific errors, like account existing with a different credential
+            if (error.code === 'auth/account-exists-with-different-credential') {
+                 toast({
+                    variant: 'destructive',
+                    title: 'Erro de Login',
+                    description: 'Já existe uma conta com este email. Por favor, faça login com o método original.',
+                });
+            } else {
+                toast({
+                    variant: 'destructive',
+                    title: 'Erro de Login',
+                    description: `Não foi possível fazer o login com Facebook: ${error.message}`,
+                });
+            }
         }
     };
 
