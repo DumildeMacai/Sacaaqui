@@ -2,6 +2,7 @@
 import './globals.css';
 import React from 'react';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { Toaster } from '@/components/ui/toaster';
 
 export default function RootLayout({
   children,
@@ -13,6 +14,7 @@ export default function RootLayout({
         <body>
             <ThemeProvider>
                 {children}
+                <Toaster />
             </ThemeProvider>
         </body>
     </html>

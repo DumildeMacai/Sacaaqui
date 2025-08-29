@@ -11,8 +11,7 @@ import { auth } from '@/firebase/init';
 import { FacebookSignInButton } from '@/components/facebook-signin-button';
 import { Button } from '@/components/ui/button';
 import { MacaiLogo } from '@/components/logo';
-import { Link } from '@/navigation';
-import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 
 export default function Home() {
@@ -20,7 +19,6 @@ export default function Home() {
   const { theme, toggleTheme } = useTheme();
   const [isVerifying, setIsVerifying] = useState(true);
   const isDarkMode = theme === 'dark';
-  const t = useTranslations('Index');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -60,8 +58,8 @@ export default function Home() {
 
       <main className="flex flex-col items-center justify-center min-h-screen px-4 text-center -mt-16">
         <h1 className="text-3xl sm:text-4xl font-semibold mb-4 text-primary">Macai ATM Locator</h1>
-        <h2 className="text-3xl sm:text-4xl font-semibold mb-4" dangerouslySetInnerHTML={{ __html: t.raw('welcome') }} />
-        <p className="text-md sm:text-lg text-muted-foreground mb-8">{t('description')}</p>
+        <h2 className="text-3xl sm:text-4xl font-semibold mb-4">Bem-vindo ao <span className="text-green-400">ATM Locator</span></h2>
+        <p className="text-md sm:text-lg text-muted-foreground mb-8">Escolha uma opção para continuar</p>
 
         <div className="flex flex-col gap-4 w-full max-w-xs">
           <GoogleSignInButton />
@@ -70,13 +68,13 @@ export default function Home() {
             className="bg-[#28a745] hover:bg-[#218838] text-white"
             asChild
           >
-            <Link href="/login-email">{t('loginButton')}</Link>
+            <Link href="/login-email">Entrar com Email e Senha</Link>
           </Button>
           <Button
             className="bg-[#8A2BE2] hover:bg-[#7B1FA2] text-white"
             asChild
           >
-            <Link href="/signup">{t('signupButton')}</Link>
+            <Link href="/signup">Criar Conta</Link>
           </Button>
         </div>
       </main>

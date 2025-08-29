@@ -1,9 +1,0 @@
-
-{
-  "Index": {
-    "welcome": "Bem-vindo ao <span class=\"text-green-400\">ATM Locator</span>",
-    "description": "Escolha uma opção para continuar",
-    "loginButton": "Entrar com Email e Senha",
-    "signupButton": "Criar Conta"
-  }
-}

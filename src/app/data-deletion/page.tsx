@@ -34,7 +34,7 @@ export default function DataDeletionPage() {
             </ul>
 
             <h3 className="font-semibold text-lg text-foreground">O que acontece depois de enviar o pedido?</h3>
-            <p>Após recebermos o seu pedido, a nossa equipa irá verificar as informações e proceder à eliminação da sua conta e de todos os dados associados, incluindo o seu perfil, histórico de relatórios e pontuação de reputação. Este processo será concluído num prazo de 30 dias.</p>
+            <p>Após recebermos o seu pedido, a nossa equipa irá verificar as informações e proceder à eliminação da sua conta e de todos os seus dados associados, incluindo o seu perfil, histórico de relatórios e pontuação de reputação. Este processo será concluído num prazo de 30 dias.</p>
             <p>Ser-lhe-á enviada uma confirmação por e-mail assim que os seus dados tiverem sido eliminados com sucesso.</p>
 
             <h3 className="font-semibold text-lg text-foreground">Que dados são eliminados?</h3>
