@@ -259,38 +259,35 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 ;
 ;
 async function geocodeAddressAction(address) {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const apiKey = process.env.LOCATIONIQ_API_KEY;
     if (!apiKey) {
-        console.error("Google Maps API key is not configured.");
+        console.error("LocationIQ API key is not configured.");
         return {
             success: false,
-            error: 'A chave da API do Google Maps não está configurada no servidor.'
+            error: 'A chave da API do LocationIQ não está configurada no servidor.'
         };
     }
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
+    const url = `https://us1.locationiq.com/v1/search.php?key=${apiKey}&q=${encodeURIComponent(address)}&format=json&limit=1`;
     try {
         const response = await fetch(url);
         const data = await response.json();
-        if (data.status === 'OK') {
-            const location = data.results[0].geometry.location;
+        if (response.ok && data && data.length > 0) {
+            const location = data[0];
             return {
                 success: true,
-                lat: location.lat,
-                lng: location.lng
+                lat: parseFloat(location.lat),
+                lng: parseFloat(location.lon)
             };
         } else {
-            console.error('Geocoding API Error:', data.status, data.error_message);
-            let errorMessage = `Falha ao geocodificar o endereço. Status: ${data.status}.`;
-            if (data.error_message) {
-                errorMessage += ` Detalhes: ${data.error_message}`;
-            }
+            const errorMessage = data.error || `Falha ao geocodificar o endereço. Resposta da API: ${response.statusText}`;
+            console.error('LocationIQ API Error:', errorMessage);
             return {
                 success: false,
                 error: errorMessage
             };
         }
     } catch (error) {
-        console.error('Error fetching from Geocoding API:', error);
+        console.error('Error fetching from LocationIQ API:', error);
         return {
             success: false,
             error: 'Ocorreu um erro de rede ao tentar contatar a API de Geocodificação.'
