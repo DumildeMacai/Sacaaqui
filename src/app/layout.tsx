@@ -9,19 +9,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // O layout raiz agora apenas fornece contextos que não dependem do locale.
   return (
-    <html lang="en">
-        <head>
-            <link rel="preconnect" href="https://fonts.googleapis.com" />
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        </head>
-        <body className="font-body antialiased">
-            <ThemeProvider>
-                {children}
-                <Toaster />
-            </ThemeProvider>
-        </body>
-    </html>
+    <ThemeProvider>
+      {children}
+      <Toaster />
+    </ThemeProvider>
   );
 }

@@ -1,23 +1,24 @@
-
-'use client';
-
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
 import '../globals.css';
 import React from 'react';
-import { NextIntlClientProvider, useMessages } from 'next-intl';
 
-// Este layout agora é responsável por fornecer o contexto de internacionalização.
-export default function LocaleLayout({
+export default async function LocaleLayout({
   children,
   params: { locale },
-}: Readonly<{
+}: {
   children: React.ReactNode;
   params: { locale: string };
-}>) {
-  const messages = useMessages();
+}) {
+  const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      {children}
-    </NextIntlClientProvider>
+    <html lang={locale}>
+      <body>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          {children}
+        </NextIntlClientProvider>
+      </body>
+    </html>
   );
 }
