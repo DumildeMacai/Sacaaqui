@@ -37,10 +37,11 @@ const __TURBOPACK__default__export__ = (0, __TURBOPACK__imported__module__$5b$pr
     defaultLocale: 'en-US'
 });
 const config = {
-    // Match only internationalized pathnames
+    // Match all pathnames except for
+    // - … if they start with `/api`, `/_next` or `/_vercel`
+    // - … the ones containing a dot (e.g. `favicon.ico`)
     matcher: [
-        '/',
-        '/(pt-BR|en-US)/:path*'
+        '/((?!api|_next|_vercel|.*\\..*).*)'
     ]
 };
 }}),
