@@ -7,11 +7,13 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { auth } from '@/firebase/init';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { Menu, LogOut, Loader2, Home } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Notifications } from '@/components/notifications';
+
 
 export default function AdminPanelLayout({
   children,
@@ -20,11 +22,13 @@ export default function AdminPanelLayout({
 }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       // Check if user is logged in and is the admin
       if (user && user.email === 'admin@admin.com') {
+        setCurrentUser(user);
         setIsLoading(false);
       } else {
         // If not admin or not logged in, redirect to home
@@ -43,7 +47,7 @@ export default function AdminPanelLayout({
     });
   };
 
-  if (isLoading) {
+  if (isLoading || !currentUser) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -96,6 +100,7 @@ export default function AdminPanelLayout({
                     Painel do Utilizador
                 </Link>
             </Button>
+            {currentUser && <Notifications userId={currentUser.uid} />}
             <ThemeToggle />
              <Button variant="ghost" size="icon" onClick={handleLogout} title="Sair">
                 <LogOut className="h-5 w-5" />

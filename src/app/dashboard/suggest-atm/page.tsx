@@ -16,7 +16,7 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { auth, db } from '@/firebase/init';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 
 const suggestionSchema = z.object({
     name: z.string().min(5, { message: "O nome deve ter pelo menos 5 caracteres." }),
@@ -62,6 +62,24 @@ const SuggestAtmPage = () => {
         },
     });
 
+    // Function to get the admin user's ID
+    const getAdminUserId = async (): Promise<string | null> => {
+        try {
+            const q = query(collection(db, 'users'), where('email', '==', 'admin@admin.com'));
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                // Return the ID of the first admin found
+                return querySnapshot.docs[0].id;
+            }
+            console.warn("Admin user 'admin@admin.com' not found in users collection.");
+            return null;
+        } catch (error) {
+            console.error("Error fetching admin user ID:", error);
+            return null;
+        }
+    };
+
+
     const handleSubmit = async (values: SuggestionFormValues) => {
         if (!currentUser) {
             toast({ variant: 'destructive', title: 'Erro', description: 'Utilizador não autenticado. Faça login novamente.' });
@@ -70,21 +88,38 @@ const SuggestAtmPage = () => {
 
         setIsLoading(true);
 
-        const newSuggestion = {
-            ...values,
-            userId: currentUser.uid,
-            userName: currentUserName,
-            status: 'pending',
-            createdAt: serverTimestamp(),
-        };
-
         try {
+            // 1. Add the suggestion
+            const newSuggestion = {
+                ...values,
+                userId: currentUser.uid,
+                userName: currentUserName,
+                status: 'pending',
+                createdAt: serverTimestamp(),
+            };
             await addDoc(collection(db, 'atm_suggestions'), newSuggestion);
+
+            // 2. Get admin ID
+            const adminId = await getAdminUserId();
+
+            // 3. Create a notification for the admin if adminId is found
+            if (adminId) {
+                await addDoc(collection(db, 'notifications'), {
+                    userId: adminId,
+                    title: 'Nova Sugestão de ATM',
+                    message: `O utilizador "${currentUserName}" sugeriu um novo ATM: "${values.name}".`,
+                    read: false,
+                    createdAt: serverTimestamp(),
+                    type: 'generic' // or a new type like 'new_suggestion'
+                });
+            }
+
             toast({
                 title: 'Obrigado pela sua sugestão!',
                 description: 'A sua sugestão foi enviada para revisão pelo administrador.',
             });
             router.push('/dashboard');
+            
         } catch (error) {
             console.error('Error adding ATM suggestion:', error);
             toast({

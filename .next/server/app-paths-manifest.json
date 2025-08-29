@@ -5,6 +5,7 @@
   "/admin/(panel)/suggestions/page": "app/admin/(panel)/suggestions/page.js",
   "/admin/(panel)/users/page": "app/admin/(panel)/users/page.js",
   "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/suggest-atm/page": "app/dashboard/suggest-atm/page.js",
   "/login-email/page": "app/login-email/page.js",
   "/page": "app/page.js"
 }
