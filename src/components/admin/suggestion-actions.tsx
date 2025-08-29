@@ -28,8 +28,6 @@ export function SuggestionActions({ suggestion, onSuggestionUpdate }: Suggestion
     const [name, setName] = useState(suggestion.name);
     const [address, setAddress] = useState(suggestion.address);
     const [details, setDetails] = useState(suggestion.details || '');
-    const [lat, setLat] = useState<number | null>(null);
-    const [lng, setLng] = useState<number | null>(null);
     const [geocodingError, setGeocodingError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -38,8 +36,6 @@ export function SuggestionActions({ suggestion, onSuggestionUpdate }: Suggestion
             setName(suggestion.name);
             setAddress(suggestion.address);
             setDetails(suggestion.details || '');
-            setLat(null);
-            setLng(null);
             setGeocodingError(null);
         }
     }, [isApproveModalOpen, suggestion]);
@@ -53,9 +49,10 @@ export function SuggestionActions({ suggestion, onSuggestionUpdate }: Suggestion
             // Step 1: Geocode the address
             const geocodeResult = await geocodeAddressAction(address);
 
-            if (!geocodeResult.success || !geocodeResult.lat || !geocodeResult.lng) {
-                setGeocodingError(geocodeResult.error || "Não foi possível encontrar as coordenadas para este endereço. Verifique o endereço ou insira as coordenadas manualmente.");
-                toast({ variant: 'destructive', title: 'Erro de Geocodificação', description: geocodeResult.error });
+            if (!geocodeResult.success || geocodeResult.lat === undefined || geocodeResult.lng === undefined) {
+                const errorMsg = geocodeResult.error || "Não foi possível encontrar as coordenadas para este endereço. Verifique o endereço.";
+                setGeocodingError(errorMsg);
+                toast({ variant: 'destructive', title: 'Erro de Geocodificação', description: errorMsg });
                 setIsLoading(false);
                 return;
             }
