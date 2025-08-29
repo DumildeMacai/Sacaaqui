@@ -13,6 +13,7 @@ import { FacebookSignInButton } from '@/components/facebook-signin-button';
 import { Button } from '@/components/ui/button';
 import { MacaiLogo } from '@/components/logo';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 
 export default function Home() {
@@ -67,15 +68,15 @@ export default function Home() {
           <FacebookSignInButton />
           <Button
             className="bg-[#28a745] hover:bg-[#218838] text-white"
-            onClick={() => router.push('/login-email')}
+            asChild
           >
-            {t('loginButton')}
+            <Link href="/login-email">{t('loginButton')}</Link>
           </Button>
           <Button
             className="bg-[#8A2BE2] hover:bg-[#7B1FA2] text-white"
-            onClick={() => router.push('/signup')}
+            asChild
           >
-            {t('signupButton')}
+            <Link href="/signup">{t('signupButton')}</Link>
           </Button>
         </div>
       </main>

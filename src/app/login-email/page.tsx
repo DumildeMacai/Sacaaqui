@@ -10,6 +10,7 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
 
 export default function LoginPhone() {
   const router = useRouter();
@@ -47,10 +48,12 @@ export default function LoginPhone() {
         <Button 
             variant="ghost" 
             className="absolute top-4 left-4"
-            onClick={() => router.back()}
+            asChild
         >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar
+            <Link href="/">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar
+            </Link>
         </Button>
         <Card>
           <CardHeader>
