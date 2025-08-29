@@ -3,6 +3,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { db } from '@/firebase/init';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,6 +14,8 @@ import { ptBR } from 'date-fns/locale';
 import { Badge } from "@/components/ui/badge";
 import type { Suggestion } from "@/types";
 import { SuggestionActions } from "@/components/admin/suggestion-actions";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 const convertTimestampToString = (timestamp: any): string => {
   if (timestamp && typeof timestamp.toDate === 'function') {
@@ -36,6 +39,8 @@ export default function AdminSuggestionsPage() {
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
+
 
     const fetchSuggestions = async () => {
         try {
@@ -97,8 +102,16 @@ export default function AdminSuggestionsPage() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Sugestões de Novos ATMs</CardTitle>
-                <CardDescription>Reveja, aprove ou rejeite as sugestões enviadas pelos utilizadores.</CardDescription>
+                <div className='flex justify-between items-start'>
+                    <div>
+                        <CardTitle>Sugestões de Novos ATMs</CardTitle>
+                        <CardDescription>Reveja, aprove ou rejeite as sugestões enviadas pelos utilizadores.</CardDescription>
+                    </div>
+                     <Button variant="outline" onClick={() => router.back()}>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Voltar
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent>
                 {loading ? (
@@ -149,3 +162,4 @@ export default function AdminSuggestionsPage() {
         </Card>
     )
 }
+
