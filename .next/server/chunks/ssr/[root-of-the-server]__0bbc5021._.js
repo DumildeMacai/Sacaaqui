@@ -63,20 +63,20 @@ async function getDashboardData() {
         const adminDb = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$admin$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getAdminDb"])();
         const atmsRef = adminDb.collection("atms");
         const usersRef = adminDb.collection("users");
+        // Use get() and size for broader compatibility instead of count()
         const [atmsSnapshot, usersSnapshot] = await Promise.all([
-            atmsRef.count().get(),
-            usersRef.count().get()
+            atmsRef.get(),
+            usersRef.get()
         ]);
-        const atmCount = atmsSnapshot.data().count;
-        const userCount = usersSnapshot.data().count;
+        const atmCount = atmsSnapshot.size;
+        const userCount = usersSnapshot.size;
         // Fetch all ATMs to calculate status distribution
-        const allAtmsSnapshot = await atmsRef.get();
         const statusCounts = {
             com_dinheiro: 0,
             sem_dinheiro: 0,
             desconhecido: 0
         };
-        allAtmsSnapshot.forEach((doc)=>{
+        atmsSnapshot.forEach((doc)=>{
             const atm = doc.data();
             if (statusCounts[atm.status] !== undefined) {
                 statusCounts[atm.status]++;
@@ -106,7 +106,9 @@ async function getDashboardData() {
         };
     } catch (error) {
         console.error("Error fetching dashboard data with Admin SDK:", error);
-        throw new Error('Failed to fetch dashboard data. Check server logs and Firestore permissions for the service account.');
+        // Provide a more specific error message if possible
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        throw new Error(`Failed to fetch dashboard data. Check server logs and Firestore permissions for the service account. Details: ${errorMessage}`);
     }
 }
 ;
