@@ -11,7 +11,7 @@ import { auth } from '@/firebase/init';
 import { FacebookSignInButton } from '@/components/facebook-signin-button';
 import { Button } from '@/components/ui/button';
 import { MacaiLogo } from '@/components/logo';
-import { Link } from '@/navigation'; // Alterado de 'next/link' para '@/navigation'
+import { Link } from '@/navigation';
 import { useTranslations } from 'next-intl';
 
 
