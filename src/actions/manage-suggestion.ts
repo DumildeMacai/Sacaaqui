@@ -2,7 +2,8 @@
 'use server';
 
 import { db } from "@/firebase/init";
-import { addDoc, collection, doc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+import { FieldValue } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 
 interface ApproveSuggestionInput {
@@ -30,7 +31,7 @@ export async function handleApproveSuggestion(input: ApproveSuggestionInput) {
             },
             details: input.details || '',
             status: 'desconhecido',
-            lastUpdate: serverTimestamp(),
+            lastUpdate: FieldValue.serverTimestamp(),
             reports: [],
         };
         await addDoc(collection(db, 'atms'), newAtmPayload);
@@ -46,7 +47,7 @@ export async function handleApproveSuggestion(input: ApproveSuggestionInput) {
                 title: 'Sugestão Aprovada!',
                 message: `O ATM "${input.name}" que você sugeriu foi aprovado e adicionado ao mapa. Obrigado por sua contribuição!`,
                 read: false,
-                createdAt: serverTimestamp(),
+                createdAt: FieldValue.serverTimestamp(),
                 type: 'suggestion_approved'
             });
         }
@@ -82,7 +83,7 @@ export async function handleRejectSuggestion(input: RejectSuggestionInput) {
                 title: 'Sugestão Rejeitada',
                 message: `A sua sugestão para o ATM "${input.suggestionName}" foi revista mas não pôde ser aprovada neste momento.`,
                 read: false,
-                createdAt: serverTimestamp(),
+                createdAt: FieldValue.serverTimestamp(),
                 type: 'suggestion_rejected'
             });
         }

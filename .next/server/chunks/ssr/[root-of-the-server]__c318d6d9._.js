@@ -160,7 +160,6 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 ;
 ;
 async function handleApproveSuggestion(input) {
-    // Validação robustecida para garantir que os campos obrigatórios existem e são números válidos
     if (!input.name || !input.address || isNaN(input.lat) || isNaN(input.lng)) {
         return {
             success: false,
@@ -168,7 +167,6 @@ async function handleApproveSuggestion(input) {
         };
     }
     try {
-        // 1. Create the new ATM document
         const newAtmPayload = {
             name: input.name,
             address: input.address,
@@ -182,12 +180,10 @@ async function handleApproveSuggestion(input) {
             reports: []
         };
         await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["addDoc"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"], 'atms'), newAtmPayload);
-        // 2. Update the suggestion status to 'approved'
         const suggestionRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["doc"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"], 'atm_suggestions', input.suggestionId);
         await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["updateDoc"])(suggestionRef, {
             status: 'approved'
         });
-        // 3. Create a notification for the user, only if userId is present
         if (input.userId) {
             await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["addDoc"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"], 'notifications'), {
                 userId: input.userId,
@@ -213,12 +209,10 @@ async function handleApproveSuggestion(input) {
 }
 async function handleRejectSuggestion(input) {
     try {
-        // 1. Update the suggestion status to 'rejected'
         const suggestionRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["doc"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"], 'atm_suggestions', input.suggestionId);
         await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["updateDoc"])(suggestionRef, {
             status: 'rejected'
         });
-        // 2. Create a notification for the user, only if userId is present
         if (input.userId) {
             await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["addDoc"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"], 'notifications'), {
                 userId: input.userId,
