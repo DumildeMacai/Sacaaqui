@@ -1,8 +1,8 @@
+
 'use server';
 
 import { db } from "@/firebase/init";
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
-import { FieldValue } from "firebase-admin/firestore";
+import { addDoc, collection, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { revalidatePath } from "next/cache";
 
 interface ApproveSuggestionInput {
@@ -30,7 +30,7 @@ export async function handleApproveSuggestion(input: ApproveSuggestionInput) {
             },
             details: input.details || '',
             status: 'desconhecido',
-            lastUpdate: FieldValue.serverTimestamp(),
+            lastUpdate: serverTimestamp(),
             reports: [],
         };
         await addDoc(collection(db, 'atms'), newAtmPayload);
@@ -46,7 +46,7 @@ export async function handleApproveSuggestion(input: ApproveSuggestionInput) {
                 title: 'Sugestão Aprovada!',
                 message: `O ATM "${input.name}" que você sugeriu foi aprovado e adicionado ao mapa. Obrigado por sua contribuição!`,
                 read: false,
-                createdAt: FieldValue.serverTimestamp(),
+                createdAt: serverTimestamp(),
                 type: 'suggestion_approved'
             });
         }
@@ -58,7 +58,8 @@ export async function handleApproveSuggestion(input: ApproveSuggestionInput) {
 
     } catch (error) {
         console.error("Error approving suggestion:", error);
-        return { success: false, error: "Falha ao aprovar a sugestão." };
+        const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
+        return { success: false, error: `Falha ao aprovar a sugestão: ${errorMessage}` };
     }
 }
 
@@ -82,7 +83,7 @@ export async function handleRejectSuggestion(input: RejectSuggestionInput) {
                 title: 'Sugestão Rejeitada',
                 message: `A sua sugestão para o ATM "${input.suggestionName}" foi revista mas não pôde ser aprovada neste momento.`,
                 read: false,
-                createdAt: FieldValue.serverTimestamp(),
+                createdAt: serverTimestamp(),
                 type: 'suggestion_rejected'
             });
         }
@@ -92,6 +93,7 @@ export async function handleRejectSuggestion(input: RejectSuggestionInput) {
         return { success: true };
     } catch (error) {
         console.error("Error rejecting suggestion:", error);
-        return { success: false, error: "Falha ao rejeitar a sugestão." };
+        const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
+        return { success: false, error: `Falha ao rejeitar a sugestão: ${errorMessage}` };
     }
 }
