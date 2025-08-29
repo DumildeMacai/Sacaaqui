@@ -1,4 +1,16 @@
 {
-  "node": {},
+  "node": {
+    "00879f9357d3b42e2666da171427705e594fa57d78": {
+      "workers": {
+        "app/admin/(panel)/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/get-dashboard-data.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/admin/(panel)/dashboard/page": "action-browser"
+      }
+    }
+  },
   "edge": {}
 }
