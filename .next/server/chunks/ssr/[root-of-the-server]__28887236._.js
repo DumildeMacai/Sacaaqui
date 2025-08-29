@@ -336,6 +336,11 @@ function GoogleSignInButton() {
             });
             router.push('/dashboard');
         } catch (error) {
+            // Silently handle popup closed by user error
+            if (error.code === 'auth/popup-closed-by-user') {
+                console.log("Google sign-in popup closed by user.");
+                return;
+            }
             console.error("Erro durante o login com Google:", error);
             toast({
                 variant: 'destructive',
@@ -353,14 +358,14 @@ function GoogleSignInButton() {
                 className: "mr-2 h-5 w-5"
             }, void 0, false, {
                 fileName: "[project]/src/components/google-signin-button.tsx",
-                lineNumber: 64,
+                lineNumber: 69,
                 columnNumber: 13
             }, this),
             "Entrar com o Google"
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/google-signin-button.tsx",
-        lineNumber: 63,
+        lineNumber: 68,
         columnNumber: 9
     }, this);
 }
@@ -437,6 +442,11 @@ function FacebookSignInButton() {
             });
             router.push('/dashboard');
         } catch (error) {
+            // Silently handle popup closed by user error
+            if (error.code === 'auth/popup-closed-by-user') {
+                console.log("Facebook sign-in popup closed by user.");
+                return;
+            }
             console.error("Erro durante o login com Facebook:", error);
             // Handle specific errors, like account existing with a different credential
             if (error.code === 'auth/account-exists-with-different-credential') {
@@ -462,14 +472,14 @@ function FacebookSignInButton() {
                 className: "mr-2 h-5 w-5"
             }, void 0, false, {
                 fileName: "[project]/src/components/facebook-signin-button.tsx",
-                lineNumber: 69,
+                lineNumber: 75,
                 columnNumber: 13
             }, this),
             "Entrar com o Facebook"
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/facebook-signin-button.tsx",
-        lineNumber: 68,
+        lineNumber: 74,
         columnNumber: 9
     }, this);
 }

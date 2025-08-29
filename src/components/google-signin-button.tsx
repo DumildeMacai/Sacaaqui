@@ -50,6 +50,11 @@ export function GoogleSignInButton() {
             router.push('/dashboard');
 
         } catch (error: any) {
+             // Silently handle popup closed by user error
+            if (error.code === 'auth/popup-closed-by-user') {
+                console.log("Google sign-in popup closed by user.");
+                return;
+            }
             console.error("Erro durante o login com Google:", error);
             toast({
                 variant: 'destructive',

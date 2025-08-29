@@ -46,6 +46,12 @@ export function FacebookSignInButton() {
             router.push('/dashboard');
 
         } catch (error: any) {
+            // Silently handle popup closed by user error
+            if (error.code === 'auth/popup-closed-by-user') {
+                console.log("Facebook sign-in popup closed by user.");
+                return;
+            }
+            
             console.error("Erro durante o login com Facebook:", error);
             // Handle specific errors, like account existing with a different credential
             if (error.code === 'auth/account-exists-with-different-credential') {
