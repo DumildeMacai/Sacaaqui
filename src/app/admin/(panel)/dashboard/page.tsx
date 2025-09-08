@@ -6,10 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users, CreditCard, AlertCircle } from 'lucide-react';
 import { AtmStatusChart } from '@/components/admin/atm-status-chart';
-import { auth, db } from '@/firebase/init';
-import { onAuthStateChanged } from 'firebase/auth';
-import { collection, getDocs } from 'firebase/firestore';
+import { auth } from '@/firebase/init';
+import { onAuthStateChanged, getIdToken } from 'firebase/auth';
 import type { Atm } from '@/types';
+import { getDashboardData } from '@/actions/get-admin-data';
 
 export interface DashboardData {
     atmCount: number;
@@ -28,56 +28,46 @@ function AdminDashboardPage() {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user && user.email === 'admin@admin.com') {
+            if (user) {
                 try {
-                    const atmsRef = collection(db, "atms");
-                    const usersRef = collection(db, "users");
+                    const token = await getIdToken(user);
+                    const result = await getDashboardData(token);
 
-                    const [atmsSnapshot, usersSnapshot] = await Promise.all([
-                        getDocs(atmsRef),
-                        getDocs(usersRef)
-                    ]);
+                    if (result.success && result.data) {
+                        const statusCounts: { [key in Atm['status']]: number } = {
+                            com_dinheiro: 0,
+                            sem_dinheiro: 0,
+                            desconhecido: 0,
+                        };
+                        result.data.atms.forEach(atm => {
+                             if (atm.status && statusCounts[atm.status] !== undefined) {
+                                statusCounts[atm.status]++;
+                            }
+                        });
+                        const chartData = [
+                            { name: 'Com Dinheiro', value: statusCounts.com_dinheiro, fill: "var(--color-com_dinheiro)" },
+                            { name: 'Sem Dinheiro', value: statusCounts.sem_dinheiro, fill: "var(--color-sem_dinheiro)"  },
+                            { name: 'Desconhecido', value: statusCounts.desconhecido, fill: "var(--color-desconhecido)"  },
+                        ];
 
-                    const atmCount = atmsSnapshot.size;
-                    const userCount = usersSnapshot.size;
-
-                    const statusCounts: { [key in Atm['status']]: number } = {
-                        com_dinheiro: 0,
-                        sem_dinheiro: 0,
-                        desconhecido: 0,
-                    };
-
-                    atmsSnapshot.forEach(doc => {
-                        const atm = doc.data() as Omit<Atm, 'id'>;
-                        if (atm.status && statusCounts[atm.status] !== undefined) {
-                            statusCounts[atm.status]++;
-                        }
-                    });
-                    
-                    const chartData = [
-                        { name: 'Com Dinheiro', value: statusCounts.com_dinheiro, fill: "var(--color-com_dinheiro)" },
-                        { name: 'Sem Dinheiro', value: statusCounts.sem_dinheiro, fill: "var(--color-sem_dinheiro)"  },
-                        { name: 'Desconhecido', value: statusCounts.desconhecido, fill: "var(--color-desconhecido)"  },
-                    ];
-
-                    setData({ atmCount, userCount, chartData });
-
+                        setData({
+                            atmCount: result.data.atmCount,
+                            userCount: result.data.userCount,
+                            chartData
+                        });
+                    } else {
+                         throw new Error(result.error || "Acesso não autorizado ou falha ao buscar os dados.");
+                    }
                 } catch (err: any) {
                     console.error("Error fetching dashboard data:", err);
                     setError(err.message || "Ocorreu um erro desconhecido.");
-                    if (err.code === 'permission-denied') {
-                        setError("Permissões insuficientes. Verifique as regras de segurança do Firestore.");
-                    }
                 } finally {
                     setLoading(false);
                 }
             } else {
+                // Se não houver utilizador, definir o erro e parar o carregamento
+                setError("Utilizador não autenticado.");
                 setLoading(false);
-                if (!user) {
-                    setError("Utilizador não autenticado.");
-                } else {
-                    setError("Acesso não autorizado.");
-                }
             }
         });
 

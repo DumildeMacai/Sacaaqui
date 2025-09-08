@@ -5,9 +5,9 @@ import { UserDataTable } from "@/components/admin/user-data-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { User } from "@/types";
 import { useEffect, useState } from "react";
-import { db, auth } from '@/firebase/init';
-import { collection, getDocs } from 'firebase/firestore';
-import { onAuthStateChanged } from "firebase/auth";
+import { auth } from '@/firebase/init';
+import { onAuthStateChanged, getIdToken } from "firebase/auth";
+import { getUsersData } from "@/actions/get-admin-data";
 
 
 export default function AdminUsersPage() {
@@ -17,24 +17,15 @@ export default function AdminUsersPage() {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user && user.email === 'admin@admin.com') {
+            if (user) {
                 try {
-                    const usersSnapshot = await getDocs(collection(db, 'users'));
-                    if (usersSnapshot.empty) {
-                        setUsers([]);
+                    const token = await getIdToken(user);
+                    const result = await getUsersData(token);
+
+                    if (result.success && result.data) {
+                        setUsers(result.data);
                     } else {
-                        const usersData: User[] = usersSnapshot.docs.map(doc => {
-                            const data = doc.data();
-                            return {
-                                id: doc.id,
-                                name: data.name || '',
-                                email: data.email || '',
-                                dateOfBirth: data.dateOfBirth || '',
-                                phoneNumber: data.phoneNumber || '',
-                                reputation: data.reputation ?? 0,
-                            };
-                        });
-                        setUsers(usersData);
+                        throw new Error(result.error || 'Falha ao buscar utilizadores.');
                     }
                 } catch (err: any) {
                     console.error(err);
@@ -44,11 +35,7 @@ export default function AdminUsersPage() {
                 }
             } else {
                  setLoading(false);
-                 if (!user) {
-                     setError('Utilizador não autenticado.');
-                 } else {
-                     setError('Acesso não autorizado.');
-                 }
+                 setError('Acesso não autorizado.');
             }
         });
         return () => unsubscribe();

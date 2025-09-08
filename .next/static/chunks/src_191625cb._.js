@@ -626,10 +626,13 @@ function AdminDashboardPage() {
                     if (user && user.email === 'admin@admin.com') {
                         try {
                             const atmsRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["db"], "atms");
-                            // Apenas obter dados dos ATMs. A contagem de utilizadores foi removida
-                            // para evitar problemas de permissões no dashboard.
-                            const atmsSnapshot = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getDocs"])(atmsRef);
+                            const usersRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["db"], "users");
+                            const [atmsSnapshot, usersSnapshot] = await Promise.all([
+                                (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getDocs"])(atmsRef),
+                                (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getDocs"])(usersRef)
+                            ]);
                             const atmCount = atmsSnapshot.size;
+                            const userCount = usersSnapshot.size;
                             const statusCounts = {
                                 com_dinheiro: 0,
                                 sem_dinheiro: 0,
@@ -660,15 +663,17 @@ function AdminDashboardPage() {
                                     fill: "var(--color-desconhecido)"
                                 }
                             ];
-                            // A contagem de utilizadores é definida como 0, pois não a estamos a obter aqui.
                             setData({
                                 atmCount,
-                                userCount: 0,
+                                userCount,
                                 chartData
                             });
                         } catch (err) {
                             console.error("Error fetching dashboard data:", err);
                             setError(err.message || "Ocorreu um erro desconhecido.");
+                            if (err.code === 'permission-denied') {
+                                setError("Permissões insuficientes. Verifique as regras de segurança do Firestore.");
+                            }
                         } finally{
                             setLoading(false);
                         }
@@ -697,19 +702,19 @@ function AdminDashboardPage() {
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$alert$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertCircle$3e$__["AlertCircle"], {}, void 0, false, {
                                 fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                                lineNumber: 88,
+                                lineNumber: 92,
                                 columnNumber: 25
                             }, this),
                             "Erro ao Carregar o Dashboard"
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                        lineNumber: 87,
+                        lineNumber: 91,
                         columnNumber: 21
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                    lineNumber: 86,
+                    lineNumber: 90,
                     columnNumber: 17
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -718,7 +723,7 @@ function AdminDashboardPage() {
                             children: "Não foi possível carregar os dados do dashboard."
                         }, void 0, false, {
                             fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                            lineNumber: 93,
+                            lineNumber: 97,
                             columnNumber: 21
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -728,7 +733,7 @@ function AdminDashboardPage() {
                                     children: "Detalhes:"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                                    lineNumber: 95,
+                                    lineNumber: 99,
                                     columnNumber: 25
                                 }, this),
                                 " ",
@@ -736,19 +741,19 @@ function AdminDashboardPage() {
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                            lineNumber: 94,
+                            lineNumber: 98,
                             columnNumber: 21
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                    lineNumber: 92,
+                    lineNumber: 96,
                     columnNumber: 17
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-            lineNumber: 85,
+            lineNumber: 89,
             columnNumber: 13
         }, this);
     }
@@ -768,20 +773,20 @@ function AdminDashboardPage() {
                                         children: "Total de ATMs"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                                        lineNumber: 107,
+                                        lineNumber: 111,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$credit$2d$card$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__CreditCard$3e$__["CreditCard"], {
                                         className: "h-4 w-4 text-muted-foreground"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                                        lineNumber: 108,
+                                        lineNumber: 112,
                                         columnNumber: 25
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                                lineNumber: 106,
+                                lineNumber: 110,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -789,25 +794,25 @@ function AdminDashboardPage() {
                                     className: "h-8 w-1/4"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                                    lineNumber: 111,
+                                    lineNumber: 115,
                                     columnNumber: 36
                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     className: "text-2xl font-bold",
                                     children: data?.atmCount
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                                    lineNumber: 111,
+                                    lineNumber: 115,
                                     columnNumber: 73
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                                lineNumber: 110,
+                                lineNumber: 114,
                                 columnNumber: 21
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                        lineNumber: 105,
+                        lineNumber: 109,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -820,38 +825,14 @@ function AdminDashboardPage() {
                                         children: "Total de Utilizadores"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                                        lineNumber: 116,
+                                        lineNumber: 120,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__["Users"], {
                                         className: "h-4 w-4 text-muted-foreground"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                                        lineNumber: 117,
-                                        columnNumber: 25
-                                    }, this)
-                                ]
-                            }, void 0, true, {
-                                fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                                lineNumber: 115,
-                                columnNumber: 21
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "text-2xl font-bold",
-                                        children: "-"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
                                         lineNumber: 121,
-                                        columnNumber: 25
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                        className: "text-xs text-muted-foreground",
-                                        children: "Ver na página de utilizadores"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                                        lineNumber: 122,
                                         columnNumber: 25
                                     }, this)
                                 ]
@@ -859,17 +840,37 @@ function AdminDashboardPage() {
                                 fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
                                 lineNumber: 119,
                                 columnNumber: 21
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
+                                children: loading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Skeleton"], {
+                                    className: "h-8 w-1/4"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
+                                    lineNumber: 124,
+                                    columnNumber: 35
+                                }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    className: "text-2xl font-bold",
+                                    children: data?.userCount
+                                }, void 0, false, {
+                                    fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
+                                    lineNumber: 124,
+                                    columnNumber: 72
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
+                                lineNumber: 123,
+                                columnNumber: 21
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                        lineNumber: 114,
+                        lineNumber: 118,
                         columnNumber: 17
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                lineNumber: 104,
+                lineNumber: 108,
                 columnNumber: 13
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -880,20 +881,20 @@ function AdminDashboardPage() {
                                 children: "Distribuição de Status dos ATMs"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                                lineNumber: 129,
+                                lineNumber: 131,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
                                 children: "Visualização da quantidade de ATMs por status atual."
                             }, void 0, false, {
                                 fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                                lineNumber: 130,
+                                lineNumber: 132,
                                 columnNumber: 21
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                        lineNumber: 128,
+                        lineNumber: 130,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -901,30 +902,30 @@ function AdminDashboardPage() {
                             className: "h-64 w-full"
                         }, void 0, false, {
                             fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                            lineNumber: 134,
+                            lineNumber: 136,
                             columnNumber: 25
                         }, this) : data?.chartData && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$admin$2f$atm$2d$status$2d$chart$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AtmStatusChart"], {
                             data: data.chartData
                         }, void 0, false, {
                             fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                            lineNumber: 136,
+                            lineNumber: 138,
                             columnNumber: 44
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                        lineNumber: 132,
+                        lineNumber: 134,
                         columnNumber: 17
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-                lineNumber: 127,
+                lineNumber: 129,
                 columnNumber: 13
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/admin/(panel)/dashboard/page.tsx",
-        lineNumber: 103,
+        lineNumber: 107,
         columnNumber: 9
     }, this);
 }
