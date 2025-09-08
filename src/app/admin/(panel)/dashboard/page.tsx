@@ -7,8 +7,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Users, CreditCard, AlertCircle } from 'lucide-react';
 import { AtmStatusChart } from '@/components/admin/atm-status-chart';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '@/firebase/init';
+import { db, auth } from '@/firebase/init';
 import type { Atm } from '@/types';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export interface DashboardData {
     atmCount: number;
@@ -28,14 +29,9 @@ function AdminDashboardPage() {
 
     useEffect(() => {
         const getDashboardData = async (): Promise<DashboardData> => {
-            // NOTE: This now uses the CLIENT SDK.
-            // Make sure your Firestore rules allow the admin user to read these collections.
             const atmsRef = collection(db, "atms");
             const usersRef = collection(db, "users");
 
-            // Fetching documents using the client SDK. The currently logged-in user's
-            // authentication state (and custom claims, if any) will be used by Firestore
-            // to evaluate security rules.
             const [atmsSnapshot, usersSnapshot] = await Promise.all([
                 getDocs(atmsRef),
                 getDocs(usersRef)
@@ -84,7 +80,16 @@ function AdminDashboardPage() {
             }
         };
 
-        fetchData();
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user && user.email === 'admin@admin.com') {
+                fetchData();
+            } else {
+                setError("Acesso não autorizado.");
+                setLoading(false);
+            }
+        });
+
+        return () => unsubscribe();
     }, []);
 
     if (error) {
