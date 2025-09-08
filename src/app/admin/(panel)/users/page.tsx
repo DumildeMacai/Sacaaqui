@@ -7,6 +7,7 @@ import type { User } from "@/types";
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db, auth } from "@/firebase/init";
+import { onAuthStateChanged } from "firebase/auth";
 
 
 export default function AdminUsersPage() {
@@ -45,8 +46,10 @@ export default function AdminUsersPage() {
             }
         };
 
-        const unsubscribe = auth.onAuthStateChanged((user) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user && user.email === 'admin@admin.com') {
+                console.log("USERS: UID Logado:", user.uid);
+                console.log("USERS: Email Logado:", user.email);
                 fetchUsers();
             } else {
                 // Se o utilizador não for o admin, definimos o erro e paramos o carregamento
