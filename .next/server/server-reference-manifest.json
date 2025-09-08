@@ -1,5 +1,39 @@
 {
-  "node": {},
+  "node": {
+    "408cbc0cba845c177411416c89f0ebf240f0dbfabd": {
+      "workers": {
+        "app/admin/(panel)/suggestions/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/suggestions/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/manage-suggestion.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/actions/geocode-address.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/admin/(panel)/suggestions/page": "action-browser"
+      }
+    },
+    "40bd35e0421fcdfe86e5e3d617a874443e7a41d37f": {
+      "workers": {
+        "app/admin/(panel)/suggestions/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/suggestions/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/manage-suggestion.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/actions/geocode-address.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/admin/(panel)/suggestions/page": "action-browser"
+      }
+    },
+    "40a120578ee9bf31fe37699d6fb9705ec561252117": {
+      "workers": {
+        "app/admin/(panel)/suggestions/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/suggestions/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/manage-suggestion.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/actions/geocode-address.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/admin/(panel)/suggestions/page": "action-browser"
+      }
+    }
+  },
   "edge": {},
   "encryptionKey": "4cdjO+6sR6PdNjExhqxQgUgNISkqSH6C03nPaR/PmtU="
 }

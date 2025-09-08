@@ -6,8 +6,8 @@ import { UserDataTable } from "@/components/admin/user-data-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { User } from "@/types";
 import { useEffect, useState } from "react";
-import { db } from '@/firebase/init';
-import { collection, getDocs, query } from 'firebase/firestore';
+import { getUsersAction } from "@/actions/get-users";
+import { auth } from "@/firebase/init";
 
 
 export default function AdminUsersPage() {
@@ -19,25 +19,22 @@ export default function AdminUsersPage() {
         const fetchUsers = async () => {
             try {
                 setLoading(true);
-                const q = query(collection(db, "users"));
-                const usersSnapshot = await getDocs(q);
 
-                if (usersSnapshot.empty) {
-                    setUsers([]);
-                } else {
-                     const usersData: User[] = usersSnapshot.docs.map(doc => {
-                        const data = doc.data();
-                        return {
-                            id: doc.id,
-                            name: data.name || '',
-                            email: data.email || '',
-                            dateOfBirth: data.dateOfBirth || '',
-                            phoneNumber: data.phoneNumber || '',
-                            reputation: data.reputation || 0,
-                        };
-                    });
-                    setUsers(usersData);
+                // We need to pass the user's auth token to the server action
+                // so it can verify that the user is an admin.
+                const currentUser = auth.currentUser;
+                if (!currentUser) {
+                    throw new Error("Utilizador não autenticado.");
                 }
+                
+                const result = await getUsersAction();
+
+                if ('error' in result) {
+                    throw new Error(result.error);
+                }
+
+                setUsers(result.users);
+
             } catch (err: any) {
                 console.error(err);
                 setError('Failed to fetch users');
@@ -46,7 +43,16 @@ export default function AdminUsersPage() {
             }
         };
 
-        fetchUsers();
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (user) {
+                fetchUsers();
+            } else {
+                setLoading(false);
+                setError("Por favor, faça login para ver os utilizadores.");
+            }
+        });
+
+        return () => unsubscribe();
     }, []);
 
 

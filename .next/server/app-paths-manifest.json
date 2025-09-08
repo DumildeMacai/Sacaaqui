@@ -1,4 +1,7 @@
 {
+  "/admin/(panel)/atms/page": "app/admin/(panel)/atms/page.js",
   "/admin/(panel)/dashboard/page": "app/admin/(panel)/dashboard/page.js",
+  "/admin/(panel)/suggestions/page": "app/admin/(panel)/suggestions/page.js",
+  "/admin/(panel)/users/page": "app/admin/(panel)/users/page.js",
   "/page": "app/page.js"
 }
