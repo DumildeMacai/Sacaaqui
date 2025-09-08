@@ -6,8 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users, CreditCard, AlertCircle } from 'lucide-react';
 import { AtmStatusChart } from '@/components/admin/atm-status-chart';
-import type { Atm } from '@/types';
 import { getDashboardData } from '@/actions/get-admin-data';
+import { auth } from '@/firebase/init';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export interface DashboardData {
     atmCount: number;
@@ -26,23 +27,30 @@ function AdminDashboardPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const result = await getDashboardData();
-                if (result.error) {
-                    throw new Error(result.error);
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user && user.email === 'admin@admin.com') {
+                try {
+                    const idToken = await user.getIdToken();
+                    const result = await getDashboardData(idToken);
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+                    setData(result.data);
+                } catch (err: any) {
+                    console.error("Error fetching dashboard data:", err);
+                    setError(err.message || "Ocorreu um erro desconhecido.");
+                } finally {
+                    setLoading(false);
                 }
-                setData(result.data);
-            } catch (err: any) {
-                console.error("Error fetching dashboard data:", err);
-                setError(err.message || "Ocorreu um erro desconhecido.");
-            } finally {
+            } else {
+                // Not an admin or not logged in
                 setLoading(false);
+                // The layout already handles redirection, but we can set an error for clarity
+                setError("Acesso não autorizado.");
             }
-        };
+        });
 
-        fetchData();
+        return () => unsubscribe();
     }, []);
 
     if (error) {

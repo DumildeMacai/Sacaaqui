@@ -6,6 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { User } from "@/types";
 import { useEffect, useState } from "react";
 import { getUsersData } from "@/actions/get-admin-data";
+import { auth } from "@/firebase/init";
+import { onAuthStateChanged } from "firebase/auth";
 
 
 export default function AdminUsersPage() {
@@ -13,23 +15,29 @@ export default function AdminUsersPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                setLoading(true);
-                const result = await getUsersData();
-                if (result.error) {
-                    throw new Error(result.error);
+     useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user && user.email === 'admin@admin.com') {
+                try {
+                    setLoading(true);
+                    const idToken = await user.getIdToken();
+                    const result = await getUsersData(idToken);
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+                    setUsers(result.users || []);
+                } catch (err: any) {
+                    console.error(err);
+                    setError('Falha ao buscar utilizadores. Verifique as permissões e os logs do servidor.');
+                } finally {
+                    setLoading(false);
                 }
-                setUsers(result.users || []);
-            } catch (err: any) {
-                console.error(err);
-                setError('Falha ao buscar utilizadores. Verifique as permissões e os logs do servidor.');
-            } finally {
-                setLoading(false);
+            } else {
+                 setLoading(false);
+                 setError('Acesso não autorizado.');
             }
-        };
-        fetchUsers();
+        });
+        return () => unsubscribe();
     }, []);
 
 

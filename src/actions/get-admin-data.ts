@@ -1,18 +1,15 @@
 
 'use server';
 
-import { headers } from 'next/headers';
 import { adminDb, adminAuth } from '@/firebase/admin';
 import type { Atm, User } from '@/types';
 import type { DashboardData } from '@/app/admin/(panel)/dashboard/page';
 
-async function verifyAdmin(): Promise<{ isAdmin: boolean; error?: string }> {
+async function verifyAdmin(idToken: string | undefined): Promise<{ isAdmin: boolean; error?: string }> {
+  if (!idToken) {
+    return { isAdmin: false, error: 'No token provided' };
+  }
   try {
-    const authorization = headers().get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-      return { isAdmin: false, error: 'No token provided' };
-    }
-    const idToken = authorization.split('Bearer ')[1];
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     
     if (decodedToken.email !== 'admin@admin.com') {
@@ -26,8 +23,8 @@ async function verifyAdmin(): Promise<{ isAdmin: boolean; error?: string }> {
   }
 }
 
-export async function getDashboardData(): Promise<{ data?: DashboardData; error?: string; }> {
-    const authResult = await verifyAdmin();
+export async function getDashboardData(idToken: string | undefined): Promise<{ data?: DashboardData; error?: string; }> {
+    const authResult = await verifyAdmin(idToken);
     if (!authResult.isAdmin) {
         return { error: `Acesso não autorizado: ${authResult.error}` };
     }
@@ -71,8 +68,8 @@ export async function getDashboardData(): Promise<{ data?: DashboardData; error?
 }
 
 
-export async function getUsersData(): Promise<{ users?: User[]; error?: string; }> {
-    const authResult = await verifyAdmin();
+export async function getUsersData(idToken: string | undefined): Promise<{ users?: User[]; error?: string; }> {
+    const authResult = await verifyAdmin(idToken);
     if (!authResult.isAdmin) {
         return { error: `Acesso não autorizado: ${authResult.error}` };
     }

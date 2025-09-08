@@ -1,36 +1,14 @@
 {
   "node": {
-    "408cbc0cba845c177411416c89f0ebf240f0dbfabd": {
+    "4040cfe520810cccf3faf1b4221396e17c97dd38ce": {
       "workers": {
-        "app/admin/(panel)/suggestions/page": {
-          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/suggestions/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/manage-suggestion.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/actions/geocode-address.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+        "app/admin/(panel)/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/get-admin-data.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
         }
       },
       "layer": {
-        "app/admin/(panel)/suggestions/page": "action-browser"
-      }
-    },
-    "40bd35e0421fcdfe86e5e3d617a874443e7a41d37f": {
-      "workers": {
-        "app/admin/(panel)/suggestions/page": {
-          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/suggestions/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/manage-suggestion.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/actions/geocode-address.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/admin/(panel)/suggestions/page": "action-browser"
-      }
-    },
-    "40a120578ee9bf31fe37699d6fb9705ec561252117": {
-      "workers": {
-        "app/admin/(panel)/suggestions/page": {
-          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/suggestions/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/manage-suggestion.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/actions/geocode-address.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/admin/(panel)/suggestions/page": "action-browser"
+        "app/admin/(panel)/dashboard/page": "action-browser"
       }
     }
   },
