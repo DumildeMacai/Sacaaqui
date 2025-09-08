@@ -1,13 +1,12 @@
 
-
 'use client'
 
 import { UserDataTable } from "@/components/admin/user-data-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { User } from "@/types";
 import { useEffect, useState } from "react";
-import { getUsersAction } from "@/actions/get-users";
-import { auth } from "@/firebase/init";
+import { collection, getDocs } from "firebase/firestore";
+import { db, auth } from "@/firebase/init";
 
 
 export default function AdminUsersPage() {
@@ -19,31 +18,41 @@ export default function AdminUsersPage() {
         const fetchUsers = async () => {
             try {
                 setLoading(true);
-                const result = await getUsersAction();
-
-                if ('error' in result) {
-                    throw new Error(result.error);
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                
+                if (usersSnapshot.empty) {
+                    setUsers([]);
+                    return;
                 }
-
-                setUsers(result.users);
+                
+                const usersData: User[] = usersSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        name: data.name || '',
+                        email: data.email || '',
+                        dateOfBirth: data.dateOfBirth || '',
+                        phoneNumber: data.phoneNumber || '',
+                        reputation: data.reputation ?? 0,
+                    };
+                });
+                
+                setUsers(usersData);
 
             } catch (err: any) {
                 console.error(err);
-                setError('Failed to fetch users');
+                setError('Falha ao buscar utilizadores. Verifique as regras do Firestore.');
             } finally {
                 setLoading(false);
             }
         };
 
-        // The auth state listener ensures we only fetch data once the user's
-        // auth state is confirmed. The route protection is handled by the layout.
         const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
+            if (user && user.email === 'admin@admin.com') {
                 fetchUsers();
             } else {
-                // This case should not be reached if the layout protection is working.
                 setLoading(false);
-                setError("Por favor, faça login para ver os utilizadores.");
+                setError("Acesso não autorizado.");
             }
         });
 
@@ -52,7 +61,7 @@ export default function AdminUsersPage() {
 
 
     if (error) {
-        return <div className="text-destructive text-center">Erro ao carregar os utilizadores. Tente novamente mais tarde.</div>;
+        return <div className="text-destructive text-center">{error}</div>;
     }
 
     if (loading) {
