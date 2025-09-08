@@ -384,9 +384,9 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$admin$2f$user$2d$data$2d$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/admin/user-data-table.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/skeleton.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/firebase/init.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$firestore$2f$dist$2f$esm$2f$index$2e$esm$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$module__evaluation$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/firestore/dist/esm/index.esm.js [app-client] (ecmascript) <module evaluation>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@firebase/firestore/dist/index.esm2017.js [app-client] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/firebase/init.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$auth$2f$dist$2f$esm$2f$index$2e$esm$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$module__evaluation$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/auth/dist/esm/index.esm.js [app-client] (ecmascript) <module evaluation>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$esm2017$2f$index$2d$35c79a8a$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__z__as__onAuthStateChanged$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/node_modules/@firebase/auth/dist/esm2017/index-35c79a8a.js [app-client] (ecmascript) <export z as onAuthStateChanged>");
 ;
@@ -405,50 +405,45 @@ function AdminUsersPage() {
     const [error, setError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "AdminUsersPage.useEffect": ()=>{
-            const fetchUsers = {
-                "AdminUsersPage.useEffect.fetchUsers": async ()=>{
-                    try {
-                        // Não é necessário definir o setLoading(true) aqui, já é tratado pelo estado inicial
-                        const usersSnapshot = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getDocs"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["db"], 'users'));
-                        if (usersSnapshot.empty) {
-                            setUsers([]);
-                        } else {
-                            const usersData = usersSnapshot.docs.map({
-                                "AdminUsersPage.useEffect.fetchUsers.usersData": (doc)=>{
-                                    const data = doc.data();
-                                    return {
-                                        id: doc.id,
-                                        name: data.name || '',
-                                        email: data.email || '',
-                                        dateOfBirth: data.dateOfBirth || '',
-                                        phoneNumber: data.phoneNumber || '',
-                                        reputation: data.reputation ?? 0
-                                    };
-                                }
-                            }["AdminUsersPage.useEffect.fetchUsers.usersData"]);
-                            setUsers(usersData);
-                        }
-                    } catch (err) {
-                        console.error(err);
-                        setError('Falha ao buscar utilizadores. Verifique as regras do Firestore.');
-                    } finally{
-                        // Apenas definimos o loading como false depois de tentar buscar os dados
-                        setLoading(false);
-                    }
-                }
-            }["AdminUsersPage.useEffect.fetchUsers"];
             const unsubscribe = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$esm2017$2f$index$2d$35c79a8a$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__z__as__onAuthStateChanged$3e$__["onAuthStateChanged"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["auth"], {
-                "AdminUsersPage.useEffect.unsubscribe": (user)=>{
+                "AdminUsersPage.useEffect.unsubscribe": async (user)=>{
                     if (user && user.email === 'admin@admin.com') {
-                        fetchUsers();
+                        try {
+                            const usersSnapshot = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getDocs"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["db"], 'users'));
+                            if (usersSnapshot.empty) {
+                                setUsers([]);
+                            } else {
+                                const usersData = usersSnapshot.docs.map({
+                                    "AdminUsersPage.useEffect.unsubscribe.usersData": (doc)=>{
+                                        const data = doc.data();
+                                        return {
+                                            id: doc.id,
+                                            name: data.name || '',
+                                            email: data.email || '',
+                                            dateOfBirth: data.dateOfBirth || '',
+                                            phoneNumber: data.phoneNumber || '',
+                                            reputation: data.reputation ?? 0
+                                        };
+                                    }
+                                }["AdminUsersPage.useEffect.unsubscribe.usersData"]);
+                                setUsers(usersData);
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            setError('Falha ao buscar utilizadores. Verifique as permissões e os logs do servidor.');
+                        } finally{
+                            setLoading(false);
+                        }
                     } else {
-                        // Se o utilizador não for o admin, definimos o erro e paramos o carregamento
-                        setError("Acesso não autorizado.");
                         setLoading(false);
+                        if (!user) {
+                            setError('Utilizador não autenticado.');
+                        } else {
+                            setError('Acesso não autorizado.');
+                        }
                     }
                 }
             }["AdminUsersPage.useEffect.unsubscribe"]);
-            // Cleanup da subscrição quando o componente é desmontado
             return ({
                 "AdminUsersPage.useEffect": ()=>unsubscribe()
             })["AdminUsersPage.useEffect"];
@@ -460,7 +455,7 @@ function AdminUsersPage() {
             children: error
         }, void 0, false, {
             fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-            lineNumber: 65,
+            lineNumber: 59,
             columnNumber: 16
         }, this);
     }
@@ -476,25 +471,25 @@ function AdminUsersPage() {
                                 className: "h-8 w-64"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                                lineNumber: 73,
+                                lineNumber: 67,
                                 columnNumber: 25
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Skeleton"], {
                                 className: "h-4 w-80 mt-2"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                                lineNumber: 74,
+                                lineNumber: 68,
                                 columnNumber: 25
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                        lineNumber: 72,
+                        lineNumber: 66,
                         columnNumber: 21
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                    lineNumber: 71,
+                    lineNumber: 65,
                     columnNumber: 18
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -506,38 +501,38 @@ function AdminUsersPage() {
                                 className: "h-12 w-full"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                                lineNumber: 79,
+                                lineNumber: 73,
                                 columnNumber: 25
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Skeleton"], {
                                 className: "h-12 w-full"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                                lineNumber: 80,
+                                lineNumber: 74,
                                 columnNumber: 25
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Skeleton"], {
                                 className: "h-12 w-full"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                                lineNumber: 81,
+                                lineNumber: 75,
                                 columnNumber: 25
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                        lineNumber: 78,
+                        lineNumber: 72,
                         columnNumber: 21
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                    lineNumber: 77,
+                    lineNumber: 71,
                     columnNumber: 17
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-            lineNumber: 70,
+            lineNumber: 64,
             columnNumber: 13
         }, this);
     }
@@ -546,12 +541,12 @@ function AdminUsersPage() {
             data: users
         }, void 0, false, {
             fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-            lineNumber: 90,
+            lineNumber: 84,
             columnNumber: 13
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-        lineNumber: 89,
+        lineNumber: 83,
         columnNumber: 9
     }, this);
 }

@@ -344,9 +344,9 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$admin$2f$user$2d$data$2d$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/admin/user-data-table.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/skeleton.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/firebase/init.ts [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$firestore$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$module__evaluation$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/firestore/dist/index.mjs [app-ssr] (ecmascript) <module evaluation>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@firebase/firestore/dist/index.node.mjs [app-ssr] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/firebase/init.ts [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$auth$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$module__evaluation$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/auth/dist/index.mjs [app-ssr] (ecmascript) <module evaluation>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$a9833fe5$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__z__as__onAuthStateChanged$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/node_modules/@firebase/auth/dist/node-esm/totp-a9833fe5.js [app-ssr] (ecmascript) <export z as onAuthStateChanged>");
 'use client';
@@ -362,44 +362,41 @@ function AdminUsersPage() {
     const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
     const [error, setError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        const fetchUsers = async ()=>{
-            try {
-                // Não é necessário definir o setLoading(true) aqui, já é tratado pelo estado inicial
-                const usersSnapshot = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getDocs"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["db"], 'users'));
-                if (usersSnapshot.empty) {
-                    setUsers([]);
-                } else {
-                    const usersData = usersSnapshot.docs.map((doc)=>{
-                        const data = doc.data();
-                        return {
-                            id: doc.id,
-                            name: data.name || '',
-                            email: data.email || '',
-                            dateOfBirth: data.dateOfBirth || '',
-                            phoneNumber: data.phoneNumber || '',
-                            reputation: data.reputation ?? 0
-                        };
-                    });
-                    setUsers(usersData);
-                }
-            } catch (err) {
-                console.error(err);
-                setError('Falha ao buscar utilizadores. Verifique as regras do Firestore.');
-            } finally{
-                // Apenas definimos o loading como false depois de tentar buscar os dados
-                setLoading(false);
-            }
-        };
-        const unsubscribe = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$a9833fe5$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__z__as__onAuthStateChanged$3e$__["onAuthStateChanged"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["auth"], (user)=>{
+        const unsubscribe = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$a9833fe5$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__z__as__onAuthStateChanged$3e$__["onAuthStateChanged"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["auth"], async (user)=>{
             if (user && user.email === 'admin@admin.com') {
-                fetchUsers();
+                try {
+                    const usersSnapshot = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getDocs"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$init$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["db"], 'users'));
+                    if (usersSnapshot.empty) {
+                        setUsers([]);
+                    } else {
+                        const usersData = usersSnapshot.docs.map((doc)=>{
+                            const data = doc.data();
+                            return {
+                                id: doc.id,
+                                name: data.name || '',
+                                email: data.email || '',
+                                dateOfBirth: data.dateOfBirth || '',
+                                phoneNumber: data.phoneNumber || '',
+                                reputation: data.reputation ?? 0
+                            };
+                        });
+                        setUsers(usersData);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    setError('Falha ao buscar utilizadores. Verifique as permissões e os logs do servidor.');
+                } finally{
+                    setLoading(false);
+                }
             } else {
-                // Se o utilizador não for o admin, definimos o erro e paramos o carregamento
-                setError("Acesso não autorizado.");
                 setLoading(false);
+                if (!user) {
+                    setError('Utilizador não autenticado.');
+                } else {
+                    setError('Acesso não autorizado.');
+                }
             }
         });
-        // Cleanup da subscrição quando o componente é desmontado
         return ()=>unsubscribe();
     }, []);
     if (error) {
@@ -408,7 +405,7 @@ function AdminUsersPage() {
             children: error
         }, void 0, false, {
             fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-            lineNumber: 65,
+            lineNumber: 59,
             columnNumber: 16
         }, this);
     }
@@ -424,25 +421,25 @@ function AdminUsersPage() {
                                 className: "h-8 w-64"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                                lineNumber: 73,
+                                lineNumber: 67,
                                 columnNumber: 25
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Skeleton"], {
                                 className: "h-4 w-80 mt-2"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                                lineNumber: 74,
+                                lineNumber: 68,
                                 columnNumber: 25
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                        lineNumber: 72,
+                        lineNumber: 66,
                         columnNumber: 21
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                    lineNumber: 71,
+                    lineNumber: 65,
                     columnNumber: 18
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -454,38 +451,38 @@ function AdminUsersPage() {
                                 className: "h-12 w-full"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                                lineNumber: 79,
+                                lineNumber: 73,
                                 columnNumber: 25
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Skeleton"], {
                                 className: "h-12 w-full"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                                lineNumber: 80,
+                                lineNumber: 74,
                                 columnNumber: 25
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Skeleton"], {
                                 className: "h-12 w-full"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                                lineNumber: 81,
+                                lineNumber: 75,
                                 columnNumber: 25
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                        lineNumber: 78,
+                        lineNumber: 72,
                         columnNumber: 21
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-                    lineNumber: 77,
+                    lineNumber: 71,
                     columnNumber: 17
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-            lineNumber: 70,
+            lineNumber: 64,
             columnNumber: 13
         }, this);
     }
@@ -494,12 +491,12 @@ function AdminUsersPage() {
             data: users
         }, void 0, false, {
             fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-            lineNumber: 90,
+            lineNumber: 84,
             columnNumber: 13
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/app/admin/(panel)/users/page.tsx",
-        lineNumber: 89,
+        lineNumber: 83,
         columnNumber: 9
     }, this);
 }

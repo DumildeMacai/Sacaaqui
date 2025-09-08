@@ -2,7 +2,7 @@
 'use server';
 
 import { adminDb, adminAuth } from '@/firebase/admin';
-import type { Atm, User } from '@/types';
+import type { Atm } from '@/types';
 import type { DashboardData } from '@/app/admin/(panel)/dashboard/page';
 
 async function verifyAdmin(idToken: string | undefined): Promise<{ isAdmin: boolean; error?: string }> {
@@ -64,37 +64,5 @@ export async function getDashboardData(idToken: string | undefined): Promise<{ d
     } catch (error: any) {
         console.error("Error fetching dashboard data with Admin SDK:", error);
         return { error: `Falha ao obter dados do dashboard: ${error.message}` };
-    }
-}
-
-
-export async function getUsersData(idToken: string | undefined): Promise<{ users?: User[]; error?: string; }> {
-    const authResult = await verifyAdmin(idToken);
-    if (!authResult.isAdmin) {
-        return { error: `Acesso não autorizado: ${authResult.error}` };
-    }
-
-    try {
-        const usersSnapshot = await adminDb.collection('users').get();
-        if (usersSnapshot.empty) {
-            return { users: [] };
-        }
-        
-        const usersData: User[] = usersSnapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                name: data.name || '',
-                email: data.email || '',
-                dateOfBirth: data.dateOfBirth || '',
-                phoneNumber: data.phoneNumber || '',
-                reputation: data.reputation ?? 0,
-            };
-        });
-
-        return { users: usersData };
-    } catch (error: any) {
-        console.error("Error fetching users with Admin SDK:", error);
-        return { error: `Falha ao obter utilizadores: ${error.message}` };
     }
 }
