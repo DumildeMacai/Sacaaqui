@@ -19,14 +19,6 @@ export default function AdminUsersPage() {
         const fetchUsers = async () => {
             try {
                 setLoading(true);
-
-                // We need to pass the user's auth token to the server action
-                // so it can verify that the user is an admin.
-                const currentUser = auth.currentUser;
-                if (!currentUser) {
-                    throw new Error("Utilizador não autenticado.");
-                }
-                
                 const result = await getUsersAction();
 
                 if ('error' in result) {
@@ -43,10 +35,13 @@ export default function AdminUsersPage() {
             }
         };
 
+        // The auth state listener ensures we only fetch data once the user's
+        // auth state is confirmed. The route protection is handled by the layout.
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
                 fetchUsers();
             } else {
+                // This case should not be reached if the layout protection is working.
                 setLoading(false);
                 setError("Por favor, faça login para ver os utilizadores.");
             }
