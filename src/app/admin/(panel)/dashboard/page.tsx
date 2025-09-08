@@ -35,7 +35,9 @@ function AdminDashboardPage() {
                     if (result.error) {
                         throw new Error(result.error);
                     }
-                    setData(result.data);
+                    if(result.data) {
+                        setData(result.data);
+                    }
                 } catch (err: any) {
                     console.error("Error fetching dashboard data:", err);
                     setError(err.message || "Ocorreu um erro desconhecido.");
@@ -43,9 +45,7 @@ function AdminDashboardPage() {
                     setLoading(false);
                 }
             } else {
-                // Not an admin or not logged in
                 setLoading(false);
-                // The layout already handles redirection, but we can set an error for clarity
                 setError("Acesso não autorizado.");
             }
         });

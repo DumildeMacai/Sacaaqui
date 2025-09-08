@@ -24,9 +24,10 @@ function initializeAdminApp() {
         return (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["app"])();
     }
     try {
-        return (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["initializeApp"])({
-            credential: __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["credential"].applicationDefault()
-        });
+        // Initialize without explicit credentials.
+        // In a managed environment like Firebase/Google Cloud,
+        // the SDK will automatically discover the credentials.
+        return (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["initializeApp"])();
     } catch (error) {
         console.error('Firebase admin initialization error', error);
         throw new Error('Failed to initialize Firebase Admin SDK. Check server logs.');
