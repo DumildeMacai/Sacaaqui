@@ -1,22 +1,22 @@
 
 import * as admin from 'firebase-admin';
 
-// This function ensures we only initialize the app once.
-const initAdmin = () => {
-  if (admin.apps.length > 0) {
-    return;
-  }
-  
-  try {
-     admin.initializeApp({
-      credential: admin.credential.applicationDefault(),
-    });
-  } catch (error: any) {
-    console.error('Firebase admin initialization error', error.stack);
-  }
-};
+function initializeAdminApp() {
+    if (admin.apps.length > 0) {
+        return admin.app();
+    }
+    try {
+        return admin.initializeApp({
+            credential: admin.credential.applicationDefault(),
+        });
+    } catch (error) {
+        console.error('Firebase admin initialization error', error);
+        throw new Error('Failed to initialize Firebase Admin SDK. Check server logs.');
+    }
+}
 
-initAdmin();
+const adminApp = initializeAdminApp();
+const adminDb = admin.firestore(adminApp);
+const adminAuth = admin.auth(adminApp);
 
-export const adminDb = admin.firestore();
-export const adminAuth = admin.auth();
+export { adminDb, adminAuth };
