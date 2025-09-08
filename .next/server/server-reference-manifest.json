@@ -1,5 +1,17 @@
 {
-  "node": {},
+  "node": {
+    "4040cfe520810cccf3faf1b4221396e17c97dd38ce": {
+      "workers": {
+        "app/admin/(panel)/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/get-admin-data.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/admin/(panel)/dashboard/page": "action-browser"
+      }
+    }
+  },
   "edge": {},
   "encryptionKey": "4cdjO+6sR6PdNjExhqxQgUgNISkqSH6C03nPaR/PmtU="
 }

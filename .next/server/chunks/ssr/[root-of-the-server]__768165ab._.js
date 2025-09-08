@@ -43,9 +43,8 @@ const adminAuth = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase
 
 var { g: global, __dirname } = __turbopack_context__;
 {
-/* __next_internal_action_entry_do_not_use__ [{"4040cfe520810cccf3faf1b4221396e17c97dd38ce":"getDashboardData","40b713bbd34af92c36becad1119c82b5c71e6c929d":"getUsersData"},"",""] */ __turbopack_context__.s({
-    "getDashboardData": (()=>getDashboardData),
-    "getUsersData": (()=>getUsersData)
+/* __next_internal_action_entry_do_not_use__ [{"4040cfe520810cccf3faf1b4221396e17c97dd38ce":"getDashboardData"},"",""] */ __turbopack_context__.s({
+    "getDashboardData": (()=>getDashboardData)
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/build/webpack/loaders/next-flight-loader/server-reference.js [app-rsc] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$app$2d$render$2f$encryption$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/app-render/encryption.js [app-rsc] (ecmascript)");
@@ -138,48 +137,11 @@ async function getDashboardData(idToken) {
         };
     }
 }
-async function getUsersData(idToken) {
-    const authResult = await verifyAdmin(idToken);
-    if (!authResult.isAdmin) {
-        return {
-            error: `Acesso não autorizado: ${authResult.error}`
-        };
-    }
-    try {
-        const usersSnapshot = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$admin$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["adminDb"].collection('users').get();
-        if (usersSnapshot.empty) {
-            return {
-                users: []
-            };
-        }
-        const usersData = usersSnapshot.docs.map((doc)=>{
-            const data = doc.data();
-            return {
-                id: doc.id,
-                name: data.name || '',
-                email: data.email || '',
-                dateOfBirth: data.dateOfBirth || '',
-                phoneNumber: data.phoneNumber || '',
-                reputation: data.reputation ?? 0
-            };
-        });
-        return {
-            users: usersData
-        };
-    } catch (error) {
-        console.error("Error fetching users with Admin SDK:", error);
-        return {
-            error: `Falha ao obter utilizadores: ${error.message}`
-        };
-    }
-}
 ;
 (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$validate$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ensureServerEntryExports"])([
-    getDashboardData,
-    getUsersData
+    getDashboardData
 ]);
 (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["registerServerReference"])(getDashboardData, "4040cfe520810cccf3faf1b4221396e17c97dd38ce", null);
-(0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["registerServerReference"])(getUsersData, "40b713bbd34af92c36becad1119c82b5c71e6c929d", null);
 }}),
 "[project]/.next-internal/server/app/admin/(panel)/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/get-admin-data.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript) <locals>": ((__turbopack_context__) => {
 "use strict";
