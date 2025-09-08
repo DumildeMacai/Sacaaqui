@@ -5,8 +5,21 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users, CreditCard, AlertCircle } from 'lucide-react';
-import { getDashboardData, type DashboardData } from '@/actions/get-dashboard-data';
 import { AtmStatusChart } from '@/components/admin/atm-status-chart';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/firebase/init';
+import type { Atm } from '@/types';
+
+export interface DashboardData {
+    atmCount: number;
+    userCount: number;
+    chartData: {
+        name: string;
+        value: number;
+        fill: string;
+    }[];
+}
+
 
 function AdminDashboardPage() {
     const [data, setData] = useState<DashboardData | null>(null);
@@ -14,6 +27,50 @@ function AdminDashboardPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        const getDashboardData = async (): Promise<DashboardData> => {
+            // NOTE: This now uses the CLIENT SDK.
+            // Make sure your Firestore rules allow the admin user to read these collections.
+            const atmsRef = collection(db, "atms");
+            const usersRef = collection(db, "users");
+
+            // Fetching documents using the client SDK. The currently logged-in user's
+            // authentication state (and custom claims, if any) will be used by Firestore
+            // to evaluate security rules.
+            const [atmsSnapshot, usersSnapshot] = await Promise.all([
+                getDocs(atmsRef),
+                getDocs(usersRef)
+            ]);
+
+            const atmCount = atmsSnapshot.size;
+            const userCount = usersSnapshot.size;
+
+            const statusCounts: { [key in Atm['status']]: number } = {
+                com_dinheiro: 0,
+                sem_dinheiro: 0,
+                desconhecido: 0,
+            };
+
+            atmsSnapshot.forEach(doc => {
+                const atm = doc.data() as Omit<Atm, 'id'>;
+                if (atm.status && statusCounts[atm.status] !== undefined) {
+                    statusCounts[atm.status]++;
+                }
+            });
+            
+            const chartData = [
+                { name: 'Com Dinheiro', value: statusCounts.com_dinheiro, fill: "var(--color-com_dinheiro)" },
+                { name: 'Sem Dinheiro', value: statusCounts.sem_dinheiro, fill: "var(--color-sem_dinheiro)"  },
+                { name: 'Desconhecido', value: statusCounts.desconhecido, fill: "var(--color-desconhecido)"  },
+            ];
+
+            return {
+                atmCount,
+                userCount,
+                chartData,
+            };
+        }
+
+
         const fetchData = async () => {
             try {
                 setLoading(true);
