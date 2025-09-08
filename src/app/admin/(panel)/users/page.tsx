@@ -17,32 +17,30 @@ export default function AdminUsersPage() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                setLoading(true);
+                // Não é necessário definir o setLoading(true) aqui, já é tratado pelo estado inicial
                 const usersSnapshot = await getDocs(collection(db, 'users'));
                 
                 if (usersSnapshot.empty) {
                     setUsers([]);
-                    return;
+                } else {
+                    const usersData: User[] = usersSnapshot.docs.map(doc => {
+                        const data = doc.data();
+                        return {
+                            id: doc.id,
+                            name: data.name || '',
+                            email: data.email || '',
+                            dateOfBirth: data.dateOfBirth || '',
+                            phoneNumber: data.phoneNumber || '',
+                            reputation: data.reputation ?? 0,
+                        };
+                    });
+                    setUsers(usersData);
                 }
-                
-                const usersData: User[] = usersSnapshot.docs.map(doc => {
-                    const data = doc.data();
-                    return {
-                        id: doc.id,
-                        name: data.name || '',
-                        email: data.email || '',
-                        dateOfBirth: data.dateOfBirth || '',
-                        phoneNumber: data.phoneNumber || '',
-                        reputation: data.reputation ?? 0,
-                    };
-                });
-                
-                setUsers(usersData);
-
             } catch (err: any) {
                 console.error(err);
                 setError('Falha ao buscar utilizadores. Verifique as regras do Firestore.');
             } finally {
+                // Apenas definimos o loading como false depois de tentar buscar os dados
                 setLoading(false);
             }
         };
@@ -51,11 +49,13 @@ export default function AdminUsersPage() {
             if (user && user.email === 'admin@admin.com') {
                 fetchUsers();
             } else {
-                setLoading(false);
+                // Se o utilizador não for o admin, definimos o erro e paramos o carregamento
                 setError("Acesso não autorizado.");
+                setLoading(false);
             }
         });
 
+        // Cleanup da subscrição quando o componente é desmontado
         return () => unsubscribe();
     }, []);
 

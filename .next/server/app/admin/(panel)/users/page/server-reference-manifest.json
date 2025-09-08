@@ -1,16 +1,4 @@
 {
-  "node": {
-    "0064b366acb73bcb0edcc6a0e214bdec8fe931163a": {
-      "workers": {
-        "app/admin/(panel)/users/page": {
-          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/users/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/get-users.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/admin/(panel)/users/page": "action-browser"
-      }
-    }
-  },
+  "node": {},
   "edge": {}
 }
