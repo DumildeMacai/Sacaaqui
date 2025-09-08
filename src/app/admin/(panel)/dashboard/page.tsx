@@ -32,15 +32,12 @@ function AdminDashboardPage() {
             if (user && user.email === 'admin@admin.com') {
                 try {
                     const atmsRef = collection(db, "atms");
-                    const usersRef = collection(db, "users");
-
-                    const [atmsSnapshot, usersSnapshot] = await Promise.all([
-                        getDocs(atmsRef),
-                        getDocs(usersRef)
-                    ]);
+                    
+                    // Apenas obter dados dos ATMs. A contagem de utilizadores foi removida
+                    // para evitar problemas de permissões no dashboard.
+                    const atmsSnapshot = await getDocs(atmsRef);
 
                     const atmCount = atmsSnapshot.size;
-                    const userCount = usersSnapshot.size;
                     
                     const statusCounts: { [key in Atm['status']]: number } = {
                         com_dinheiro: 0,
@@ -60,8 +57,9 @@ function AdminDashboardPage() {
                         { name: 'Sem Dinheiro', value: statusCounts.sem_dinheiro, fill: "var(--color-sem_dinheiro)"  },
                         { name: 'Desconhecido', value: statusCounts.desconhecido, fill: "var(--color-desconhecido)"  },
                     ];
-
-                    setData({ atmCount, userCount, chartData });
+                    
+                    // A contagem de utilizadores é definida como 0, pois não a estamos a obter aqui.
+                    setData({ atmCount, userCount: 0, chartData });
 
                 } catch (err: any) {
                     console.error("Error fetching dashboard data:", err);
@@ -119,7 +117,9 @@ function AdminDashboardPage() {
                         <Users className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        {loading ? <Skeleton className="h-8 w-1/4" /> : <div className="text-2xl font-bold">{data?.userCount}</div>}
+                       {/* O total de utilizadores é carregado na sua própria página para evitar problemas de permissão. */}
+                        <div className="text-2xl font-bold">-</div>
+                        <p className="text-xs text-muted-foreground">Ver na página de utilizadores</p>
                     </CardContent>
                 </Card>
             </div>
