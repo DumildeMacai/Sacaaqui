@@ -79,26 +79,22 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 async function verifyAdmin() {
     const authorization = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$headers$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["headers"])().get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
+        // No authorization header, assume not admin.
         return false;
     }
     const idToken = authorization.split('Bearer ')[1];
     try {
         const decodedToken = await (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["auth"])().verifyIdToken(idToken);
+        // Check if the user is the specific admin user.
         return decodedToken.email === 'admin@admin.com';
     } catch (error) {
+        // Token verification failed (invalid, expired, etc.)
         console.error("Error verifying admin token:", error);
         return false;
     }
 }
 async function getUsersAction() {
     try {
-        // This check is not strictly necessary if your Firestore rules are correctly
-        // set up for the Admin SDK, but it adds an extra layer of security.
-        const isAdmin = await verifyAdmin();
-        if (!isAdmin) {
-        // This case should ideally not be hit if the page is protected.
-        // return { error: "Acesso não autorizado." };
-        }
         const db = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2f$admin$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getAdminDb"])();
         const usersSnapshot = await db.collection('users').get();
         if (usersSnapshot.empty) {
