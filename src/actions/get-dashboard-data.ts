@@ -1,7 +1,8 @@
 
 'use server';
 
-import { getAdminDb } from '@/firebase/admin';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/firebase/init';
 import type { Atm } from '@/types';
 
 export interface DashboardData {
@@ -16,13 +17,17 @@ export interface DashboardData {
 
 export async function getDashboardData(): Promise<DashboardData> {
     try {
-        const adminDb = getAdminDb();
-        const atmsRef = adminDb.collection("atms");
-        const usersRef = adminDb.collection("users");
+        // NOTE: This now uses the CLIENT SDK.
+        // Make sure your Firestore rules allow the admin user to read these collections.
+        const atmsRef = collection(db, "atms");
+        const usersRef = collection(db, "users");
 
+        // Fetching documents using the client SDK. The currently logged-in user's
+        // authentication state (and custom claims, if any) will be used by Firestore
+        // to evaluate security rules.
         const [atmsSnapshot, usersSnapshot] = await Promise.all([
-            atmsRef.get(),
-            usersRef.get()
+            getDocs(atmsRef),
+            getDocs(usersRef)
         ]);
 
         const atmCount = atmsSnapshot.size;
@@ -36,11 +41,11 @@ export async function getDashboardData(): Promise<DashboardData> {
 
         atmsSnapshot.forEach(doc => {
             const atm = doc.data() as Omit<Atm, 'id'>;
-            if (statusCounts[atm.status] !== undefined) {
+            if (atm.status && statusCounts[atm.status] !== undefined) {
                 statusCounts[atm.status]++;
             }
         });
-
+        
         const chartData = [
             { name: 'Com Dinheiro', value: statusCounts.com_dinheiro, fill: "var(--color-com_dinheiro)" },
             { name: 'Sem Dinheiro', value: statusCounts.sem_dinheiro, fill: "var(--color-sem_dinheiro)"  },
@@ -54,9 +59,9 @@ export async function getDashboardData(): Promise<DashboardData> {
         };
 
     } catch (error) {
-        console.error("Error fetching dashboard data with Admin SDK:", error);
-        // Provide a more specific error message if possible
+        console.error("Error fetching dashboard data with Client SDK in Server Action:", error);
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-        throw new Error(`Failed to fetch dashboard data. Check server logs and Firestore permissions for the service account. Details: ${errorMessage}`);
+        // This error will be caught by the page and displayed to the user.
+        throw new Error(`Failed to fetch dashboard data. Check browser console and Firestore rules. Details: ${errorMessage}`);
     }
 }

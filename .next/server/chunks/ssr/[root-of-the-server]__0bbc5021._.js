@@ -15,8 +15,6 @@ var { g: global, __dirname } = __turbopack_context__;
 {
 // src/firebase/admin.ts
 __turbopack_context__.s({
-    "adminAuth": (()=>adminAuth),
-    "adminDb": (()=>adminDb),
     "getAdminDb": (()=>getAdminDb)
 });
 var __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__ = __turbopack_context__.i("[externals]/firebase-admin [external] (firebase-admin, cjs)");
@@ -34,12 +32,9 @@ if (!__TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$ex
         console.log("For local development, ensure you have run 'gcloud auth application-default login' or have the GOOGLE_APPLICATION_CREDENTIALS environment variable set.");
     }
 }
-const adminDb = __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["default"].firestore();
-const adminAuth = __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["default"].auth();
-;
-function getAdminDb() {
-    return adminDb;
-}
+const getAdminDb = ()=>{
+    return __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2d$admin__$5b$external$5d$__$28$firebase$2d$admin$2c$__cjs$29$__["default"].firestore();
+};
 }}),
 "[project]/src/actions/get-dashboard-data.ts [app-rsc] (ecmascript)": ((__turbopack_context__) => {
 "use strict";
