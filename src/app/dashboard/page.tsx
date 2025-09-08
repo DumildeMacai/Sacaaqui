@@ -1,4 +1,3 @@
-
 'use client';
 import type { Atm } from '@/types'; 
 import { AtmList } from '@/components/atm-list';
