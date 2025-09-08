@@ -6,9 +6,10 @@ function initializeAdminApp() {
         return admin.app();
     }
     try {
-        return admin.initializeApp({
-            credential: admin.credential.applicationDefault(),
-        });
+        // Initialize without explicit credentials.
+        // In a managed environment like Firebase/Google Cloud,
+        // the SDK will automatically discover the credentials.
+        return admin.initializeApp();
     } catch (error) {
         console.error('Firebase admin initialization error', error);
         throw new Error('Failed to initialize Firebase Admin SDK. Check server logs.');
