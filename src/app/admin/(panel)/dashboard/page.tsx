@@ -82,8 +82,6 @@ function AdminDashboardPage() {
 
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user && user.email === 'admin@admin.com') {
-                console.log("DASHBOARD: UID Logado:", user.uid);
-                console.log("DASHBOARD: Email Logado:", user.email);
                 fetchData();
             } else {
                 setError("Acesso não autorizado.");
