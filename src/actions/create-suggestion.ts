@@ -2,6 +2,7 @@
 'use server';
 
 import { getAdminDb } from "@/firebase/admin";
+import { firestore } from "firebase-admin";
 
 // O ID do administrador é fixo para garantir que as notificações sejam sempre enviadas para a conta correta.
 const ADMIN_USER_ID = 'admin_user_id';
@@ -26,8 +27,7 @@ export async function createSuggestionAction(input: CreateSuggestionInput): Prom
     
     try {
         const adminDb = getAdminDb();
-        const FieldValue = adminDb.FieldValue;
-
+        
         // Use a batch to ensure both operations succeed or fail together
         const batch = adminDb.batch();
 
@@ -38,7 +38,7 @@ export async function createSuggestionAction(input: CreateSuggestionInput): Prom
             userId,
             userName,
             status: 'pending',
-            createdAt: FieldValue.serverTimestamp(),
+            createdAt: firestore.FieldValue.serverTimestamp(),
         };
         batch.set(suggestionRef, newSuggestion);
 
@@ -49,7 +49,7 @@ export async function createSuggestionAction(input: CreateSuggestionInput): Prom
             title: 'Nova Sugestão de ATM',
             message: `O utilizador ${userName} sugeriu um novo ATM: "${suggestionData.name}".`,
             read: false,
-            createdAt: FieldValue.serverTimestamp(),
+            createdAt: firestore.FieldValue.serverTimestamp(),
             type: 'generic', 
             relatedId: suggestionRef.id,
         };
