@@ -134,7 +134,7 @@ export default function DashboardPage() {
         {loading ? (
              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <Skeleton className="h-[220px] w-full rounded-xl" />
-                <Skeleton className="h-[220px] w-full rounded-xl" />
+                <Skeleton className="h-[22-0px] w-full rounded-xl" />
                 <Skeleton className="h-[220px] w-full rounded-xl" />
              </div>
         ) : (
