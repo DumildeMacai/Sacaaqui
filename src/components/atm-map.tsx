@@ -6,34 +6,29 @@ import L from 'leaflet';
 import type { Atm } from '@/types';
 import 'leaflet/dist/leaflet.css';
 
-const createIcon = (color: string, checked: boolean = false) => {
-    const checkmark = checked ? `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check">
-            <path d="M20 6 9 17l-5-5"/>
-        </svg>
-    ` : '';
+const createIcon = (color: string, isSelected: boolean = false) => {
+    const scale = isSelected ? 1.5 : 1;
+    const shadow = isSelected ? 'drop-shadow(0 0 5px rgba(0,0,0,0.5))' : 'drop-shadow(0 1px 3px rgba(0,0,0,0.3))';
 
     return L.divIcon({
         html: `
-            <div style="background-color: ${color};" class="w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-2 border-white">
-                ${checkmark}
+            <div style="background-color: ${color}; transform: scale(${scale}); filter: ${shadow};" class="w-6 h-6 rounded-full flex items-center justify-center transition-transform duration-200">
+                <div class="w-2 h-2 bg-white rounded-full"></div>
             </div>
-            <div style="border-top-color: ${color};" class="w-0 h-0 border-t-8 border-l-4 border-r-4 border-l-transparent border-r-transparent absolute left-1/2 -translate-x-1/2 bottom-[-8px]"></div>
         `,
         className: 'bg-transparent border-none',
-        iconSize: [32, 40],
-        iconAnchor: [16, 40],
-        popupAnchor: [0, -40]
+        iconSize: [24 * scale, 24 * scale],
+        iconAnchor: [12 * scale, 12 * scale],
     });
 };
 
-const greenIcon = createIcon('#22c55e');
-const redIcon = createIcon('#ef4444');
-const greyIcon = createIcon('#6b7280');
+const greenIcon = createIcon('#10B981'); // green-500
+const redIcon = createIcon('#EF4444'); // red-500
+const greyIcon = createIcon('#6B7280'); // gray-500
 
-const selectedGreenIcon = createIcon('#16a34a', true);
-const selectedRedIcon = createIcon('#dc2626', true);
-const selectedGreyIcon = createIcon('#4b5563', true);
+const selectedGreenIcon = createIcon('#10B981', true);
+const selectedRedIcon = createIcon('#EF4444', true);
+const selectedGreyIcon = createIcon('#6B7280', true);
 
 
 const getIcon = (status: Atm['status'], isSelected: boolean) => {
@@ -57,19 +52,17 @@ export default function AtmMap({ atms, onMarkerClick, selectedAtmId }: AtmMapPro
     const markerLayer = useRef<L.LayerGroup | null>(null);
     const markersRef = useRef<Map<string, L.Marker>>(new Map());
 
-    // Initialize map
     useEffect(() => {
         if (mapRef.current && !mapInstance.current) {
             mapInstance.current = L.map(mapRef.current, {
                 center: [-8.8368, 13.2343],
                 zoom: 13,
-                zoomControl: false, // Disable default zoom control
+                zoomControl: false,
             });
 
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                subdomains: 'abcd',
-                maxZoom: 20
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
             }).addTo(mapInstance.current);
             
             L.control.zoom({ position: 'topleft' }).addTo(mapInstance.current);
@@ -85,9 +78,8 @@ export default function AtmMap({ atms, onMarkerClick, selectedAtmId }: AtmMapPro
         };
     }, []);
 
-    // Update markers when atms array changes
     useEffect(() => {
-        if (!markerLayer.current) return;
+        if (!markerLayer.current || !mapInstance.current) return;
         
         const existingMarkers = markersRef.current;
         const newMarkers = new Map<string, L.Marker>();
@@ -98,11 +90,17 @@ export default function AtmMap({ atms, onMarkerClick, selectedAtmId }: AtmMapPro
                 const marker = existingMarkers.get(atm.id)!;
                 marker.setLatLng([atm.location.lat, atm.location.lng]);
                 marker.setIcon(getIcon(atm.status, isSelected));
+                if (isSelected) {
+                    marker.setZIndexOffset(1000);
+                } else {
+                    marker.setZIndexOffset(0);
+                }
                 newMarkers.set(atm.id, marker);
                 existingMarkers.delete(atm.id);
             } else {
                 const marker = L.marker([atm.location.lat, atm.location.lng], { 
-                    icon: getIcon(atm.status, isSelected) 
+                    icon: getIcon(atm.status, isSelected),
+                    zIndexOffset: isSelected ? 1000 : 0
                 })
                 .on('click', () => onMarkerClick(atm.id));
                 markerLayer.current?.addLayer(marker);
@@ -110,14 +108,12 @@ export default function AtmMap({ atms, onMarkerClick, selectedAtmId }: AtmMapPro
             }
         });
 
-        // Remove old markers
         existingMarkers.forEach(marker => marker.remove());
         markersRef.current = newMarkers;
 
     }, [atms, onMarkerClick, selectedAtmId]);
 
 
-    // Fly to selected ATM
     useEffect(() => {
         if (selectedAtmId && mapInstance.current) {
             const atm = atms.find(a => a.id === selectedAtmId);
@@ -127,5 +123,5 @@ export default function AtmMap({ atms, onMarkerClick, selectedAtmId }: AtmMapPro
         }
     }, [selectedAtmId, atms]);
 
-    return <div ref={mapRef} className="absolute inset-0 z-0" />;
+    return <div ref={mapRef} className="h-full w-full rounded-2xl" />;
 }

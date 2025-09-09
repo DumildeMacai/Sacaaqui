@@ -52,41 +52,39 @@ export default function DashboardLayout({
 
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background">
-      <header className="sticky top-0 left-0 right-0 z-20 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
+    <div className="flex min-h-screen w-full flex-col bg-gray-100">
+      <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-white px-4 shadow-sm md:px-6">
           <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold md:text-base">
             <MacaiLogo />
           </Link>
         
-        {loading ? (
-            <div className="ml-auto flex items-center gap-4">
-              <Skeleton className="h-9 w-9 rounded-full" />
-              <Skeleton className="h-9 w-9 rounded-full" />
-              <Skeleton className="h-9 w-16" />
-           </div>
-        ) : (
-          <div className="ml-auto flex items-center gap-2">
-            {currentUser && <Notifications userId={currentUser.uid} />}
-            {isAdmin && (
-                <Button asChild variant="outline" size="sm">
-                <Link href="/admin/dashboard">
-                <Shield className="mr-2 h-4 w-4" />
-                Admin
-                </Link>
-                </Button>
+        <div className="ml-auto flex items-center gap-4">
+            {loading ? (
+                <div className="flex items-center gap-4">
+                    <Skeleton className="h-8 w-24" />
+                    <Skeleton className="h-9 w-9 rounded-full" />
+                    <Skeleton className="h-9 w-9 rounded-full" />
+                    <Skeleton className="h-9 w-16" />
+                </div>
+            ) : (
+            <>
+                {currentUser && <p className="text-sm text-gray-700 hidden md:block">Olá, {currentUser.displayName}</p>}
+                {currentUser && <Notifications userId={currentUser.uid} />}
+                {isAdmin && (
+                    <Button asChild variant="outline" size="sm">
+                        <Link href="/admin/dashboard">
+                            <Shield className="mr-2 h-4 w-4" />
+                            Admin
+                        </Link>
+                    </Button>
+                )}
+                <ThemeToggle />
+                <LogoutButton />
+            </>
             )}
-           <ThemeToggle />
-            {currentUser && (
-                <Avatar className="h-9 w-9">
-                    <AvatarImage src={currentUser.photoURL ?? ''} alt={currentUser.displayName ?? ''} />
-                    <AvatarFallback>{getInitials(currentUser.displayName)}</AvatarFallback>
-                </Avatar>
-            )}
-           <LogoutButton />
         </div>
-        )}
       </header>
-      <main className="flex flex-1 flex-col relative">
+      <main className="flex flex-1 flex-col p-4 md:p-6 lg:p-8">
         {children}
       </main>
     </div>

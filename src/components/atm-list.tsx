@@ -68,8 +68,8 @@ export function AtmList({ atms, onCardClick, selectedAtmId }: AtmListProps) {
 
   if (atms.length === 0) {
     return (
-        <div className="w-full flex justify-center">
-            <Card className="bg-background/80 backdrop-blur-sm max-w-sm">
+        <div className="col-span-1 md:col-span-2 lg:col-span-3">
+            <Card className="bg-white">
                 <CardHeader className='flex-row items-center gap-4'>
                     <Info className="h-8 w-8 text-primary" />
                     <div>

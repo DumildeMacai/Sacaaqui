@@ -1,5 +1,4 @@
 
-// src/context/ThemeContext.tsx
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
@@ -14,27 +13,18 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+  // Force light theme as per request
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
-    const storedTheme = localStorage.getItem("theme") as Theme | null;
-    const preferredTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    const initialTheme = storedTheme || preferredTheme;
-    setTheme(initialTheme);
+    // Set light theme and remove dark class from html element
+    document.documentElement.classList.remove("dark");
+    localStorage.setItem("theme", "light");
   }, []);
-  
-  useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [theme]);
 
   const toggleTheme = useCallback(() => {
-    setTheme(prevTheme => (prevTheme === "dark" ? "light" : "dark"));
+    // Toggle functionality is disabled, but we keep the function for potential future use
+    console.log("Theme toggle is disabled. The application is set to light mode.");
   }, []);
 
   return (
