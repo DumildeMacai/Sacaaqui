@@ -2,6 +2,7 @@
   "app/dashboard/page.tsx -> @/components/atm-map": {
     "id": "app/dashboard/page.tsx -> @/components/atm-map",
     "files": [
+      "static/css/_app-pages-browser_src_components_atm-map_tsx.css",
       "static/chunks/_app-pages-browser_src_components_atm-map_tsx.js"
     ]
   }

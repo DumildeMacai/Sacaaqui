@@ -7,6 +7,7 @@ import L from 'leaflet';
 import type { Atm } from '@/types';
 import { Button } from './ui/button';
 import Link from 'next/link';
+import 'leaflet/dist/leaflet.css';
 
 // Custom icon for the markers
 const defaultIcon = new L.Icon({
