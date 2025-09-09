@@ -72,8 +72,6 @@ const SuggestAtmPage = () => {
         setIsLoading(true);
 
         try {
-            // A notificação para o admin será agora criada por uma Cloud Function.
-            // O cliente apenas cria a sugestão.
             const newSuggestion = {
                 ...values,
                 userId: currentUser.uid,
@@ -83,19 +81,6 @@ const SuggestAtmPage = () => {
             };
             
             await addDoc(collection(db, 'atm_suggestions'), newSuggestion);
-            
-            // Criar notificação para o admin diretamente no cliente
-            // Assumindo que o ID do admin é conhecido e fixo.
-            const adminId = 'admin_user_id'; 
-            await addDoc(collection(db, 'notifications'), {
-                userId: adminId,
-                title: 'Nova Sugestão de ATM',
-                message: `${currentUserName} sugeriu um novo ATM: "${values.name}".`,
-                read: false,
-                createdAt: serverTimestamp(),
-                type: 'generic',
-            });
-
 
             toast({
                 title: 'Obrigado pela sua sugestão!',
