@@ -1,8 +1,7 @@
 
 'use server';
 
-import { db } from "@/firebase/init";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { getAdminDb } from "@/firebase/admin";
 
 // O ID do administrador é fixo para garantir que as notificações sejam sempre enviadas para a conta correta.
 const ADMIN_USER_ID = 'admin_user_id';
@@ -24,34 +23,44 @@ interface CreateSuggestionOutput {
 
 export async function createSuggestionAction(input: CreateSuggestionInput): Promise<CreateSuggestionOutput> {
     const { suggestionData, userId, userName } = input;
-
+    
     try {
-        // Passo 1: Criar a sugestão de ATM
+        const adminDb = getAdminDb();
+        const FieldValue = adminDb.FieldValue;
+
+        // Use a batch to ensure both operations succeed or fail together
+        const batch = adminDb.batch();
+
+        // Step 1: Create the ATM suggestion
+        const suggestionRef = adminDb.collection('atm_suggestions').doc();
         const newSuggestion = {
             ...suggestionData,
             userId,
             userName,
             status: 'pending',
-            createdAt: serverTimestamp(),
+            createdAt: FieldValue.serverTimestamp(),
         };
-        const suggestionDoc = await addDoc(collection(db, 'atm_suggestions'), newSuggestion);
+        batch.set(suggestionRef, newSuggestion);
 
-        // Passo 2: Criar a notificação para o administrador
+        // Step 2: Create the notification for the administrator
+        const notificationRef = adminDb.collection('notifications').doc();
         const notificationPayload = {
             userId: ADMIN_USER_ID,
             title: 'Nova Sugestão de ATM',
             message: `O utilizador ${userName} sugeriu um novo ATM: "${suggestionData.name}".`,
             read: false,
-            createdAt: serverTimestamp(),
-            type: 'generic', // ou um tipo específico como 'new_suggestion'
-            relatedId: suggestionDoc.id, // Opcional: link para a sugestão
+            createdAt: FieldValue.serverTimestamp(),
+            type: 'generic', 
+            relatedId: suggestionRef.id,
         };
-        await addDoc(collection(db, 'notifications'), notificationPayload);
+        batch.set(notificationRef, notificationPayload);
+        
+        await batch.commit();
 
         return { success: true };
 
     } catch (error) {
-        console.error("Error creating suggestion and notification:", error);
+        console.error("Error creating suggestion and notification with Admin SDK:", error);
         const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
         return { success: false, error: `Falha ao processar a sugestão: ${errorMessage}` };
     }
