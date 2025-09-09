@@ -5,9 +5,9 @@ import { UserDataTable } from "@/components/admin/user-data-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { User } from "@/types";
 import { useEffect, useState } from "react";
-import { auth } from '@/firebase/init';
-import { onAuthStateChanged, getIdToken } from "firebase/auth";
-import { getUsersData } from "@/actions/get-admin-data";
+import { auth, db } from '@/firebase/init';
+import { onAuthStateChanged } from "firebase/auth";
+import { collection, getDocs, query } from "firebase/firestore";
 
 
 export default function AdminUsersPage() {
@@ -17,25 +17,27 @@ export default function AdminUsersPage() {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
+            if (user && user.email === 'admin@admin.com') {
                 try {
-                    const token = await getIdToken(user);
-                    const result = await getUsersData(token);
+                    const usersRef = collection(db, 'users');
+                    const q = query(usersRef);
+                    const usersSnapshot = await getDocs(q);
 
-                    if (result.success && result.data) {
-                        setUsers(result.data);
-                    } else {
-                        throw new Error(result.error || 'Falha ao buscar utilizadores.');
-                    }
+                    const usersData: User[] = usersSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    })) as User[];
+                    setUsers(usersData);
+
                 } catch (err: any) {
-                    console.error(err);
-                    setError('Falha ao buscar utilizadores. Verifique as permissões e os logs do servidor.');
+                    console.error("Error fetching users:", err);
+                    setError('Falha ao buscar utilizadores. Verifique as permissões e a conexão.');
                 } finally {
                     setLoading(false);
                 }
-            } else {
+            } else if (!user) {
                  setLoading(false);
-                 setError('Acesso não autorizado.');
+                 setError('Acesso não autorizado. Faça login como administrador.');
             }
         });
         return () => unsubscribe();

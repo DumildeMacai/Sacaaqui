@@ -1,4 +1,16 @@
 {
-  "node": {},
+  "node": {
+    "40b713bbd34af92c36becad1119c82b5c71e6c929d": {
+      "workers": {
+        "app/admin/(panel)/users/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/(panel)/users/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/get-admin-data.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/admin/(panel)/users/page": "action-browser"
+      }
+    }
+  },
   "edge": {}
 }
