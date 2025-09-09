@@ -2,7 +2,7 @@
 import type { Atm } from '@/types';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { CheckCircle2, CircleSlash, HelpCircle, ThumbsDown, ThumbsUp, Search, Clock } from 'lucide-react';
+import { ThumbsDown, ThumbsUp, Search, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -44,12 +44,12 @@ export function AtmCard({
             isSelected ? "border-primary ring-2 ring-primary" : "border-gray-200"
         )}
     >
-        <div className="flex justify-between items-start">
-             <div className="flex-1 pr-2">
+        <div className="flex justify-between items-start gap-2">
+             <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-base text-gray-800 truncate">{atm.name}</h3>
                 <p className="text-sm text-gray-500 truncate">{atm.address}</p>
             </div>
-            <Badge variant="outline" className={cn("flex items-center gap-1 whitespace-nowrap text-xs", statusInfo.className)}>
+            <Badge variant="outline" className={cn("flex items-center gap-1 whitespace-nowrap text-xs flex-shrink-0", statusInfo.className)}>
                 {statusInfo.text}
             </Badge>
         </div>
