@@ -57,7 +57,6 @@ export default function Home() {
       </header>
 
       <main className="flex-grow flex flex-col items-center justify-center px-4 text-center">
-        <h1 className="text-3xl sm:text-4xl font-semibold mb-4 text-primary">O maior localizador de atms de Angola</h1>
         <h2 className="text-3xl sm:text-4xl font-semibold mb-4">Bem vindo ao <span className="text-green-400">Sacaaqui</span></h2>
         <p className="text-md sm:text-lg text-muted-foreground mb-8">Escolha uma opção para continuar</p>
 
@@ -77,6 +76,7 @@ export default function Home() {
             <Link href="/signup">Criar Conta</Link>
           </Button>
         </div>
+        <h1 className="text-xl sm:text-2xl font-semibold mt-8 text-primary">O maior localizador de atms de Angola</h1>
       </main>
 
       <footer className="w-full py-4 px-6 text-center text-sm text-muted-foreground">
