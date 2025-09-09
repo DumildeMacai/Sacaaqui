@@ -1,25 +1,10 @@
 
 'use client';
 
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import type { LatLngExpression } from 'leaflet';
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import type { Atm } from '@/types';
-import { Button } from './ui/button';
-import Link from 'next/link';
 import 'leaflet/dist/leaflet.css';
-
-// Custom icon for the markers
-const defaultIcon = new L.Icon({
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-});
-
 
 // Custom icons for different statuses
 const comDinheiroIcon = new L.Icon({
@@ -61,38 +46,57 @@ const getIcon = (status: Atm['status']) => {
     }
 };
 
-
 interface AtmMapProps {
   atms: Atm[];
 }
 
 export default function AtmMap({ atms }: AtmMapProps) {
-    const defaultPosition: LatLngExpression = [-8.8368, 13.2343]; // Luanda, Angola
+    const mapRef = useRef<HTMLDivElement>(null);
+    const mapInstance = useRef<L.Map | null>(null);
 
-    return (
-        <MapContainer center={defaultPosition} zoom={13} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
-            <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            {atms.map((atm) => (
-                <Marker 
-                    key={atm.id} 
-                    position={[atm.location.lat, atm.location.lng]}
-                    icon={getIcon(atm.status)}
-                >
-                    <Popup>
-                        <div className="space-y-2">
-                             <h3 className="font-bold">{atm.name}</h3>
-                             <p className="text-sm">{atm.address}</p>
-                             <p className="text-xs capitalize">Status: <span className="font-semibold">{atm.status.replace('_', ' ')}</span></p>
-                             <Button asChild size="sm" className="w-full">
-                                <Link href={`/dashboard/atm/${atm.id}`}>Ver Detalhes</Link>
-                             </Button>
-                        </div>
-                    </Popup>
-                </Marker>
-            ))}
-        </MapContainer>
-    );
+    useEffect(() => {
+        // Initialize map only if the ref is available and no map instance exists
+        if (mapRef.current && !mapInstance.current) {
+            mapInstance.current = L.map(mapRef.current).setView([-8.8368, 13.2343], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(mapInstance.current);
+        }
+
+        // Add markers
+        if (mapInstance.current) {
+            // Clear existing markers before adding new ones
+            mapInstance.current.eachLayer((layer) => {
+                if (layer instanceof L.Marker) {
+                    mapInstance.current?.removeLayer(layer);
+                }
+            });
+            
+            atms.forEach(atm => {
+                const popupContent = `
+                    <div class="space-y-2">
+                         <h3 class="font-bold">${atm.name}</h3>
+                         <p class="text-sm">${atm.address}</p>
+                         <p class="text-xs capitalize">Status: <span class="font-semibold">${atm.status.replace('_', ' ')}</span></p>
+                         <a href="/dashboard/atm/${atm.id}" class="block w-full text-center bg-primary text-primary-foreground hover:bg-primary/90 text-sm rounded-md py-1">Ver Detalhes</a>
+                    </div>
+                `;
+
+                L.marker([atm.location.lat, atm.location.lng], { icon: getIcon(atm.status) })
+                    .addTo(mapInstance.current!)
+                    .bindPopup(popupContent);
+            });
+        }
+        
+        // Cleanup function to run when component unmounts
+        return () => {
+            if (mapInstance.current) {
+                mapInstance.current.remove();
+                mapInstance.current = null;
+            }
+        };
+    }, [atms]);
+
+    return <div ref={mapRef} style={{ height: '100%', width: '100%' }} />;
 }
