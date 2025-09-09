@@ -15,7 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { auth, db } from '@/firebase/init';
-import { onAuthStateChanged, type User, signInWithEmailAndPassword } from 'firebase/auth';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const suggestionSchema = z.object({
@@ -62,26 +62,6 @@ const SuggestAtmPage = () => {
         },
     });
 
-    // Função para obter o ID do administrador
-    const getAdminUserId = async (): Promise<string | null> => {
-        try {
-            // A forma mais fiável de obter o UID a partir de um email conhecido é usar o signIn
-            // (isto não criará uma nova sessão, apenas obterá os dados do utilizador)
-            // NOTA: Isto assume que conhece a senha do admin ou que pode usar uma senha temporária
-            // se a sua lógica de autenticação o permitir. Para este caso, como é uma app interna
-            // e a senha é conhecida ou pode ser definida, esta abordagem é válida.
-            // A senha do admin não está exposta no lado do cliente.
-            const adminCredential = await signInWithEmailAndPassword(auth, 'admin@admin.com', 'admin123');
-            if (adminCredential.user) {
-                return adminCredential.user.uid;
-            }
-            return null;
-        } catch (error) {
-            console.error("Could not get admin user. This might happen if the admin user was deleted or password changed.", error);
-            return null;
-        }
-    };
-
 
     const handleSubmit = async (values: SuggestionFormValues) => {
         if (!currentUser) {
@@ -92,7 +72,8 @@ const SuggestAtmPage = () => {
         setIsLoading(true);
 
         try {
-            // 1. Add the suggestion
+            // A notificação para o admin será agora criada por uma Cloud Function.
+            // O cliente apenas cria a sugestão.
             const newSuggestion = {
                 ...values,
                 userId: currentUser.uid,
@@ -101,21 +82,6 @@ const SuggestAtmPage = () => {
                 createdAt: serverTimestamp(),
             };
             await addDoc(collection(db, 'atm_suggestions'), newSuggestion);
-
-            // 2. Get admin ID
-            const adminId = await getAdminUserId();
-
-            // 3. Create a notification for the admin if adminId is found
-            if (adminId) {
-                await addDoc(collection(db, 'notifications'), {
-                    userId: adminId,
-                    title: 'Nova Sugestão de ATM',
-                    message: `O utilizador "${currentUserName}" sugeriu um novo ATM: "${values.name}".`,
-                    read: false,
-                    createdAt: serverTimestamp(),
-                    type: 'generic'
-                });
-            }
 
             toast({
                 title: 'Obrigado pela sua sugestão!',
