@@ -57,8 +57,8 @@ export default function Home() {
       </header>
 
       <main className="flex-grow flex flex-col items-center justify-center px-4 text-center">
-        <h1 className="text-3xl sm:text-4xl font-semibold mb-4 text-primary">Macai ATM Locator</h1>
-        <h2 className="text-3xl sm:text-4xl font-semibold mb-4">Bem-vindo ao <span className="text-green-400">ATM Locator</span></h2>
+        <h1 className="text-3xl sm:text-4xl font-semibold mb-4 text-primary">O maior localizador de atms de Angola</h1>
+        <h2 className="text-3xl sm:text-4xl font-semibold mb-4">Bem vindo ao <span className="text-green-400">Sacaaqui</span></h2>
         <p className="text-md sm:text-lg text-muted-foreground mb-8">Escolha uma opção para continuar</p>
 
         <div className="flex flex-col gap-4 w-full max-w-xs">
