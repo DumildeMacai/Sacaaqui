@@ -39,12 +39,16 @@ export default function SignupPage() {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      let user = userCredential.user;
+
+      // Se for o admin, usar um ID fixo
+      const userId = email === 'admin@admin.com' ? 'admin_user_id' : user.uid;
 
       if (user) {
         await updateProfile(user, { displayName: name });
 
-        await setDoc(doc(db, "users", user.uid), {
+        // Usar o userId (fixo para o admin, dinâmico para outros)
+        await setDoc(doc(db, "users", userId), {
           name,
           email: user.email,
           dateOfBirth,

@@ -16,7 +16,7 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { auth, db } from '@/firebase/init';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { doc, getDoc, collection, addDoc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const suggestionSchema = z.object({
     name: z.string().min(5, { message: "O nome deve ter pelo menos 5 caracteres." }),
@@ -81,25 +81,20 @@ const SuggestAtmPage = () => {
                 status: 'pending',
                 createdAt: serverTimestamp(),
             };
-            const suggestionRef = await addDoc(collection(db, 'atm_suggestions'), newSuggestion);
-
-            // In-line server action to notify admin
-            const usersQuery = query(collection(db, 'users'), where('email', '==', 'admin@admin.com'));
-            const adminQuerySnapshot = await getDocs(usersQuery);
             
-            if (!adminQuerySnapshot.empty) {
-                const adminId = adminQuerySnapshot.docs[0].id;
-                await addDoc(collection(db, 'notifications'), {
-                    userId: adminId,
-                    title: 'Nova Sugestão de ATM',
-                    message: `${currentUserName} sugeriu um novo ATM: "${values.name}".`,
-                    read: false,
-                    createdAt: serverTimestamp(),
-                    type: 'generic',
-                });
-            } else {
-                 console.error("Admin user not found, cannot create notification.");
-            }
+            await addDoc(collection(db, 'atm_suggestions'), newSuggestion);
+            
+            // Criar notificação para o admin diretamente no cliente
+            // Assumindo que o ID do admin é conhecido e fixo.
+            const adminId = 'admin_user_id'; 
+            await addDoc(collection(db, 'notifications'), {
+                userId: adminId,
+                title: 'Nova Sugestão de ATM',
+                message: `${currentUserName} sugeriu um novo ATM: "${values.name}".`,
+                read: false,
+                createdAt: serverTimestamp(),
+                type: 'generic',
+            });
 
 
             toast({

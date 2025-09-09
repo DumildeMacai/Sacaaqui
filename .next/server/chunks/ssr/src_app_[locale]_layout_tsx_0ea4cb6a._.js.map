@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///home/user/studio/src/app/%5Blocale%5D/layout.tsx"],"sourcesContent":["import { NextIntlClientProvider } from 'next-intl';\nimport { getMessages } from 'next-intl/server';\nimport '../globals.css';\nimport React from 'react';\n\nexport default async function LocaleLayout({\n  children,\n  params: { locale },\n}: {\n  children: React.ReactNode;\n  params: { locale: string };\n}) {\n  const messages = await getMessages();\n\n  return (\n    <html lang={locale}>\n      <body>\n        <NextIntlClientProvider locale={locale} messages={messages}>\n          {children}\n        </NextIntlClientProvider>\n      </body>\n    </html>\n  );\n}"],"names":[],"mappings":";;;;AAAA;AACA;;;;;AAIe,eAAe,aAAa,EACzC,QAAQ,EACR,QAAQ,EAAE,MAAM,EAAE,EAInB;IACC,MAAM,WAAW,MAAM,CAAA,GAAA,iOAAA,CAAA,cAAW,AAAD;IAEjC,qBACE,8OAAC;QAAK,MAAM;kBACV,cAAA,8OAAC;sBACC,cAAA,8OAAC,mPAAA,CAAA,yBAAsB;gBAAC,QAAQ;gBAAQ,UAAU;0BAC/C;;;;;;;;;;;;;;;;AAKX","debugId":null}}]
-}

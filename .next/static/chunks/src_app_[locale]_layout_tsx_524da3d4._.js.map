@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///home/user/studio/src/app/%5Blocale%5D/layout.tsx"],"sourcesContent":["\n'use client';\n\nimport '../globals.css';\nimport React from 'react';\nimport { NextIntlClientProvider, useMessages } from 'next-intl';\n\n// Este layout agora é responsável por fornecer o contexto de internacionalização.\nexport default function LocaleLayout({\n  children,\n  params: { locale },\n}: Readonly<{\n  children: React.ReactNode;\n  params: { locale: string };\n}>) {\n  const messages = useMessages();\n\n  return (\n    <NextIntlClientProvider locale={locale} messages={messages}>\n      {children}\n    </NextIntlClientProvider>\n  );\n}\n"],"names":[],"mappings":";;;;AAKA;;;AAJA;;;AAOe,SAAS,aAAa,EACnC,QAAQ,EACR,QAAQ,EAAE,MAAM,EAAE,EAIlB;;IACA,MAAM,WAAW,CAAA,GAAA,mKAAA,CAAA,cAAW,AAAD;IAE3B,qBACE,6LAAC,mKAAA,CAAA,yBAAsB;QAAC,QAAQ;QAAQ,UAAU;kBAC/C;;;;;;AAGP;GAdwB;;QAOL,mKAAA,CAAA,cAAW;;;KAPN","debugId":null}}]
-}
