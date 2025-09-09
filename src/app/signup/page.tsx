@@ -39,29 +39,27 @@ export default function SignupPage() {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      let user = userCredential.user;
+      const user = userCredential.user;
 
-      // Se for o admin, usar um ID fixo
+      // Garante que a conta de administrador tenha um ID de documento fixo e conhecido.
       const userId = email === 'admin@admin.com' ? 'admin_user_id' : user.uid;
 
-      if (user) {
-        await updateProfile(user, { displayName: name });
+      await updateProfile(user, { displayName: name });
 
-        // Usar o userId (fixo para o admin, dinâmico para outros)
-        await setDoc(doc(db, "users", userId), {
-          name,
-          email: user.email,
-          dateOfBirth,
-          phoneNumber: phone,
-          reputation: 1,
-        });
+      // Usa o userId (fixo para o admin, dinâmico para outros) para criar o documento no Firestore
+      await setDoc(doc(db, "users", userId), {
+        name,
+        email: user.email,
+        dateOfBirth,
+        phoneNumber: phone,
+        reputation: 1,
+      });
 
-        toast({
-          title: "Conta Criada!",
-          description: "A sua conta foi criada com sucesso. Bem-vindo!",
-        });
-        router.push("/dashboard");
-      }
+      toast({
+        title: "Conta Criada!",
+        description: "A sua conta foi criada com sucesso. Bem-vindo!",
+      });
+      router.push("/dashboard");
 
     } catch (err: any) {
       console.error("Erro ao criar usuário:", err.message);

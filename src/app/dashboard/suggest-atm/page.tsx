@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -16,7 +15,8 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { auth, db } from '@/firebase/init';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
+import { createSuggestionAction } from '@/actions/create-suggestion';
 
 const suggestionSchema = z.object({
     name: z.string().min(5, { message: "O nome deve ter pelo menos 5 caracteres." }),
@@ -72,28 +72,28 @@ const SuggestAtmPage = () => {
         setIsLoading(true);
 
         try {
-            const newSuggestion = {
-                ...values,
+            const result = await createSuggestionAction({
+                suggestionData: values,
                 userId: currentUser.uid,
                 userName: currentUserName,
-                status: 'pending',
-                createdAt: serverTimestamp(),
-            };
-            
-            await addDoc(collection(db, 'atm_suggestions'), newSuggestion);
-
-            toast({
-                title: 'Obrigado pela sua sugestão!',
-                description: 'A sua sugestão foi enviada para revisão pelo administrador.',
             });
-            router.push('/dashboard');
-            
+
+            if (result.success) {
+                 toast({
+                    title: 'Obrigado pela sua sugestão!',
+                    description: 'A sua sugestão foi enviada e o administrador foi notificado.',
+                });
+                router.push('/dashboard');
+            } else {
+                throw new Error(result.error || 'Ocorreu um erro desconhecido.');
+            }
+           
         } catch (error) {
             console.error('Error adding ATM suggestion:', error);
             toast({
                 variant: 'destructive',
                 title: 'Erro',
-                description: 'Falha ao guardar a sugestão no servidor. Tente novamente mais tarde.',
+                description: 'Falha ao guardar a sugestão. Tente novamente mais tarde.',
             });
         } finally {
             setIsLoading(false);
