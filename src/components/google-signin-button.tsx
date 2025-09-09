@@ -1,4 +1,3 @@
-
 'use client';
 
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
@@ -8,7 +7,6 @@ import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-// Custom SVG for Google Icon
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px" {...props}>
         <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
@@ -29,7 +27,6 @@ export function GoogleSignInButton() {
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
             
-            // Check if user exists in Firestore, if not create a new document
             const userDocRef = doc(db, 'users', user.uid);
             const userDoc = await getDoc(userDocRef);
 
@@ -39,7 +36,7 @@ export function GoogleSignInButton() {
                     email: user.email,
                     dateOfBirth: '',
                     phoneNumber: user.phoneNumber || '',
-                    reputation: 1, // Initial reputation
+                    reputation: 1, 
                 });
             }
 
@@ -50,7 +47,6 @@ export function GoogleSignInButton() {
             router.push('/dashboard');
 
         } catch (error: any) {
-             // Silently handle popup closed by user or cancelled requests
             if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
                 console.log("Google sign-in popup closed or cancelled by user.");
                 return;
@@ -65,9 +61,9 @@ export function GoogleSignInButton() {
     };
 
     return (
-        <Button onClick={handleSignIn} variant="outline" className="w-full bg-white text-gray-700 hover:bg-gray-50 border-gray-300">
-            <GoogleIcon className="mr-2 h-5 w-5" />
-            Entrar com o Google
+        <Button onClick={handleSignIn} size="xl" className="w-full bg-white text-gray-800 hover:bg-gray-200 font-semibold justify-start text-base">
+            <GoogleIcon className="mr-4 h-6 w-6" />
+            Continuar com Google
         </Button>
     );
 }
