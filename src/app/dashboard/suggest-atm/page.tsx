@@ -15,8 +15,8 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { auth, db } from '@/firebase/init';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { createSuggestionAction } from '@/actions/create-suggestion';
+import { doc, getDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+
 
 const suggestionSchema = z.object({
     name: z.string().min(5, { message: "O nome deve ter pelo menos 5 caracteres." }),
@@ -72,28 +72,29 @@ const SuggestAtmPage = () => {
         setIsLoading(true);
 
         try {
-            const result = await createSuggestionAction({
-                suggestionData: values,
+            const suggestionPayload = {
+                ...values,
                 userId: currentUser.uid,
                 userName: currentUserName,
-            });
+                status: 'pending',
+                createdAt: serverTimestamp(),
+            };
 
-            if (result.success) {
-                 toast({
-                    title: 'Obrigado pela sua sugestão!',
-                    description: 'A sua sugestão foi enviada e o administrador foi notificado.',
-                });
-                router.push('/dashboard');
-            } else {
-                throw new Error(result.error || 'Ocorreu um erro desconhecido.');
-            }
+            await addDoc(collection(db, 'atm_suggestions'), suggestionPayload);
+
+            toast({
+                title: 'Obrigado pela sua sugestão!',
+                description: 'A sua sugestão foi enviada para revisão pelo administrador.',
+            });
+            router.push('/dashboard');
            
         } catch (error) {
             console.error('Error adding ATM suggestion:', error);
+            const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
             toast({
                 variant: 'destructive',
                 title: 'Erro',
-                description: 'Falha ao guardar a sugestão. Tente novamente mais tarde.',
+                description: `Falha ao guardar a sugestão: ${errorMessage}`,
             });
         } finally {
             setIsLoading(false);
