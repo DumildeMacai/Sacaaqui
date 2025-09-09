@@ -74,12 +74,17 @@ export default function DashboardPage() {
       }
     };
 
-    fetchAtms();
+    const initialFetch = async () => {
+        await fetchAtms();
+        setLoading(false);
+    };
+
+    initialFetch();
     
-    const intervalId = setInterval(fetchAtms, 3000); 
+    const intervalId = setInterval(fetchAtms, 1000); 
 
     return () => clearInterval(intervalId);
-  }, [loading]); 
+  }, []); 
 
   const filteredAtms = useMemo(() => {
     if (!searchTerm) {
