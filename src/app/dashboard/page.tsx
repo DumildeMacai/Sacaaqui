@@ -80,7 +80,7 @@ export default function DashboardPage() {
 
     fetchAtms(); // Initial fetch
     
-    const intervalId = setInterval(fetchAtms, 3000); // Set up auto-refresh every 3 seconds
+    const intervalId = setInterval(fetchAtms, 1000); // Set up auto-refresh every 1 second
 
     // Cleanup function to clear the interval when the component unmounts
     return () => clearInterval(intervalId);
