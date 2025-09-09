@@ -1,3 +1,4 @@
+
 'use client';
 import type { Atm } from '@/types'; 
 import { AtmList } from '@/components/atm-list';
@@ -9,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Search, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 
 // Helper to convert Firestore Timestamps to ISO strings safely
 const convertTimestampToString = (timestamp: any): string => {
@@ -27,6 +29,12 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Dynamic import for the map component to ensure it's client-side only
+  const AtmMap = useMemo(() => dynamic(() => import('@/components/atm-map'), { 
+    ssr: false,
+    loading: () => <Skeleton className="h-[400px] w-full rounded-lg" />
+  }), []);
 
   useEffect(() => {
     const fetchAtms = async () => {
@@ -109,6 +117,10 @@ export default function DashboardPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
+        </div>
+        
+        <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden h-[400px]">
+          <AtmMap atms={filteredAtms} />
         </div>
 
 
