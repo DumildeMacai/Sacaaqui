@@ -2,14 +2,13 @@
 'use client';
 import type { Atm } from '@/types'; 
 import { AtmList } from '@/components/atm-list';
-import { useEffect, useState, useMemo, Suspense } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { db } from '@/firebase/init';
 import { collection, getDocs, query } from 'firebase/firestore';
 import { Input } from '@/components/ui/input';
-import { Search, PlusCircle } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
 // Helper to convert Firestore Timestamps to ISO strings safely
@@ -29,44 +28,41 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedAtmId, setSelectedAtmId] = useState<string | null>(null);
 
-  // Dynamic import for the map component to ensure it's client-side only
+  const listRef = useRef<HTMLDivElement>(null);
+
   const AtmMap = useMemo(() => dynamic(() => import('@/components/atm-map'), { 
     ssr: false,
-    loading: () => <Skeleton className="h-[400px] w-full rounded-lg" />
+    loading: () => <Skeleton className="absolute inset-0" />
   }), []);
 
   useEffect(() => {
     const fetchAtms = async () => {
       try {
-        // We don't set loading to true on subsequent fetches to avoid UI flickering
         const q = query(collection(db, "atms"));
         const atmsSnapshot = await getDocs(q);
         
-        if (atmsSnapshot.empty) {
-          setAtms([]);
-        } else {
-           const atmsData: Atm[] = atmsSnapshot.docs.map(doc => {
-              const data = doc.data();
-              const reports = (data.reports || []).map((report: any) => ({
-                ...report,
-                timestamp: convertTimestampToString(report.timestamp),
-              }));
+        const atmsData: Atm[] = atmsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            const reports = (data.reports || []).map((report: any) => ({
+              ...report,
+              timestamp: convertTimestampToString(report.timestamp),
+            }));
 
-              return {
-                id: doc.id,
-                name: data.name || '',
-                address: data.address || '',
-                location: data.location || { lat: 0, lng: 0 },
-                status: data.status || 'desconhecido',
-                details: data.details || '',
-                lastUpdate: convertTimestampToString(data.lastUpdate),
-                reports: reports,
-              };
-            });
-            setAtms(atmsData);
-        }
-        setError(null);
+            return {
+              id: doc.id,
+              name: data.name || '',
+              address: data.address || '',
+              location: data.location || { lat: 0, lng: 0 },
+              status: data.status || 'desconhecido',
+              details: data.details || '',
+              lastUpdate: convertTimestampToString(data.lastUpdate),
+              reports: reports,
+            };
+          });
+          setAtms(atmsData);
+          setError(null);
 
       } catch (err: any) {
         console.error(err);
@@ -78,14 +74,12 @@ export default function DashboardPage() {
       }
     };
 
-    fetchAtms(); // Initial fetch
+    fetchAtms();
     
-    const intervalId = setInterval(fetchAtms, 1000); // Set up auto-refresh every 1 second
+    const intervalId = setInterval(fetchAtms, 3000); 
 
-    // Cleanup function to clear the interval when the component unmounts
     return () => clearInterval(intervalId);
-
-  }, [loading]); // Dependency array ensures effect runs correctly
+  }, [loading]); 
 
   const filteredAtms = useMemo(() => {
     if (!searchTerm) {
@@ -97,59 +91,66 @@ export default function DashboardPage() {
     );
   }, [atms, searchTerm]);
 
+  // When an ATM is selected (from map), scroll it into view in the list
+    useEffect(() => {
+        if (selectedAtmId && listRef.current) {
+            const element = document.getElementById(`atm-card-${selectedAtmId}`);
+            if (element) {
+                element.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'start',
+                });
+            }
+        }
+    }, [selectedAtmId]);
+
 
   if (error && loading) {
-    return <div className="text-destructive text-center">Erro ao carregar os ATMs. Tente novamente mais tarde.</div>;
+    return <div className="text-destructive text-center p-8">Erro ao carregar os ATMs. Tente novamente mais tarde.</div>;
   }
 
   return (
-    <div className="space-y-8"> 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"> 
-        <div> 
-          <h1 className="text-3xl font-bold tracking-tight font-headline">ATMs Próximos</h1>
-          <p className="text-muted-foreground">Veja o status dos caixas e ajude a comunidade.</p> 
-        </div>
-        <Button asChild>
-            <Link href="/dashboard/suggest-atm">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Sugerir um ATM
-            </Link>
-        </Button>
-      </div>
-
-       <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-                type="search"
-                placeholder="Pesquisar por nome ou endereço..."
-                className="w-full pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-            />
-        </div>
+    <div className="h-full w-full">
+        <AtmMap 
+            atms={filteredAtms} 
+            onMarkerClick={(atmId) => setSelectedAtmId(atmId)}
+            selectedAtmId={selectedAtmId}
+        />
         
-        <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden h-[400px]">
-          <AtmMap atms={filteredAtms} />
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-md px-4 z-10">
+            <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                    type="search"
+                    placeholder="Pesquisar por nome ou endereço..."
+                    className="w-full pl-10 rounded-full shadow-lg"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
         </div>
 
-
-      <Suspense fallback={
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <Skeleton className="h-[220px] w-full rounded-xl" />
-              <Skeleton className="h-[220px] w-full rounded-xl" />
-              <Skeleton className="h-[220px] w-full rounded-xl" />
-          </div>
-      }>
-        {loading ? (
-             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Skeleton className="h-[220px] w-full rounded-xl" />
-                <Skeleton className="h-[22-0px] w-full rounded-xl" />
-                <Skeleton className="h-[220px] w-full rounded-xl" />
-             </div>
-        ) : (
-            <AtmList atms={filteredAtms} />
-        )}
-      </Suspense>
+        <div 
+            ref={listRef} 
+            className="absolute bottom-0 left-0 right-0 z-10 p-4 overflow-x-auto"
+        >
+            <div className="flex gap-4">
+                {loading ? (
+                    <>
+                        <Skeleton className="h-[150px] w-80 rounded-xl flex-shrink-0" />
+                        <Skeleton className="h-[150px] w-80 rounded-xl flex-shrink-0" />
+                        <Skeleton className="h-[150px] w-80 rounded-xl flex-shrink-0" />
+                    </>
+                ) : (
+                    <AtmList 
+                        atms={filteredAtms} 
+                        onCardClick={(atmId) => setSelectedAtmId(atmId)}
+                        selectedAtmId={selectedAtmId}
+                    />
+                )}
+            </div>
+        </div>
     </div>
   );
 }

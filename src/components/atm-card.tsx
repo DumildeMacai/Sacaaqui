@@ -1,75 +1,67 @@
+
 import type { Atm } from '@/types';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { CheckCircle2, CircleSlash, HelpCircle, MapPin, ThumbsDown, ThumbsUp } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { CheckCircle2, CircleSlash, HelpCircle, ThumbsDown, ThumbsUp, Search } from 'lucide-react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 type StatusVariant = 'default' | 'destructive' | 'secondary';
 
-const statusMap: { [key in Atm['status']]: { text: string; variant: StatusVariant; icon: React.ReactNode } } = {
-  com_dinheiro: { text: 'Com Dinheiro', variant: 'default', icon: <CheckCircle2 className="h-4 w-4 text-accent" /> },
-  sem_dinheiro: { text: 'Sem Dinheiro', variant: 'destructive', icon: <CircleSlash className="h-4 w-4" /> },
-  desconhecido: { text: 'Desconhecido', variant: 'secondary', icon: <HelpCircle className="h-4 w-4" /> },
+const statusMap: { [key in Atm['status']]: { text: string; variant: StatusVariant; icon: React.ReactNode; className: string } } = {
+  com_dinheiro: { text: 'Com Dinheiro', variant: 'default', icon: <CheckCircle2 className="h-4 w-4" />, className: 'bg-green-500/20 text-green-400 border-green-500/30' },
+  sem_dinheiro: { text: 'Sem Dinheiro', variant: 'destructive', icon: <CircleSlash className="h-4 w-4" />, className: 'bg-red-500/20 text-red-400 border-red-500/30'},
+  desconhecido: { text: 'Desconhecido', variant: 'secondary', icon: <HelpCircle className="h-4 w-4" />, className: 'bg-gray-500/20 text-gray-400 border-gray-500/30'},
 };
 
 
-export function AtmCard({ atm, onStatusUpdate }: { atm: Atm, onStatusUpdate: (atmId: string, status: 'com_dinheiro' | 'sem_dinheiro') => void }) {
+export function AtmCard({ 
+    atm, 
+    onStatusUpdate, 
+    onClick,
+    isSelected 
+}: { 
+    atm: Atm, 
+    onStatusUpdate: (atmId: string, status: 'com_dinheiro' | 'sem_dinheiro') => void,
+    onClick: () => void,
+    isSelected: boolean
+}) {
     const statusInfo = statusMap[atm.status];
-    
-    // --- Modificação: Lidar com valores de data inválidos ---
-    let lastUpdate = 'Data desconhecida'; // Valor padrão
 
-    if (atm.lastUpdate) { // Verifica se lastUpdate existe
-        try {
-            // Tenta criar um objeto Date. Se atm.lastUpdate já for Date, funcionará.
-            // Se for Timestamp convertido, também deve funcionar.
-            const date = new Date(atm.lastUpdate);
-            if (!isNaN(date.getTime())) { // Verifica se a data é válida
-                lastUpdate = formatDistanceToNow(date, { addSuffix: true, locale: ptBR });
-            }
-        } catch (error) {
-            console.error('Erro ao formatar data:', error);
-            lastUpdate = 'Erro na data'; // Mensagem de erro caso a formatação falhe
-        }
-    }
-    // --- Fim da Modificação ---
+    const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
 
   return (
-    <Card className="flex flex-col">
-        <CardHeader>
-            <CardTitle className="flex items-start justify-between">
-                <span>{atm.name}</span>
-                <Badge variant={statusInfo.variant} className="flex items-center gap-1 whitespace-nowrap">
-                    {statusInfo.icon}
-                    {statusInfo.text}
-                </Badge>
-            </CardTitle>
-            <CardDescription className="flex items-center gap-2 pt-1">
-                <MapPin className="h-4 w-4" /> 
-                {atm.address}
-            </CardDescription>
-        </CardHeader>
-        <CardContent className="flex-grow">
-           <p className="text-sm text-muted-foreground">
-             Última atualização: {lastUpdate}
-           </p>
-        </CardContent>
-        <CardFooter className="flex flex-col items-stretch gap-2 md:flex-row">
-            <div className="flex flex-grow gap-2">
-                 <Button variant="outline" className="w-full" onClick={() => onStatusUpdate(atm.id, 'com_dinheiro')}>
-                    <ThumbsUp className="mr-2 h-4 w-4 text-accent"/> Tem
-                </Button>
-                <Button variant="outline" className="w-full" onClick={() => onStatusUpdate(atm.id, 'sem_dinheiro')}>
-                    <ThumbsDown className="mr-2 h-4 w-4 text-destructive"/> Não Tem
-                </Button>
+    <div
+        id={`atm-card-${atm.id}`}
+        onClick={onClick}
+        className={cn(
+            "flex-shrink-0 w-80 p-4 rounded-2xl bg-background/70 backdrop-blur-md shadow-lg border-2 cursor-pointer transition-all duration-300",
+            isSelected ? "border-primary shadow-primary/30" : "border-transparent"
+        )}
+    >
+        <div className="flex justify-between items-start">
+             <div className="flex-1 pr-2">
+                <h3 className="font-bold text-lg truncate">{atm.name}</h3>
+                <p className="text-sm text-muted-foreground truncate">{atm.address}</p>
             </div>
-            <Button asChild className="w-full md:w-auto">
-                <Link href={`/dashboard/atm/${atm.id}`}>Detalhes</Link>
+            <Badge variant="outline" className={cn("flex items-center gap-1 whitespace-nowrap text-xs", statusInfo.className)}>
+                {statusInfo.text}
+            </Badge>
+        </div>
+       
+        <div className="mt-4 flex justify-between items-center gap-2">
+            <Button size="sm" variant="outline" className="w-full" onClick={(e) => { stopPropagation(e); onStatusUpdate(atm.id, 'com_dinheiro')}}>
+                <ThumbsUp className="mr-2 h-4 w-4 text-green-400"/> Tem
             </Button>
-        </CardFooter>
-    </Card>
+            <Button size="sm" variant="outline" className="w-full" onClick={(e) => { stopPropagation(e); onStatusUpdate(atm.id, 'sem_dinheiro')}}>
+                <ThumbsDown className="mr-2 h-4 w-4 text-red-400"/> Não Tem
+            </Button>
+            <Button size="sm" asChild variant="outline" className="w-full" onClick={stopPropagation}>
+                <Link href={`/dashboard/atm/${atm.id}`}>
+                    <Search className="mr-2 h-4 w-4"/> Detalhes
+                </Link>
+            </Button>
+        </div>
+    </div>
   );
 }
