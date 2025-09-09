@@ -1,10 +1,11 @@
+
 'use client'
 import { AtmDetail } from '@/components/atm-detail';
 import { notFound, useParams } from 'next/navigation';
 import type { Atm } from '@/types';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '@/firebase/init';
 
 
@@ -41,6 +42,9 @@ export default function AtmDetailPage() {
           notFound();
           return;
         }
+
+        // Increment view count - fire-and-forget
+        updateDoc(atmRef, { viewCount: increment(1) }).catch(console.error);
         
         const data = atmDoc.data();
         const reports = (data.reports || []).map((report: any) => ({
@@ -57,6 +61,7 @@ export default function AtmDetailPage() {
             details: data.details || '',
             lastUpdate: convertTimestampToString(data.lastUpdate),
             reports: reports,
+            viewCount: data.viewCount || 0,
         };
 
         setAtmData(atm);

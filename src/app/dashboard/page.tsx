@@ -57,8 +57,13 @@ export default function DashboardPage() {
               details: data.details || '',
               lastUpdate: convertTimestampToString(data.lastUpdate),
               reports: reports,
+              viewCount: data.viewCount || 0,
             };
           });
+
+          // Sort by viewCount in descending order
+          atmsData.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+
           setAtms(atmsData);
           setError(null);
 

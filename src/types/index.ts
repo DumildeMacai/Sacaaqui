@@ -19,6 +19,7 @@ export type Atm = {
   lastUpdate: string;
   reports: Report[];
   details?: string;
+  viewCount?: number;
 };
 
 export type User = {
