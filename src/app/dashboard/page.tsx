@@ -79,7 +79,7 @@ export default function DashboardPage() {
 
     initialFetch();
     
-    const intervalId = setInterval(fetchAtms, 1000); 
+    const intervalId = setInterval(fetchAtms, 4000); 
 
     return () => clearInterval(intervalId);
   }, [loading]); 
