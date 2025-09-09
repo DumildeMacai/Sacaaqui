@@ -80,7 +80,7 @@ export default function Home() {
       </main>
 
       <footer className="w-full py-4 px-6 text-center text-sm text-muted-foreground">
-        <p>Feito com muito carinho por: Dumilde Macai</p>
+        <p>Feito com muito carinho por: <span className="font-bold">Dumilde Macai</span></p>
         <p>&copy; {new Date().getFullYear()} Todos os direitos autorais reservados.</p>
       </footer>
     </div>
