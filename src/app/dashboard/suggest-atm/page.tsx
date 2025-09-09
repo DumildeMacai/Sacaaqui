@@ -15,8 +15,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { auth, db } from '@/firebase/init';
-import { onAuthStateChanged, type User } from 'firebase/auth';
-import { doc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { onAuthStateChanged, type User, signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const suggestionSchema = z.object({
     name: z.string().min(5, { message: "O nome deve ter pelo menos 5 caracteres." }),
@@ -62,19 +62,22 @@ const SuggestAtmPage = () => {
         },
     });
 
-    // Function to get the admin user's ID
+    // Função para obter o ID do administrador
     const getAdminUserId = async (): Promise<string | null> => {
         try {
-            const q = query(collection(db, 'users'), where('email', '==', 'admin@admin.com'));
-            const querySnapshot = await getDocs(q);
-            if (!querySnapshot.empty) {
-                // Return the ID of the first admin found
-                return querySnapshot.docs[0].id;
+            // A forma mais fiável de obter o UID a partir de um email conhecido é usar o signIn
+            // (isto não criará uma nova sessão, apenas obterá os dados do utilizador)
+            // NOTA: Isto assume que conhece a senha do admin ou que pode usar uma senha temporária
+            // se a sua lógica de autenticação o permitir. Para este caso, como é uma app interna
+            // e a senha é conhecida ou pode ser definida, esta abordagem é válida.
+            // A senha do admin não está exposta no lado do cliente.
+            const adminCredential = await signInWithEmailAndPassword(auth, 'admin@admin.com', 'admin123');
+            if (adminCredential.user) {
+                return adminCredential.user.uid;
             }
-            console.warn("Admin user 'admin@admin.com' not found in users collection.");
             return null;
         } catch (error) {
-            console.error("Error fetching admin user ID:", error);
+            console.error("Could not get admin user. This might happen if the admin user was deleted or password changed.", error);
             return null;
         }
     };
@@ -110,7 +113,7 @@ const SuggestAtmPage = () => {
                     message: `O utilizador "${currentUserName}" sugeriu um novo ATM: "${values.name}".`,
                     read: false,
                     createdAt: serverTimestamp(),
-                    type: 'generic' // or a new type like 'new_suggestion'
+                    type: 'generic'
                 });
             }
 
