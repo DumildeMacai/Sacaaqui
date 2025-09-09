@@ -44,8 +44,8 @@ export default function Home() {
 
 
   return (
-    <div className='bg-background text-foreground'>
-      <div className="flex justify-between items-center px-6 py-4">
+    <div className='flex flex-col min-h-screen bg-background text-foreground'>
+      <header className="flex justify-between items-center px-6 py-4">
         <MacaiLogo />
         <button
           onClick={toggleTheme}
@@ -54,9 +54,9 @@ export default function Home() {
         >
           {isDarkMode ? <Sun className="text-yellow-400" /> : <Moon className="text-primary" />}
         </button>
-      </div>
+      </header>
 
-      <main className="flex flex-col items-center justify-center min-h-screen px-4 text-center -mt-16">
+      <main className="flex-grow flex flex-col items-center justify-center px-4 text-center">
         <h1 className="text-3xl sm:text-4xl font-semibold mb-4 text-primary">Macai ATM Locator</h1>
         <h2 className="text-3xl sm:text-4xl font-semibold mb-4">Bem-vindo ao <span className="text-green-400">ATM Locator</span></h2>
         <p className="text-md sm:text-lg text-muted-foreground mb-8">Escolha uma opção para continuar</p>
@@ -78,6 +78,11 @@ export default function Home() {
           </Button>
         </div>
       </main>
+
+      <footer className="w-full py-4 px-6 text-center text-sm text-muted-foreground">
+        <p>Feito com muito carinho por: Dumilde Macai</p>
+        <p>&copy; {new Date().getFullYear()} Todos os direitos autorais reservados.</p>
+      </footer>
     </div>
   );
 }
