@@ -39,7 +39,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchAtms = async () => {
       try {
-        setLoading(true);
+        // We don't set loading to true on subsequent fetches to avoid UI flickering
         const q = query(collection(db, "atms"));
         const atmsSnapshot = await getDocs(q);
         
@@ -66,17 +66,26 @@ export default function DashboardPage() {
             });
             setAtms(atmsData);
         }
+        setError(null);
 
       } catch (err: any) {
         console.error(err);
         setError('Failed to fetch ATMs');
       } finally {
-        setLoading(false);
+        if (loading) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchAtms();
-  }, []);
+    fetchAtms(); // Initial fetch
+    
+    const intervalId = setInterval(fetchAtms, 3000); // Set up auto-refresh every 3 seconds
+
+    // Cleanup function to clear the interval when the component unmounts
+    return () => clearInterval(intervalId);
+
+  }, [loading]); // Dependency array ensures effect runs correctly
 
   const filteredAtms = useMemo(() => {
     if (!searchTerm) {
@@ -89,7 +98,7 @@ export default function DashboardPage() {
   }, [atms, searchTerm]);
 
 
-  if (error) {
+  if (error && loading) {
     return <div className="text-destructive text-center">Erro ao carregar os ATMs. Tente novamente mais tarde.</div>;
   }
 
