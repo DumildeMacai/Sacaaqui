@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useRef } from 'react';
@@ -53,26 +52,34 @@ interface AtmMapProps {
 export default function AtmMap({ atms }: AtmMapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const mapInstance = useRef<L.Map | null>(null);
+    const markerLayer = useRef<L.LayerGroup | null>(null);
 
+    // Effect for map initialization and cleanup (runs only once)
     useEffect(() => {
-        // Initialize map only if the ref is available and no map instance exists
         if (mapRef.current && !mapInstance.current) {
             mapInstance.current = L.map(mapRef.current).setView([-8.8368, 13.2343], 13);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(mapInstance.current);
+
+            markerLayer.current = L.layerGroup().addTo(mapInstance.current);
         }
 
-        // Add markers
-        if (mapInstance.current) {
-            // Clear existing markers before adding new ones
-            mapInstance.current.eachLayer((layer) => {
-                if (layer instanceof L.Marker) {
-                    mapInstance.current?.removeLayer(layer);
-                }
-            });
-            
+        // Cleanup function to run when component unmounts
+        return () => {
+            if (mapInstance.current) {
+                mapInstance.current.remove();
+                mapInstance.current = null;
+            }
+        };
+    }, []); // Empty dependency array ensures this runs only once
+
+    // Effect for updating markers when atms array changes
+    useEffect(() => {
+        if (markerLayer.current) {
+            markerLayer.current.clearLayers(); // Clear existing markers
+
             atms.forEach(atm => {
                 const popupContent = `
                     <div class="space-y-2">
@@ -84,19 +91,11 @@ export default function AtmMap({ atms }: AtmMapProps) {
                 `;
 
                 L.marker([atm.location.lat, atm.location.lng], { icon: getIcon(atm.status) })
-                    .addTo(mapInstance.current!)
-                    .bindPopup(popupContent);
+                    .bindPopup(popupContent)
+                    .addTo(markerLayer.current!);
             });
         }
-        
-        // Cleanup function to run when component unmounts
-        return () => {
-            if (mapInstance.current) {
-                mapInstance.current.remove();
-                mapInstance.current = null;
-            }
-        };
-    }, [atms]);
+    }, [atms]); // This effect depends only on the atms prop
 
     return <div ref={mapRef} style={{ height: '100%', width: '100%' }} />;
 }
