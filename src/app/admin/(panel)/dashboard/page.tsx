@@ -6,8 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users, CreditCard, AlertCircle } from 'lucide-react';
 import { AtmStatusChart } from '@/components/admin/atm-status-chart';
-import { auth, db } from '@/firebase/init';
-import { onAuthStateChanged } from 'firebase/auth';
+import { db } from '@/firebase/init';
 import type { Atm } from '@/types';
 import { collection, getDocs } from 'firebase/firestore';
 
@@ -28,61 +27,54 @@ function AdminDashboardPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user && user.email === 'admin@admin.com') {
-                try {
-                    const atmsRef = collection(db, 'atms');
-                    const usersRef = collection(db, 'users');
+      const fetchDashboardData = async () => {
+        try {
+            setLoading(true);
+            const atmsRef = collection(db, 'atms');
+            const usersRef = collection(db, 'users');
 
-                    const [atmsSnapshot, usersSnapshot] = await Promise.all([
-                        getDocs(atmsRef),
-                        getDocs(usersRef)
-                    ]);
-                    
-                    const atms = atmsSnapshot.docs.map(doc => doc.data() as Atm);
-                    const userCount = usersSnapshot.size;
-                    const atmCount = atmsSnapshot.size;
+            const [atmsSnapshot, usersSnapshot] = await Promise.all([
+                getDocs(atmsRef),
+                getDocs(usersRef)
+            ]);
+            
+            const atms = atmsSnapshot.docs.map(doc => doc.data() as Atm);
+            const userCount = usersSnapshot.size;
+            const atmCount = atmsSnapshot.size;
 
-                    const statusCounts: { [key in Atm['status']]: number } = {
-                        com_dinheiro: 0,
-                        sem_dinheiro: 0,
-                        desconhecido: 0,
-                    };
+            const statusCounts: { [key in Atm['status']]: number } = {
+                com_dinheiro: 0,
+                sem_dinheiro: 0,
+                desconhecido: 0,
+            };
 
-                    atms.forEach(atm => {
-                            if (atm.status && statusCounts[atm.status] !== undefined) {
-                            statusCounts[atm.status]++;
-                        }
-                    });
-
-                    const chartData = [
-                        { name: 'Com Dinheiro', value: statusCounts.com_dinheiro, fill: "var(--color-com_dinheiro)" },
-                        { name: 'Sem Dinheiro', value: statusCounts.sem_dinheiro, fill: "var(--color-sem_dinheiro)"  },
-                        { name: 'Desconhecido', value: statusCounts.desconhecido, fill: "var(--color-desconhecido)"  },
-                    ];
-
-                    setData({
-                        atmCount,
-                        userCount,
-                        chartData
-                    });
-
-                } catch (err: any) {
-                    console.error("Error fetching dashboard data:", err);
-                    setError(err.message || "Ocorreu um erro ao carregar os dados.");
-                } finally {
-                    setLoading(false);
+            atms.forEach(atm => {
+                    if (atm.status && statusCounts[atm.status] !== undefined) {
+                    statusCounts[atm.status]++;
                 }
-            } else if (!user) {
-                // Se não houver utilizador, definir o erro e parar o carregamento
-                setError("Utilizador não autenticado.");
-                setLoading(false);
-            }
-            // Não faz nada se o utilizador estiver autenticado mas não for admin,
-            // pois o layout do painel já o deve ter redirecionado.
-        });
+            });
 
-        return () => unsubscribe();
+            const chartData = [
+                { name: 'Com Dinheiro', value: statusCounts.com_dinheiro, fill: "var(--color-com_dinheiro)" },
+                { name: 'Sem Dinheiro', value: statusCounts.sem_dinheiro, fill: "var(--color-sem_dinheiro)"  },
+                { name: 'Desconhecido', value: statusCounts.desconhecido, fill: "var(--color-desconhecido)"  },
+            ];
+
+            setData({
+                atmCount,
+                userCount,
+                chartData
+            });
+
+        } catch (err: any) {
+            console.error("Error fetching dashboard data:", err);
+            setError(err.message || "Ocorreu um erro ao carregar os dados.");
+        } finally {
+            setLoading(false);
+        }
+      }
+
+      fetchDashboardData();
     }, []);
 
     if (error) {

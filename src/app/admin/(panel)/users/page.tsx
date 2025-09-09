@@ -5,8 +5,7 @@ import { UserDataTable } from "@/components/admin/user-data-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { User } from "@/types";
 import { useEffect, useState } from "react";
-import { auth, db } from '@/firebase/init';
-import { onAuthStateChanged } from "firebase/auth";
+import { db } from '@/firebase/init';
 import { collection, getDocs, query } from "firebase/firestore";
 
 
@@ -16,31 +15,28 @@ export default function AdminUsersPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user && user.email === 'admin@admin.com') {
-                try {
-                    const usersRef = collection(db, 'users');
-                    const q = query(usersRef);
-                    const usersSnapshot = await getDocs(q);
+      const fetchUsers = async () => {
+        try {
+            setLoading(true);
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef);
+            const usersSnapshot = await getDocs(q);
 
-                    const usersData: User[] = usersSnapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    })) as User[];
-                    setUsers(usersData);
+            const usersData: User[] = usersSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            })) as User[];
+            setUsers(usersData);
 
-                } catch (err: any) {
-                    console.error("Error fetching users:", err);
-                    setError('Falha ao buscar utilizadores. Verifique as permissões e a conexão.');
-                } finally {
-                    setLoading(false);
-                }
-            } else if (!user) {
-                 setLoading(false);
-                 setError('Acesso não autorizado. Faça login como administrador.');
-            }
-        });
-        return () => unsubscribe();
+        } catch (err: any) {
+            console.error("Error fetching users:", err);
+            setError('Falha ao buscar utilizadores. Verifique as permissões e a conexão.');
+        } finally {
+            setLoading(false);
+        }
+      };
+
+      fetchUsers();
     }, []);
 
 

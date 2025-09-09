@@ -21,17 +21,15 @@ export default function AdminPanelLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAdminVerified, setIsAdminVerified] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      // Check if user is logged in and is the admin
       if (user && user.email === 'admin@admin.com') {
         setCurrentUser(user);
-        setIsLoading(false);
+        setIsAdminVerified(true);
       } else {
-        // If not admin or not logged in, redirect to home
         router.replace('/');
       }
     });
@@ -47,10 +45,11 @@ export default function AdminPanelLayout({
     });
   };
 
-  if (isLoading || !currentUser) {
+  if (!isAdminVerified) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
+        <p className="ml-4">A verificar permissões de administrador...</p>
       </div>
     );
   }
