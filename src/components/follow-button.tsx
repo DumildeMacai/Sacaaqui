@@ -33,7 +33,11 @@ export function FollowButton({ atmId }: FollowButtonProps) {
     }, []);
 
     useEffect(() => {
-        if (!currentUser) return;
+        if (!currentUser) {
+            // If there's no user, we are not loading the follow status.
+            setIsLoading(false);
+            return;
+        };
 
         setIsLoading(true);
         const followDocRef = doc(db, 'users', currentUser.uid, 'follows', atmId);
@@ -69,7 +73,7 @@ export function FollowButton({ atmId }: FollowButtonProps) {
                     ? 'Você não receberá mais notificações para este ATM.'
                     : 'Você será notificado quando este ATM tiver dinheiro.',
             });
-            // The onSnapshot listener will automatically update the UI, so no need to setIsFollowing here
+            // The onSnapshot listener will automatically update the UI state.
         } else {
             toast({
                 variant: 'destructive',
@@ -77,7 +81,8 @@ export function FollowButton({ atmId }: FollowButtonProps) {
                 description: result.error,
             });
         }
-        // Don't set loading to false here, onSnapshot will do it, preventing UI flicker
+        // Always set loading to false after the operation is complete.
+        setIsLoading(false);
     };
 
     if (!currentUser) {
