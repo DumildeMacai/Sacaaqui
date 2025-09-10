@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { db } from '@/firebase/init';
 import { collection, getDocs, query } from 'firebase/firestore';
 import { Input } from '@/components/ui/input';
-import { Search, PlusCircle } from 'lucide-react';
+import { Search, PlusCircle, LocateFixed } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -29,11 +29,43 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAtmId, setSelectedAtmId] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
 
   const AtmMap = useMemo(() => dynamic(() => import('@/components/atm-map'), { 
     ssr: false,
     loading: () => <Skeleton className="h-full w-full rounded-2xl" />
   }), []);
+
+
+  const handleLocateUser = () => {
+    if (navigator.geolocation) {
+        setIsLocating(true);
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setUserLocation({
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                });
+                setIsLocating(false);
+            },
+            (error) => {
+                console.error("Geolocation error:", error);
+                // Maybe show a toast message to the user
+                setIsLocating(false);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0,
+            }
+        );
+    }
+  };
+
+  useEffect(() => {
+    handleLocateUser(); // Try to locate user on initial load
+  }, []);
 
   useEffect(() => {
     const fetchAtms = async () => {
@@ -134,12 +166,23 @@ export default function DashboardPage() {
         </div>
       </div>
       
-      <div className="bg-white p-4 rounded-2xl shadow-md h-[400px] md:h-[500px]">
+      <div className="bg-white p-4 rounded-2xl shadow-md h-[400px] md:h-[500px] relative">
           <AtmMap 
               atms={filteredAtms} 
               onMarkerClick={(atmId) => setSelectedAtmId(atmId)}
               selectedAtmId={selectedAtmId}
+              userLocation={userLocation}
           />
+           <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleLocateUser} 
+                className="absolute top-6 right-6 bg-white shadow-lg"
+                title="A minha localização"
+                disabled={isLocating}
+            >
+                {isLocating ? <Loader2 className="animate-spin" /> : <LocateFixed />}
+            </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

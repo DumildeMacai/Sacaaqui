@@ -22,6 +22,15 @@ const createIcon = (color: string, isSelected: boolean = false) => {
     });
 };
 
+const userIcon = L.divIcon({
+    html: `
+        <div class="w-5 h-5 bg-blue-500 rounded-full border-2 border-white shadow-lg"></div>
+    `,
+    className: 'bg-transparent border-none',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+});
+
 const greenIcon = createIcon('#10B981'); // green-500
 const redIcon = createIcon('#EF4444'); // red-500
 const greyIcon = createIcon('#6B7280'); // gray-500
@@ -44,12 +53,14 @@ interface AtmMapProps {
   atms: Atm[];
   onMarkerClick: (atmId: string) => void;
   selectedAtmId: string | null;
+  userLocation: {lat: number, lng: number} | null;
 }
 
-export default function AtmMap({ atms, onMarkerClick, selectedAtmId }: AtmMapProps) {
+export default function AtmMap({ atms, onMarkerClick, selectedAtmId, userLocation }: AtmMapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const mapInstance = useRef<L.Map | null>(null);
     const markerLayer = useRef<L.LayerGroup | null>(null);
+    const userMarkerRef = useRef<L.Marker | null>(null);
     const markersRef = useRef<Map<string, L.Marker>>(new Map());
 
     useEffect(() => {
@@ -122,6 +133,21 @@ export default function AtmMap({ atms, onMarkerClick, selectedAtmId }: AtmMapPro
             }
         }
     }, [selectedAtmId, atms]);
+
+     useEffect(() => {
+        if (userLocation && mapInstance.current) {
+            const userLatLng = L.latLng(userLocation.lat, userLocation.lng);
+            if (userMarkerRef.current) {
+                userMarkerRef.current.setLatLng(userLatLng);
+            } else {
+                userMarkerRef.current = L.marker(userLatLng, {
+                    icon: userIcon,
+                    zIndexOffset: 2000 // Ensure user marker is always on top
+                }).addTo(mapInstance.current);
+            }
+            mapInstance.current.flyTo(userLatLng, 14);
+        }
+    }, [userLocation]);
 
     return <div ref={mapRef} className="h-full w-full rounded-2xl" />;
 }
