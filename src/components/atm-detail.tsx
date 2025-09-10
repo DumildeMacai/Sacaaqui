@@ -7,6 +7,7 @@ import { ptBR } from 'date-fns/locale';
 import { AtmVerificationClient } from './atm-verification-client';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
+import { FollowButton } from './follow-button';
 
 type StatusVariant = 'default' | 'destructive' | 'secondary';
 
@@ -33,21 +34,27 @@ export function AtmDetail({ atm }: { atm: Atm }) {
             <div className="md:col-span-2 space-y-8">
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center justify-between font-headline text-3xl">
-                            {atm.name}
-                            <Badge variant={statusInfo.variant} className="flex items-center gap-1 text-base">
-                                {statusInfo.icon}
-                                {statusInfo.text}
-                            </Badge>
-                        </CardTitle>
+                        <div className="flex justify-between items-start">
+                            <CardTitle className="flex-1 font-headline text-3xl">
+                                {atm.name}
+                            </CardTitle>
+                            <FollowButton atmId={atm.id} followers={atm.followers || []} />
+                        </div>
                         <CardDescription className="flex items-center gap-2 pt-2">
                             <MapPin className="h-4 w-4" />
                             {atm.address}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-sm text-muted-foreground">
-                            <p><span className="text-green-500">Última atualização: {format(new Date(atm.lastUpdate), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</span></p>
+                         <div className="flex items-center justify-between text-sm text-muted-foreground">
+                             <Badge variant={statusInfo.variant} className="flex items-center gap-1 text-base">
+                                {statusInfo.icon}
+                                {statusInfo.text}
+                            </Badge>
+                            <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4" />
+                                <span>Última atualização: {format(new Date(atm.lastUpdate), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</span>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>

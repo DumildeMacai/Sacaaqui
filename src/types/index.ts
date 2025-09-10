@@ -20,6 +20,7 @@ export type Atm = {
   reports: Report[];
   details?: string;
   viewCount?: number;
+  followers?: string[];
 };
 
 export type User = {
@@ -49,6 +50,7 @@ export type Notification = {
     message: string;
     read: boolean;
     createdAt: string; // ISO string
-    type: 'suggestion_approved' | 'suggestion_rejected' | 'generic';
+    type: 'suggestion_approved' | 'suggestion_rejected' | 'generic' | 'status_update';
 };
+
 

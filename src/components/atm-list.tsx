@@ -9,6 +9,9 @@ import { doc, updateDoc, arrayUnion, serverTimestamp, getDoc } from 'firebase/fi
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Info } from 'lucide-react';
+import { sendNotificationToFollowers } from '@/actions/send-notification';
+import { useToast } from '@/hooks/use-toast';
+
 
 interface AtmListProps {
     atms: Atm[];
@@ -19,6 +22,7 @@ interface AtmListProps {
 export function AtmList({ atms, onCardClick, selectedAtmId }: AtmListProps) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentUserName, setCurrentUserName] = useState('');
+  const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -42,27 +46,59 @@ export function AtmList({ atms, onCardClick, selectedAtmId }: AtmListProps) {
 
   const handleStatusUpdate = async (atmId: string, status: 'com_dinheiro' | 'sem_dinheiro') => {
     if (!currentUser) {
-      console.warn('Usuário não logado, não pode atualizar o status.');
+      toast({
+        variant: 'destructive',
+        title: 'Ação Bloqueada',
+        description: 'Você precisa estar logado para atualizar o status de um ATM.',
+      });
       return;
     }
-
+  
     try {
       const atmRef = doc(db, 'atms', atmId);
+      const atmDoc = await getDoc(atmRef);
+      if (!atmDoc.exists()) {
+        throw new Error("ATM não encontrado.");
+      }
+      
+      const atmData = atmDoc.data() as Atm;
+      const oldStatus = atmData.status;
+
       const newReport = {
         userId: currentUser.uid,
         status,
         timestamp: new Date().toISOString(),
         userName: currentUserName,
       };
-
+  
       await updateDoc(atmRef, {
         status: status,
         lastUpdate: serverTimestamp(),
         reports: arrayUnion(newReport),
       });
 
+      toast({
+        title: 'Status Atualizado!',
+        description: 'Obrigado pela sua contribuição para a comunidade.',
+      });
+
+      // Se o status mudou, e especialmente se mudou para 'com_dinheiro', envie notificações.
+      if (status !== oldStatus && status === 'com_dinheiro') {
+        // Não precisamos esperar por isto, pode correr em segundo plano
+        sendNotificationToFollowers({
+          atmId: atmId,
+          atmName: atmData.name,
+          reportingUserName: currentUserName,
+        });
+      }
+  
     } catch (error) {
       console.error('Erro ao atualizar status do ATM no Firestore:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro',
+        description: 'Não foi possível atualizar o status. Tente novamente mais tarde.',
+      });
     }
   };
 

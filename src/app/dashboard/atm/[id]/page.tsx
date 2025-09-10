@@ -5,7 +5,7 @@ import { notFound, useParams } from 'next/navigation';
 import type { Atm } from '@/types';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, increment } from 'firebase/firestore';
 import { db } from '@/firebase/init';
 
 
@@ -32,49 +32,43 @@ export default function AtmDetailPage() {
   useEffect(() => {
     if (!atmId) return;
 
-    const fetchAtm = async () => {
-      try {
-        setLoading(true);
-        const atmRef = doc(db, 'atms', atmId);
-        const atmDoc = await getDoc(atmRef);
+    // Increment view count once on component mount - fire-and-forget
+    const atmRef = doc(db, 'atms', atmId);
+    updateDoc(atmRef, { viewCount: increment(1) }).catch(console.error);
+    
+    const unsubscribe = onSnapshot(atmRef, (atmDoc) => {
+        if (atmDoc.exists()) {
+            const data = atmDoc.data();
+            const reports = (data.reports || []).map((report: any) => ({
+                ...report,
+                timestamp: convertTimestampToString(report.timestamp),
+            }));
 
-        if (!atmDoc.exists()) {
-          notFound();
-          return;
+            const atm: Atm = {
+                id: atmDoc.id,
+                name: data.name || '',
+                address: data.address || '',
+                location: data.location || { lat: 0, lng: 0 },
+                status: data.status || 'desconhecido',
+                details: data.details || '',
+                lastUpdate: convertTimestampToString(data.lastUpdate),
+                reports: reports,
+                viewCount: data.viewCount || 0,
+                followers: data.followers || [],
+            };
+            setAtmData(atm);
+        } else {
+            setError('ATM não encontrado');
+            notFound();
         }
-
-        // Increment view count - fire-and-forget
-        updateDoc(atmRef, { viewCount: increment(1) }).catch(console.error);
-        
-        const data = atmDoc.data();
-        const reports = (data.reports || []).map((report: any) => ({
-            ...report,
-            timestamp: convertTimestampToString(report.timestamp),
-        }));
-
-        const atm: Atm = {
-            id: atmDoc.id,
-            name: data.name || '',
-            address: data.address || '',
-            location: data.location || { lat: 0, lng: 0 },
-            status: data.status || 'desconhecido',
-            details: data.details || '',
-            lastUpdate: convertTimestampToString(data.lastUpdate),
-            reports: reports,
-            viewCount: data.viewCount || 0,
-        };
-
-        setAtmData(atm);
-
-      } catch (err: any) {
+        setLoading(false);
+    }, (err) => {
         console.error(err);
         setError('Failed to fetch ATM data');
-      } finally {
         setLoading(false);
-      }
-    };
+    });
 
-    fetchAtm();
+    return () => unsubscribe();
   }, [atmId]);
 
   if (loading) {
