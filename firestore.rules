@@ -1,69 +1,57 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-  
-    // Funções de conveniência
-    function isUserAuthenticated() {
-      return request.auth != null;
-    }
-    
-    function isRequestingOwnData(userId) {
-      return isUserAuthenticated() && request.auth.uid == userId;
-    }
-    
+
+    // Helper function to check for admin role
     function isAdmin() {
-      // O admin é identificado pelo seu UID específico.
-      return isUserAuthenticated() && request.auth.uid == 'admin_user_id';
+      // Check if the user is the specific admin user by UID
+      return request.auth != null && request.auth.uid == 'admin_user_id';
     }
 
-    // Regras para a coleção de utilizadores
+    // Default deny all reads/writes
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Admins have full read/write access to all collections
+    match /{path=**} {
+      allow read, write: if isAdmin();
+    }
+    
+    // ATMs: Publicly readable, writable only by admins
+    match /atms/{atmId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ATM Suggestions: Creatable by any authenticated user, manageable by admins
+    match /atm_suggestions/{suggestionId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Users collection
     match /users/{userId} {
-      // Um utilizador só pode ler e atualizar os seus próprios dados.
-      // A criação (registo) é permitida a qualquer um.
-      allow read, update: if isRequestingOwnData(userId) || isAdmin();
-      allow create: if isUserAuthenticated();
-      allow list, delete: if isAdmin();
+      // Users can read/update their own profile. Only admins can delete/create other users.
+      allow read, update: if request.auth.uid == userId;
+      allow create, delete, list: if isAdmin();
       
-      // Regras para a subcoleção de ATMs seguidos
+      // Users can manage their own 'follows' subcollection
       match /follows/{atmId} {
-        // O utilizador só pode gerir a sua própria lista de ATMs seguidos.
-        allow read, write, delete: if isRequestingOwnData(userId);
-        allow list: if isAdmin(); // Admin pode listar para fins de auditoria, se necessário
+        allow read, write, delete: if request.auth.uid == userId;
       }
     }
     
-    // Regras para a coleção de ATMs
-    match /atms/{atmId} {
-      // Todos podem ler a informação dos ATMs.
-      allow read: if true;
-      
-      // Apenas administradores podem criar, atualizar ou apagar ATMs.
-      allow write, delete: if isAdmin();
-    }
-    
-    // Regras para a coleção de sugestões de ATMs
-    match /atm_suggestions/{suggestionId} {
-      // Utilizadores autenticados podem criar sugestões.
-      allow create: if isUserAuthenticated();
-      
-      // Apenas administradores podem ler, atualizar (aprovar/rejeitar) ou apagar sugestões.
-      allow read, update, delete: if isAdmin();
-    }
-    
-    // Regras para a coleção de notificações
+    // Notifications: Users can only access their own
     match /notifications/{notificationId} {
-      // O utilizador só pode ler e atualizar as suas próprias notificações.
-      allow read, update: if isRequestingOwnData(resource.data.userId) || isAdmin();
-      allow create, delete, list: if isAdmin(); // A criação é controlada pelo backend (actions)
+        allow read, write, create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
 
-    // Permitir consulta de grupo de coleções (collectionGroup) para 'follows'
-    // Necessário para encontrar todos os seguidores de um ATM.
-    // A segurança é aplicada implicitamente, pois as notificações só são criadas no backend.
-    match /{path=**}/follows/{followId} {
-      allow read: if isUserAuthenticated(); // Permitir leitura para a query do backend
+    // Collection Group Queries
+    // Allow admins to query the 'follows' group to send notifications
+    match /{path=**}/follows/{atmId} {
+      allow read: if isAdmin();
     }
   }
 }
