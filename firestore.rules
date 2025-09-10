@@ -2,53 +2,55 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
+    
     // Helper function to check if the user is an admin
     function isAdmin() {
       return request.auth != null && request.auth.uid == 'admin_user_id';
     }
 
-    // Default deny all access
-    match /{document=**} {
-      allow read, write: if false;
-    }
-
-    // ATMs: Readable by anyone, writable only by admin
+    // ---------------- ATMs ----------------
     match /atms/{atmId} {
-      allow read: if true;
-      allow update, create, delete: if isAdmin();
+      allow read: if true; // público
+      allow create, update, delete: if isAdmin();
     }
 
-    // Users: Can only read/write their own data. Admin can read anyone's data.
+    // ---------------- Users ----------------
     match /users/{userId} {
-      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null; // Allow user creation on signup
+      // Admin pode ler todos, usuários só o próprio
+      allow read: if (request.auth != null && request.auth.uid == userId) || isAdmin();
       
-      // Admin can read all user documents
-      allow get: if isAdmin();
-      allow list: if isAdmin();
+      // O próprio usuário pode modificar só seu doc
+      allow update, delete: if request.auth != null && request.auth.uid == userId;
+      
+      // Criar conta ao registrar
+      allow create: if request.auth != null;
 
-      // Follows subcollection: Users can only manage their own follows.
+      // Subcoleção follows
       match /follows/{atmId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
     }
-    
-    // ATM Suggestions: Writable by authenticated users, readable by admin.
+
+    // ---------------- ATM Suggestions ----------------
     match /atm_suggestions/{suggestionId} {
       allow create: if request.auth != null;
       allow read, update: if isAdmin();
     }
     
-    // Notifications: Writable by server (admin), readable only by the concerned user.
+    // ---------------- Notifications ----------------
     match /notifications/{notificationId} {
-        allow read: if request.auth != null && request.auth.uid == resource.data.userId || isAdmin();
-        allow create: if isAdmin(); // Only server/admin can create notifications
+      allow read: if (request.auth != null && resource.data.userId == request.auth.uid) || isAdmin();
+      allow create: if isAdmin();
     }
 
-    // Collection Group query for follows: Necessary for the notification function
+    // ---------------- Collection Group para follows ----------------
     match /{path=**}/follows/{atmId} {
-      allow read: if isAdmin(); // Allows admin/server function to query across all 'follows' collections
+      allow read: if isAdmin();
+    }
+
+    // ---------------- Default deny (fallback) ----------------
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
