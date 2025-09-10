@@ -2,7 +2,7 @@
 'use server';
 
 import { db } from "@/firebase/init";
-import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { revalidatePath } from "next/cache";
 
 interface ToggleFollowInput {
@@ -17,21 +17,20 @@ export async function toggleFollowAtm({ atmId, userId, isFollowing }: ToggleFoll
     }
 
     try {
-        const atmRef = doc(db, 'atms', atmId);
+        const followRef = doc(db, 'users', userId, 'follows', atmId);
 
         if (isFollowing) {
-            // If they are currently following, unfollow them
-            await updateDoc(atmRef, {
-                followers: arrayRemove(userId)
-            });
+            // If they are currently following, unfollow them by deleting the document
+            await deleteDoc(followRef);
         } else {
-            // If they are not following, follow them
-            await updateDoc(atmRef, {
-                followers: arrayUnion(userId)
+            // If they are not following, follow them by creating the document
+            await setDoc(followRef, {
+                followedAt: serverTimestamp()
             });
         }
 
-        revalidatePath(`/dashboard/atm/${atmId}`);
+        // Revalidate the path to update the UI, but the component will also update its local state
+        revalidatePath(`/dashboard/atm/${atmId}`); 
         return { success: true };
 
     } catch (error) {

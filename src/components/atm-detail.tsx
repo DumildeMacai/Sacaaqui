@@ -38,7 +38,7 @@ export function AtmDetail({ atm }: { atm: Atm }) {
                             <CardTitle className="flex-1 font-headline text-3xl">
                                 {atm.name}
                             </CardTitle>
-                            <FollowButton atmId={atm.id} followers={atm.followers || []} />
+                            <FollowButton atmId={atm.id} />
                         </div>
                         <CardDescription className="flex items-center gap-2 pt-2">
                             <MapPin className="h-4 w-4" />

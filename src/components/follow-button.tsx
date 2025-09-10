@@ -4,36 +4,57 @@
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Bell, BellOff, Loader2 } from 'lucide-react';
-import { auth } from '@/firebase/init';
+import { auth, db } from '@/firebase/init';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { toggleFollowAtm } from '@/actions/manage-follow';
 import { useToast } from '@/hooks/use-toast';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 interface FollowButtonProps {
     atmId: string;
-    followers: string[];
 }
 
-export function FollowButton({ atmId, followers }: FollowButtonProps) {
+export function FollowButton({ atmId }: FollowButtonProps) {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [isLoading, setIsLoading] = useState(true); // Start loading until we check status
     const { toast } = useToast();
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
             setCurrentUser(user);
+            // If user logs out, stop loading and reset state
+            if (!user) {
+                setIsFollowing(false);
+                setIsLoading(false);
+            }
         });
-        return () => unsubscribe();
+        return () => unsubscribeAuth();
     }, []);
 
-    if (!currentUser) {
-        // Don't show the button if the user is not logged in
-        return null;
-    }
+    useEffect(() => {
+        if (!currentUser) return;
 
-    const isFollowing = followers.includes(currentUser.uid);
+        setIsLoading(true);
+        const followDocRef = doc(db, 'users', currentUser.uid, 'follows', atmId);
+
+        const unsubscribeSnapshot = onSnapshot(followDocRef, (doc) => {
+            setIsFollowing(doc.exists());
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Error checking follow status:", error);
+            setIsLoading(false);
+        });
+
+        return () => unsubscribeSnapshot();
+    }, [currentUser, atmId]);
 
     const handleToggleFollow = async () => {
+        if (!currentUser) {
+            toast({ variant: 'destructive', title: 'Acesso Negado', description: 'Você precisa estar logado para seguir um ATM.' });
+            return;
+        }
+
         setIsLoading(true);
         const result = await toggleFollowAtm({
             atmId,
@@ -48,6 +69,7 @@ export function FollowButton({ atmId, followers }: FollowButtonProps) {
                     ? 'Você não receberá mais notificações para este ATM.'
                     : 'Você será notificado quando este ATM tiver dinheiro.',
             });
+            // The onSnapshot listener will automatically update the UI, so no need to setIsFollowing here
         } else {
             toast({
                 variant: 'destructive',
@@ -55,9 +77,12 @@ export function FollowButton({ atmId, followers }: FollowButtonProps) {
                 description: result.error,
             });
         }
-        setIsLoading(false);
+        // Don't set loading to false here, onSnapshot will do it, preventing UI flicker
     };
 
+    if (!currentUser) {
+        return null;
+    }
 
     return (
         <Button
@@ -65,16 +90,21 @@ export function FollowButton({ atmId, followers }: FollowButtonProps) {
             size="sm"
             onClick={handleToggleFollow}
             disabled={isLoading}
-            className="flex-shrink-0"
+            className="flex-shrink-0 w-28" // Fixed width to prevent layout shift
         >
             {isLoading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
             ) : isFollowing ? (
-                <BellOff className="mr-2 h-4 w-4" />
+                <>
+                    <BellOff className="mr-2 h-4 w-4" />
+                    A Seguir
+                </>
             ) : (
-                <Bell className="mr-2 h-4 w-4" />
+                <>
+                    <Bell className="mr-2 h-4 w-4" />
+                    Seguir
+                </>
             )}
-            {isFollowing ? 'A Seguir' : 'Seguir'}
         </Button>
     );
 }

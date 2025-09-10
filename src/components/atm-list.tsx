@@ -87,7 +87,6 @@ export function AtmList({ atms, onCardClick, selectedAtmId }: AtmListProps) {
         // Não precisamos esperar por isto, pode correr em segundo plano
         sendNotificationToFollowers({
           atmId: atmId,
-          atmName: atmData.name,
           reportingUserName: currentUserName,
         });
       }

@@ -20,7 +20,6 @@ export type Atm = {
   reports: Report[];
   details?: string;
   viewCount?: number;
-  followers?: string[];
 };
 
 export type User = {
@@ -54,3 +53,7 @@ export type Notification = {
 };
 
 
+export type Follow = {
+  atmId: string;
+  followedAt: string; // ISO string
+}

@@ -54,7 +54,6 @@ export default function AtmDetailPage() {
                 lastUpdate: convertTimestampToString(data.lastUpdate),
                 reports: reports,
                 viewCount: data.viewCount || 0,
-                followers: data.followers || [],
             };
             setAtmData(atm);
         } else {

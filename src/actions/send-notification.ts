@@ -2,20 +2,21 @@
 'use server';
 
 import { db } from "@/firebase/init";
-import { doc, getDoc, collection, addDoc, serverTimestamp, writeBatch } from "firebase/firestore";
+import { collectionGroup, getDocs, query, where, writeBatch, doc, serverTimestamp, getDoc } from "firebase/firestore";
 import type { Atm } from "@/types";
 
 interface SendNotificationInput {
     atmId: string;
-    atmName: string;
     reportingUserName: string;
 }
 
 /**
  * Sends a notification to all users following a specific ATM.
+ * This function now uses a collectionGroup query to find all users who follow the ATM.
  */
 export async function sendNotificationToFollowers(input: SendNotificationInput): Promise<{ success: boolean, error?: string }> {
     try {
+        // First, get the ATM's name
         const atmRef = doc(db, 'atms', input.atmId);
         const atmDoc = await getDoc(atmRef);
 
@@ -23,21 +24,35 @@ export async function sendNotificationToFollowers(input: SendNotificationInput):
             console.error(`ATM with ID ${input.atmId} not found.`);
             return { success: false, error: 'ATM not found.' };
         }
+        const atmName = atmDoc.data().name;
 
-        const atmData = atmDoc.data() as Atm;
-        const followers = atmData.followers;
 
-        if (!followers || followers.length === 0) {
+        // Use a collectionGroup query to find all 'follows' subcollections
+        const followsQuery = query(
+            collectionGroup(db, 'follows'),
+            where('__name__', '>', `users/\0/follows/${input.atmId}`),
+            where('__name__', '<', `users/\uffff/follows/${input.atmId}`)
+        );
+
+        const followsSnapshot = await getDocs(followsQuery);
+
+        if (followsSnapshot.empty) {
             console.log(`No followers for ATM ${input.atmId}. No notifications sent.`);
-            return { success: true }; // Not an error, just no one to notify
+            return { success: true };
         }
+
+        const followerIds = followsSnapshot.docs.map(doc => {
+            // The user ID is the parent document's ID
+            return doc.ref.parent.parent!.id;
+        });
 
         const batch = writeBatch(db);
         const notificationsRef = collection(db, 'notifications');
-        const title = `Alerta de Status: ${input.atmName}`;
+        const title = `Alerta de Status: ${atmName}`;
         const message = `O ATM foi atualizado para "Com Dinheiro" por ${input.reportingUserName}.`;
 
-        followers.forEach(userId => {
+        followerIds.forEach(userId => {
+            if (!userId) return;
             const newNotificationRef = doc(notificationsRef); // Auto-generate ID
             batch.set(newNotificationRef, {
                 userId: userId,
@@ -51,7 +66,7 @@ export async function sendNotificationToFollowers(input: SendNotificationInput):
 
         await batch.commit();
 
-        console.log(`Sent ${followers.length} notifications for ATM ${input.atmId}.`);
+        console.log(`Sent ${followerIds.length} notifications for ATM ${input.atmId}.`);
         return { success: true };
 
     } catch (error) {
