@@ -71,6 +71,16 @@ eval("// full library entry point.\n\n\nmodule.exports = __webpack_require__(/*!
 
 /***/ }),
 
+/***/ "(action-browser)/./node_modules/protobufjs/minimal.js":
+/*!********************************************!*\
+  !*** ./node_modules/protobufjs/minimal.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+eval("// minimal library entry point.\n\n\nmodule.exports = __webpack_require__(/*! ./src/index-minimal */ \"(action-browser)/./node_modules/protobufjs/src/index-minimal.js\");\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiKGFjdGlvbi1icm93c2VyKS8uL25vZGVfbW9kdWxlcy9wcm90b2J1ZmpzL21pbmltYWwuanMiLCJtYXBwaW5ncyI6IkFBQUE7O0FBRWE7QUFDYixrSUFBK0MiLCJzb3VyY2VzIjpbIi9ob21lL3VzZXIvc3R1ZGlvL25vZGVfbW9kdWxlcy9wcm90b2J1ZmpzL21pbmltYWwuanMiXSwic291cmNlc0NvbnRlbnQiOlsiLy8gbWluaW1hbCBsaWJyYXJ5IGVudHJ5IHBvaW50LlxuXG5cInVzZSBzdHJpY3RcIjtcbm1vZHVsZS5leHBvcnRzID0gcmVxdWlyZShcIi4vc3JjL2luZGV4LW1pbmltYWxcIik7XG4iXSwibmFtZXMiOltdLCJpZ25vcmVMaXN0IjpbMF0sInNvdXJjZVJvb3QiOiIifQ==\n//# sourceURL=webpack-internal:///(action-browser)/./node_modules/protobufjs/minimal.js\n");
+
+/***/ }),
+
 /***/ "(action-browser)/./node_modules/protobufjs/src/common.js":
 /*!***********************************************!*\
   !*** ./node_modules/protobufjs/src/common.js ***!
