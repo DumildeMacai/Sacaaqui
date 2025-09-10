@@ -38,15 +38,16 @@ export function AtmVerificationClient({ atm }: { atm: Atm }) {
             const userIds = [...new Set(atm.reports.map(r => r.userId))];
             const userReputations = new Map<string, number>();
 
-            // Fetch each user document to get their reputation
-            for (const userId of userIds) {
-                const userRef = doc(db, 'users', userId);
-                const userDoc = await getDoc(userRef);
-                if (userDoc.exists()) {
-                    userReputations.set(userId, (userDoc.data() as User).reputation || 0);
-                } else {
-                    userReputations.set(userId, 0); // Default to 0 if user not found
-                }
+            if (userIds.length > 0) {
+                const usersRef = collection(db, 'users');
+                // Firestore 'in' query can take up to 30 elements
+                const q = query(usersRef, where('id', 'in', userIds));
+                const querySnapshot = await getDocs(q);
+
+                querySnapshot.forEach((doc) => {
+                    const userData = doc.data() as User;
+                    userReputations.set(userData.id, userData.reputation || 0);
+                });
             }
             
             // Step 2: Augment reports with reputation
@@ -133,4 +134,3 @@ export function AtmVerificationClient({ atm }: { atm: Atm }) {
         </Card>
     );
 }
-
