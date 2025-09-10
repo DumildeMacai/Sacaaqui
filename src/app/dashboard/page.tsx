@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { db } from '@/firebase/init';
 import { collection, getDocs, query } from 'firebase/firestore';
 import { Input } from '@/components/ui/input';
-import { Search, PlusCircle, LocateFixed } from 'lucide-react';
+import { Search, PlusCircle, LocateFixed, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
