@@ -1,12 +1,14 @@
+
 import type { Atm } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, CircleSlash, HelpCircle, MapPin, Clock, Info, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, CircleSlash, HelpCircle, MapPin, Clock, Info, ArrowLeft, WifiOff } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { AtmVerificationClient } from './atm-verification-client';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 type StatusVariant = 'default' | 'destructive' | 'secondary';
 
@@ -16,7 +18,7 @@ const statusMap: { [key in Atm['status']]: { text: string; variant: StatusVarian
   desconhecido: { text: 'Desconhecido', variant: 'secondary', icon: <HelpCircle className="h-4 w-4" /> },
 };
 
-export function AtmDetail({ atm }: { atm: Atm }) {
+export function AtmDetail({ atm, offlineMessage }: { atm: Atm, offlineMessage?: string | null }) {
   const router = useRouter();
   const statusInfo = statusMap[atm.status];
 
@@ -29,6 +31,15 @@ export function AtmDetail({ atm }: { atm: Atm }) {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar para a Lista
         </Button>
+
+        {offlineMessage && (
+            <Alert variant="destructive">
+                <WifiOff className="h-4 w-4" />
+                <AlertTitle>Você está offline</AlertTitle>
+                <AlertDescription>{offlineMessage}</AlertDescription>
+            </Alert>
+        )}
+
         <div className="grid gap-8 md:grid-cols-3">
             <div className="md:col-span-2 space-y-8">
                 <Card>
@@ -77,7 +88,8 @@ export function AtmDetail({ atm }: { atm: Atm }) {
                     </CardHeader>
                     <CardContent>
                         <ul className="space-y-4">
-                            {sortedReports.map((report, index) => (
+                            {sortedReports.length > 0 ? (
+                                sortedReports.map((report, index) => (
                                 <li key={index} className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         {report.status === 'com_dinheiro' ? <CheckCircle2 className="h-5 w-5 text-accent" /> : <CircleSlash className="h-5 w-5 text-destructive" />}
@@ -91,7 +103,10 @@ export function AtmDetail({ atm }: { atm: Atm }) {
                                     {format(new Date(report.timestamp), "dd/MM 'às' HH:mm", { locale: ptBR })}
                                     </div>
                                 </li>
-                            ))}
+                                ))
+                            ) : (
+                                <li className='text-muted-foreground text-sm'>Ainda não há relatórios para este ATM.</li>
+                            )}
                         </ul>
                     </CardContent>
                 </Card>

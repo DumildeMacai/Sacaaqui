@@ -2,15 +2,18 @@
 'use client';
 import type { Atm } from '@/types'; 
 import { AtmList } from '@/components/atm-list';
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { db } from '@/firebase/init';
 import { collection, getDocs, query } from 'firebase/firestore';
 import { Input } from '@/components/ui/input';
-import { Search, PlusCircle, LocateFixed, Loader2 } from 'lucide-react';
+import { Search, PlusCircle, LocateFixed, Loader2, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 const convertTimestampToString = (timestamp: any): string => {
   if (timestamp && typeof timestamp.toDate === 'function') {
@@ -31,6 +34,9 @@ export default function DashboardPage() {
   const [selectedAtmId, setSelectedAtmId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
+  const [lastCacheTime, setLastCacheTime] = useState<string | null>(null);
+
 
   const AtmMap = useMemo(() => dynamic(() => import('@/components/atm-map'), { 
     ssr: false,
@@ -93,33 +99,36 @@ export default function DashboardPage() {
             };
           });
 
-          // Sort by viewCount in descending order
           atmsData.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
 
           setAtms(atmsData);
+          localStorage.setItem('cachedAtms', JSON.stringify(atmsData));
+          const now = new Date().toISOString();
+          localStorage.setItem('cachedAtmsTimestamp', now);
+          setLastCacheTime(now);
+          setIsOffline(false);
           setError(null);
 
       } catch (err: any) {
-        console.error(err);
-        setError('Failed to fetch ATMs');
-      } finally {
-        if (loading) {
-          setLoading(false);
+        console.error("Firestore fetch error:", err);
+        setError('Não foi possível carregar os dados. A mostrar a última versão guardada.');
+        const cachedData = localStorage.getItem('cachedAtms');
+        const cachedTimestamp = localStorage.getItem('cachedAtmsTimestamp');
+        if (cachedData) {
+            setAtms(JSON.parse(cachedData));
+            setIsOffline(true);
+            if (cachedTimestamp) {
+                setLastCacheTime(cachedTimestamp);
+            }
+        } else {
+            setError('Falha ao carregar os ATMs e não existem dados guardados para modo offline.');
         }
+      } finally {
+          setLoading(false);
       }
     };
-
-    const initialFetch = async () => {
-        await fetchAtms();
-        setLoading(false);
-    };
-
-    initialFetch();
-    
-    const intervalId = setInterval(fetchAtms, 4000); 
-
-    return () => clearInterval(intervalId);
-  }, [loading]); 
+    fetchAtms();
+  }, []); 
 
   const filteredAtms = useMemo(() => {
     if (!searchTerm) {
@@ -132,8 +141,8 @@ export default function DashboardPage() {
   }, [atms, searchTerm]);
 
 
-  if (error && loading) {
-    return <div className="text-destructive text-center p-8">Erro ao carregar os ATMs. Tente novamente mais tarde.</div>;
+  if (error && !isOffline) {
+    return <div className="text-destructive text-center p-8">{error}</div>;
   }
 
   return (
@@ -166,6 +175,16 @@ export default function DashboardPage() {
         </div>
       </div>
       
+       {isOffline && lastCacheTime && (
+            <Alert variant="destructive">
+                <WifiOff className="h-4 w-4" />
+                <AlertTitle>Você está offline</AlertTitle>
+                <AlertDescription>
+                    A mostrar dados guardados de {formatDistanceToNow(new Date(lastCacheTime), { addSuffix: true, locale: ptBR })}.
+                </AlertDescription>
+            </Alert>
+        )}
+
       <div className="bg-white p-4 rounded-2xl shadow-md h-[400px] md:h-[500px] relative">
           <AtmMap 
               atms={filteredAtms} 
@@ -193,7 +212,7 @@ export default function DashboardPage() {
                   <Skeleton className="h-[160px] w-full rounded-2xl" />
               </>
           ) : (
-              !loading && <AtmList 
+              <AtmList 
                   atms={filteredAtms} 
                   onCardClick={(atmId) => setSelectedAtmId(atmId)}
                   selectedAtmId={selectedAtmId}

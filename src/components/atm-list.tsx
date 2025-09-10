@@ -52,17 +52,19 @@ export function AtmList({ atms, onCardClick, selectedAtmId }: AtmListProps) {
       });
       return;
     }
+
+    if(navigator.onLine === false) {
+      toast({
+        variant: 'destructive',
+        title: 'Você está offline',
+        description: 'Não é possível atualizar o status de um ATM enquanto estiver offline.',
+      });
+      return;
+    }
   
     try {
       const atmRef = doc(db, 'atms', atmId);
-      const atmDoc = await getDoc(atmRef);
-      if (!atmDoc.exists()) {
-        throw new Error("ATM não encontrado.");
-      }
       
-      const atmData = atmDoc.data() as Atm;
-      const oldStatus = atmData.status;
-
       const newReport = {
         userId: currentUser.uid,
         status,
@@ -99,7 +101,7 @@ export function AtmList({ atms, onCardClick, selectedAtmId }: AtmListProps) {
                     <Info className="h-8 w-8 text-primary" />
                     <div>
                         <CardTitle>Nenhum ATM encontrado</CardTitle>
-                        <CardDescription>A sua pesquisa não retornou resultados.</CardDescription>
+                        <CardDescription>A sua pesquisa não retornou resultados ou não há dados em cache para o modo offline.</CardDescription>
                     </div>
                 </CardHeader>
             </Card>

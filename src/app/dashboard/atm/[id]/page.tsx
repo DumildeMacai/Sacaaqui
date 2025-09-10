@@ -56,14 +56,24 @@ export default function AtmDetailPage() {
                 viewCount: data.viewCount || 0,
             };
             setAtmData(atm);
+            localStorage.setItem(`cachedAtm_${atmId}`, JSON.stringify(atm));
         } else {
             setError('ATM não encontrado');
             notFound();
         }
         setLoading(false);
     }, (err) => {
-        console.error(err);
-        setError('Failed to fetch ATM data');
+        console.error("Firebase snapshot error:", err);
+        setError('Falha ao carregar os dados do ATM. A tentar carregar a versão offline...');
+        
+        const cachedAtm = localStorage.getItem(`cachedAtm_${atmId}`);
+        if (cachedAtm) {
+            setAtmData(JSON.parse(cachedAtm));
+            setError('Está a ver uma versão offline desta página. Alguns dados podem estar desatualizados.');
+        } else {
+            setError('Não foi possível carregar os dados do ATM e não há versão offline disponível.');
+        }
+
         setLoading(false);
     });
 
@@ -84,7 +94,7 @@ export default function AtmDetailPage() {
     );
   }
   
-  if (error) {
+  if (error && !atmData) {
       return <div className="text-destructive text-center">Erro ao carregar os dados do ATM. Tente novamente mais tarde.</div>;
   }
 
@@ -92,5 +102,5 @@ export default function AtmDetailPage() {
     notFound();
   }
 
-  return <AtmDetail atm={atmData} />;
+  return <AtmDetail atm={atmData} offlineMessage={error} />;
 }
