@@ -9,7 +9,6 @@ import { doc, updateDoc, arrayUnion, serverTimestamp, getDoc } from 'firebase/fi
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Info } from 'lucide-react';
-import { sendNotificationToFollowers } from '@/actions/send-notification';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -81,15 +80,6 @@ export function AtmList({ atms, onCardClick, selectedAtmId }: AtmListProps) {
         title: 'Status Atualizado!',
         description: 'Obrigado pela sua contribuição para a comunidade.',
       });
-
-      // Se o status mudou, e especialmente se mudou para 'com_dinheiro', envie notificações.
-      if (status !== oldStatus && status === 'com_dinheiro') {
-        // Não precisamos esperar por isto, pode correr em segundo plano
-        sendNotificationToFollowers({
-          atmId: atmId,
-          reportingUserName: currentUserName,
-        });
-      }
   
     } catch (error) {
       console.error('Erro ao atualizar status do ATM no Firestore:', error);

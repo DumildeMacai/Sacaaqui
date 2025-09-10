@@ -49,11 +49,5 @@ export type Notification = {
     message: string;
     read: boolean;
     createdAt: string; // ISO string
-    type: 'suggestion_approved' | 'suggestion_rejected' | 'generic' | 'status_update';
+    type: 'suggestion_approved' | 'suggestion_rejected' | 'generic';
 };
-
-
-export type Follow = {
-  atmId: string;
-  followedAt: string; // ISO string
-}

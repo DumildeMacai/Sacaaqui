@@ -5,12 +5,10 @@ service cloud.firestore {
     
     // Helper function to check if the user is an admin
     function isAdmin() {
-      // The admin user has a specific, hardcoded UID.
       return request.auth != null && request.auth.uid == 'admin_user_id';
     }
 
     // ---------------- ATMs ----------------
-    // ATMs can be read by anyone, but only modified by an admin.
     match /atms/{atmId} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
@@ -18,44 +16,30 @@ service cloud.firestore {
 
     // ---------------- Users ----------------
     match /users/{userId} {
-      // Admins can read all user profiles.
-      // A user can only read their own profile.
-      allow read: if (request.auth != null && request.auth.uid == userId) || isAdmin();
+      // Admin can read anyone's profile, users can only read their own.
+      allow read: if isAdmin() || (request.auth != null && request.auth.uid == userId);
       
-      // A user can only update or delete their own profile. Admins cannot.
+      // A user can only update or delete their own document.
       allow update, delete: if request.auth != null && request.auth.uid == userId;
       
-      // Any authenticated user can create a user profile (signup).
+      // A user can be created upon signup.
       allow create: if request.auth != null;
-
-      // --- Follows Subcollection ---
-      // A user can only manage their own list of followed ATMs.
-      match /follows/{atmId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
     }
 
     // ---------------- ATM Suggestions ----------------
     match /atm_suggestions/{suggestionId} {
-      allow create: if request.auth != null; // Any authenticated user can create.
-      allow read, update, delete: if isAdmin(); // Only admins can manage.
+      // Any authenticated user can create a suggestion.
+      allow create: if request.auth != null;
+      // Only admins can read or update (approve/reject) suggestions.
+      allow read, update: if isAdmin();
     }
     
     // ---------------- Notifications ----------------
     match /notifications/{notificationId} {
-      // A user can read their own notifications, admins can read all.
+      // Users can only read their own notifications, admins can read all.
       allow read: if (request.auth != null && request.auth.uid == resource.data.userId) || isAdmin();
-      // Only admins can create notifications (e.g., for approvals/rejections).
-      // The status update notification is also created via a server action, which runs with admin privileges.
+      // Only admins can create notifications (e.g., for approved/rejected suggestions).
       allow create: if isAdmin();
-      // Allow users to mark their own notifications as read.
-      allow update: if request.auth != null && request.auth.uid == resource.data.userId;
-    }
-
-    // ---------------- Collection Group Queries ----------------
-    // Allow an admin to query across all 'follows' subcollections to send notifications.
-    match /{path=**}/follows/{atmId} {
-      allow read: if isAdmin();
     }
   }
 }
