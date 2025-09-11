@@ -80,6 +80,7 @@ export default function Home() {
                 O maior localizador de ATMs em Angola
             </h2>
              <p className="text-sm text-indigo-300">&copy; {new Date().getFullYear()} Sacaaqui.</p>
+             <p className="text-xs text-indigo-400/70">Feito por Dumilde Macai</p>
           </div>
         </div>
       </main>
