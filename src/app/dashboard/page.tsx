@@ -130,6 +130,16 @@ export default function DashboardPage() {
     fetchAtms();
   }, []); 
 
+  const handleMarkerClick = (atmId: string) => {
+    setSelectedAtmId(atmId);
+    setAtms(prevAtms => {
+        const selected = prevAtms.find(a => a.id === atmId);
+        if (!selected) return prevAtms;
+        const others = prevAtms.filter(a => a.id !== atmId);
+        return [selected, ...others];
+    });
+  };
+
   const filteredAtms = useMemo(() => {
     if (!searchTerm) {
       return atms;
@@ -188,7 +198,7 @@ export default function DashboardPage() {
       <div className="bg-white p-4 rounded-2xl shadow-md h-[400px] md:h-[500px] relative">
           <AtmMap 
               atms={filteredAtms} 
-              onMarkerClick={(atmId) => setSelectedAtmId(atmId)}
+              onMarkerClick={handleMarkerClick}
               selectedAtmId={selectedAtmId}
               userLocation={userLocation}
           />
