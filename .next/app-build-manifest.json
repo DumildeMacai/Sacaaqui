@@ -20,6 +20,11 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/page.js"
+    ],
+    "/dashboard/atm/[id]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/atm/[id]/page.js"
     ]
   }
 }

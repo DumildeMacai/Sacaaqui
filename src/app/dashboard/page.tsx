@@ -5,7 +5,7 @@ import { AtmList } from '@/components/atm-list';
 import { useEffect, useState, useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { db } from '@/firebase/init';
-import { collection, getDocs, query } from 'firebase/firestore';
+import { collection, query, onSnapshot } from 'firebase/firestore';
 import { Input } from '@/components/ui/input';
 import { Search, PlusCircle, LocateFixed, Loader2, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -74,12 +74,10 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    const fetchAtms = async () => {
-      try {
-        const q = query(collection(db, "atms"));
-        const atmsSnapshot = await getDocs(q);
-        
-        const atmsData: Atm[] = atmsSnapshot.docs.map(doc => {
+    const q = query(collection(db, "atms"));
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const atmsData: Atm[] = querySnapshot.docs.map(doc => {
             const data = doc.data();
             const reports = (data.reports || []).map((report: any) => ({
               ...report,
@@ -97,23 +95,26 @@ export default function DashboardPage() {
               reports: reports,
               viewCount: data.viewCount || 0,
             };
-          });
+        });
 
-          atmsData.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+        atmsData.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+        setAtms(atmsData);
 
-          setAtms(atmsData);
-          localStorage.setItem('cachedAtms', JSON.stringify(atmsData));
-          const now = new Date().toISOString();
-          localStorage.setItem('cachedAtmsTimestamp', now);
-          setLastCacheTime(now);
-          setIsOffline(false);
-          setError(null);
+        localStorage.setItem('cachedAtms', JSON.stringify(atmsData));
+        const now = new Date().toISOString();
+        localStorage.setItem('cachedAtmsTimestamp', now);
+        setLastCacheTime(now);
 
-      } catch (err: any) {
-        console.error("Firestore fetch error:", err);
+        setIsOffline(false);
+        setError(null);
+        setLoading(false);
+
+    }, (err) => {
+        console.error("Firestore snapshot error:", err);
         setError('Não foi possível carregar os dados. A mostrar a última versão guardada.');
         const cachedData = localStorage.getItem('cachedAtms');
         const cachedTimestamp = localStorage.getItem('cachedAtmsTimestamp');
+        
         if (cachedData) {
             setAtms(JSON.parse(cachedData));
             setIsOffline(true);
@@ -123,11 +124,11 @@ export default function DashboardPage() {
         } else {
             setError('Falha ao carregar os ATMs e não existem dados guardados para modo offline.');
         }
-      } finally {
-          setLoading(false);
-      }
-    };
-    fetchAtms();
+        setLoading(false);
+    });
+
+    return () => unsubscribe(); // Cleanup subscription on unmount
+
   }, []); 
 
   const handleMarkerClick = (atmId: string) => {
@@ -135,8 +136,18 @@ export default function DashboardPage() {
     setAtms(prevAtms => {
         const selected = prevAtms.find(a => a.id === atmId);
         if (!selected) return prevAtms;
+        // Move selected to front, maintaining original sort for the rest
         const others = prevAtms.filter(a => a.id !== atmId);
-        return [selected, ...others];
+        const newSorted = [selected, ...others];
+        
+        // After highlighting, re-apply the original popularity sort to the rest
+        const sortedOthers = others.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+        
+        // Find the index of the originally selected ATM to put it back if needed
+        const originalIndex = prevAtms.findIndex(a => a.id === atmId);
+
+        // Put it on top
+        return [selected, ...prevAtms.filter(a => a.id !== atmId)];
     });
   };
 
@@ -191,7 +202,8 @@ export default function DashboardPage() {
                 <AlertTitle>Você está offline</AlertTitle>
                 <AlertDescription>
                     A mostrar dados guardados de {formatDistanceToNow(new Date(lastCacheTime), { addSuffix: true, locale: ptBR })}.
-                </AlertDescription>
+                </Aler
+tDescription>
             </Alert>
         )}
 
