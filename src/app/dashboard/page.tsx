@@ -136,17 +136,6 @@ export default function DashboardPage() {
     setAtms(prevAtms => {
         const selected = prevAtms.find(a => a.id === atmId);
         if (!selected) return prevAtms;
-        // Move selected to front, maintaining original sort for the rest
-        const others = prevAtms.filter(a => a.id !== atmId);
-        const newSorted = [selected, ...others];
-        
-        // After highlighting, re-apply the original popularity sort to the rest
-        const sortedOthers = others.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
-        
-        // Find the index of the originally selected ATM to put it back if needed
-        const originalIndex = prevAtms.findIndex(a => a.id === atmId);
-
-        // Put it on top
         return [selected, ...prevAtms.filter(a => a.id !== atmId)];
     });
   };
@@ -202,8 +191,7 @@ export default function DashboardPage() {
                 <AlertTitle>Você está offline</AlertTitle>
                 <AlertDescription>
                     A mostrar dados guardados de {formatDistanceToNow(new Date(lastCacheTime), { addSuffix: true, locale: ptBR })}.
-                </Aler
-tDescription>
+                </AlertDescription>
             </Alert>
         )}
 
