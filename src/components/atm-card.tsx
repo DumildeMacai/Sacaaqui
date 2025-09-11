@@ -41,7 +41,7 @@ export function AtmCard({
         onClick={onClick}
         className={cn(
             "p-4 rounded-2xl bg-white border cursor-pointer transition-all duration-300 shadow-md hover:shadow-lg",
-            isSelected ? "border-primary ring-2 ring-primary" : "border-gray-200"
+            isSelected ? "border-primary ring-2 ring-primary ring-offset-2" : "border-gray-200"
         )}
     >
         <div className="flex justify-between items-start gap-2">

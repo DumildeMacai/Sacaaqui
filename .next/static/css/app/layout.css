@@ -1852,6 +1852,9 @@ video {
 .ring-sidebar-ring {
   --tw-ring-color: hsl(var(--sidebar-ring));
 }
+.ring-offset-2 {
+  --tw-ring-offset-width: 2px;
+}
 .ring-offset-background {
   --tw-ring-offset-color: hsl(var(--background));
 }
